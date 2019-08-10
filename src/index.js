@@ -5,6 +5,10 @@ const express = require("express");
 import { graphql } from "graphql";
 import { makeExecutableSchema } from "graphql-tools";
 import graphqlHTTP from "express-graphql";
+var Waterline = require("waterline");
+import sailsDiskAdapter from "sails-disk";
+
+import companies from "./graphql/resolvers/Mutation/companies/model";
 
 import typeDefs from "./graphql/typeDefs";
 import resolvers from "./graphql/index";
@@ -18,13 +22,36 @@ const { NODE_ENV } = process.env;
 
 app.get("/health", (req, res) => res.send());
 
-app.use(
-  "/graph",
-  graphqlHTTP({
-    schema,
-    graphiql: true
-  })
-);
+var config = {
+  adapters: {
+    disk: sailsDiskAdapter
+  },
+  datastores: {
+    default: {
+      adapter: "disk"
+    }
+  }
+};
+
+var waterline = new Waterline();
+waterline.registerModel(companies);
+
+waterline.initialize(config, (err,  db) => {
+  if(err){
+    throw err;
+  }
+  
+  app.use(
+    "/graph",
+    graphqlHTTP({
+      schema,
+      graphiql: true,
+      context: {
+        db
+      }
+    })
+  );
+});
 
 if (NODE_ENV !== "test")
   app.listen(port, () =>

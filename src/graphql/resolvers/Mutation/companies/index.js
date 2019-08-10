@@ -1,4 +1,20 @@
-const schema = require("./schema.graphql");
-const model = requiree("./model");
+const create = async (root, { db: { collections } }) => {
+  console.log({});
 
-export { schema, model };
+  var test = await collections.test.create({
+    id: "beagle" + Math.random(),
+    foo: "dog"
+  });
+
+  console.log(test)
+
+  return {
+    id: "test"
+  };
+};
+
+export default () => {
+  return {
+    create
+  };
+};

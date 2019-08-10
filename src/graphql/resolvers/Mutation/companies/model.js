@@ -6,7 +6,7 @@ export default Waterline.Collection.extend({
   primaryKey: "id",
 
   attributes: {
-    id: { type: "string" },
+    id: { type: "string", required: true },
     foo: { type: "string" }
   }
 });

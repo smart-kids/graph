@@ -70,16 +70,12 @@ type company {
   config: companyConfig
 }
 
-# companies
-
-# -------------------------- mutations ----------------------------------
 type Mutation {
   hello: String
-  # companies: companyMutations
+  companies: companyMutations
 }
 
 input inputCompany {
-  id: String
   name: String
 }
 
