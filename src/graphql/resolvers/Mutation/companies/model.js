@@ -1,12 +1,19 @@
 var Waterline = require("waterline");
 
 export default Waterline.Collection.extend({
-  identity: "test",
+  identity: "company",
   datastore: "default",
   primaryKey: "id",
 
   attributes: {
     id: { type: "string", required: true },
-    foo: { type: "string" }
+    name: { type: "string", required: true },
+    address: { type: "string" },
+    email: { type: "string", required: true },
+    town: { type: "string" },
+    mobile: { type: "number" },
+    physicalAddress: { type: "string" },
+    fax: { type: "string" },
+    telephone: { type: "number", required: true }
   }
 });

@@ -1,10 +1,12 @@
 require("dotenv").config();
 import "graphql-import-node";
+import "babel-polyfill";
 
 const express = require("express");
 import { graphql } from "graphql";
 import { makeExecutableSchema } from "graphql-tools";
 import graphqlHTTP from "express-graphql";
+import morgan from "morgan";
 var Waterline = require("waterline");
 import sailsDiskAdapter from "sails-disk";
 
@@ -19,6 +21,8 @@ const app = express();
 const port = 3000;
 
 const { NODE_ENV } = process.env;
+
+if (NODE_ENV !== "test") app.use(morgan("tiny"));
 
 app.get("/health", (req, res) => res.send());
 
@@ -36,11 +40,11 @@ var config = {
 var waterline = new Waterline();
 waterline.registerModel(companies);
 
-waterline.initialize(config, (err,  db) => {
-  if(err){
+waterline.initialize(config, (err, db) => {
+  if (err) {
     throw err;
   }
-  
+
   app.use(
     "/graph",
     graphqlHTTP({

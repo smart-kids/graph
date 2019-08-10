@@ -1,16 +1,19 @@
-const create = async (root, { db: { collections } }) => {
-  console.log({});
+const uuid = require("uuidv4");
+const name = "company";
 
-  var test = await collections.test.create({
-    id: "beagle" + Math.random(),
-    foo: "dog"
-  });
+const { UserError } = require("graphql-errors");
 
-  console.log(test)
+const create = async (data, { db: { collections } }) => {
+  const id = uuid();
+  const entry = Object.assign(data[name], { id });
 
-  return {
-    id: "test"
-  };
+  try {
+    await collections[name].create(entry);
+
+    return entry;
+  } catch (err) {
+    throw new UserError(err.details);
+  }
 };
 
 export default () => {

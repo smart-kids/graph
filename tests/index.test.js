@@ -6,8 +6,15 @@ import app from "../src";
 // Configure chai
 chai.use(chaiHttp);
 chai.should();
-describe("Students", () => {
-  describe("GET /", () => {
+var expect = chai.expect;
+
+describe("Companies", () => {
+  before(function(done) {
+    this.timeout(1000); // wait for db connections etc.
+    setTimeout(done, 500);
+  });
+
+  describe("GET /", function() {
     // Test to get all students record
     it("Health should return 200", done => {
       chai
@@ -15,7 +22,6 @@ describe("Students", () => {
         .get("/health")
         .end((err, res) => {
           res.should.have.status(200);
-          // res.body.should.be.null;
           done();
         });
     });
@@ -25,10 +31,44 @@ describe("Students", () => {
         .request(app)
         .post("/graph")
         .set("content-type", "application/json")
-        .send({ query: "{ hello }" })
+        .send({ query: "{hello}" })
         .end((err, res) => {
           res.should.have.status(200);
-          // res.body.should.be.null;
+          done();
+        });
+    });
+
+    it("Can create a company", done => {
+      chai
+        .request(app)
+        .post("/graph")
+        .set("content-type", "application/json")
+        .send({
+          query: `
+            mutation ($inputCompany: inputCompany!) {
+              companies {
+                create(company: $inputCompany) {
+                  id
+                }
+              }
+            }
+          `,
+          variables: {
+            inputCompany: {
+              name: "test",
+              address: "test",
+              // email: "test",
+              town: "test",
+              mobile: 1234,
+              physicalAddress: "test",
+              fax: "test",
+              telephone: 1234
+            }
+          }
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body).to.not.be.null;
           done();
         });
     });

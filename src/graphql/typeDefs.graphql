@@ -67,6 +67,13 @@ type companyConfig {
 type company {
   id: String
   name: String
+  address: String
+  email: String
+  town: String
+  mobile: Float
+  physicalAddress: String
+  fax: String
+  telephone: Float
   config: companyConfig
 }
 
@@ -77,11 +84,18 @@ type Mutation {
 
 input inputCompany {
   name: String
+  address: String
+  email: String
+  town: String
+  mobile: Float
+  physicalAddress: String
+  fax: String
+  telephone: Float
 }
 
 type companyMutations {
-  create(action: inputCompany!): company
-  update(action: inputCompany): company
-  destroy(action: inputCompany): company
-  restore(action: inputCompany): company
+  create(company: inputCompany!): company
+  update(company: inputCompany): company
+  destroy(company: inputCompany): company
+  restore(company: inputCompany): company
 }
