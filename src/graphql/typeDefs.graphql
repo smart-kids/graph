@@ -72,6 +72,20 @@ type company {
 
 # companies
 
+# -------------------------- mutations ----------------------------------
 type Mutation {
   hello: String
+  # companies: companyMutations
+}
+
+input inputCompany {
+  id: String
+  name: String
+}
+
+type companyMutations {
+  create(action: inputCompany!): company
+  update(action: inputCompany): company
+  destroy(action: inputCompany): company
+  restore(action: inputCompany): company
 }

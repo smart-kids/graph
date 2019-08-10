@@ -1,5 +1,5 @@
+import companies from "./companies";
+
 export default {
-  hello() {
-    return "hello query";
-  }
+  companies
 };
