@@ -1,0 +1,77 @@
+type Query {
+  hello: String
+  companies: [company]
+}
+
+type generalSettings {
+  name: String
+}
+
+type smsSettings {
+  smsPort: String
+}
+
+type transactionnSettings {
+  withdrawal: Float
+  duration: Float
+  minimumWithdrawalDuration: Float
+}
+
+type systemParams {
+  # tracks NAV prices change
+  minimumNavChart: Float
+  dividendsTax: Float
+  exerciseTax: Float
+  withholdingResident: Float
+  maxJointMembers: Float
+  vat: Float
+  withholdingNonResident: Float
+}
+
+type mailSettings {
+  mailer: String
+  host: String
+  encrypt: String
+  from: String
+  username: String
+  email_port: String
+}
+
+type chargeSettings {
+  minimumSwitchDuration: Float
+  transfer: Float
+  printing: Float
+  minimumTransferDuration: Float
+  membership: Float
+  switch: Float
+  bounceCheque: Float
+}
+
+type schemeCharges {
+  certificate: Float
+  chequeRequest: Float
+  RTGS: String
+  certReplacement: Float
+  rateProductsAgent: Float
+}
+
+type companyConfig {
+  general: generalSettings
+  mail: mailSettings
+  sms: smsSettings
+  transaction: transactionnSettings
+  charges: chargeSettings
+  system: systemParams
+}
+
+type company {
+  id: String
+  name: String
+  config: companyConfig
+}
+
+# companies
+
+type Mutation {
+  hello: String
+}

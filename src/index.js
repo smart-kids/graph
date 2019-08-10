@@ -4,11 +4,12 @@ import "graphql-import-node";
 const express = require("express");
 import { graphql } from "graphql";
 import { makeExecutableSchema } from "graphql-tools";
-import graphqlHTTP from "express-graphql"
+import graphqlHTTP from "express-graphql";
 
-import typeDefs from "./graphql/base";
+import typeDefs from "./graphql/typeDefs";
+import resolvers from "./graphql/index";
 
-let schema = makeExecutableSchema({ typeDefs });
+let schema = makeExecutableSchema({ typeDefs, resolvers });
 
 const app = express();
 const port = 3000;
