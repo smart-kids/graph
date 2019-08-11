@@ -1029,31 +1029,203 @@ describe("Companies", () => {
 
       it("Can fetch a restored agent", done => {
         chai
-        .request(app)
-        .post("/graph")
-        .set("content-type", "application/json")
-        .send({
-          query: `query($inputEditAgents:inputEditAgents){
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `query($inputEditAgents:inputEditAgents){
             agent(agent:$inputEditAgents){
               id,
               surname
             }
           }
           `,
-          variables: {
-            inputEditAgents: {
-              id: sharedInfo.agentId
+            variables: {
+              inputEditAgents: {
+                id: sharedInfo.agentId
+              }
             }
-          }
-        })
-        .end((err, res) => {
-          res.should.have.status(200);
-          expect(res.body).to.exist;
-          expect(res.body.data.agent.surname).to.exist;
-          expect(res.body.errors).to.not.exist;
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body).to.exist;
+            expect(res.body.data.agent.surname).to.exist;
+            expect(res.body.errors).to.not.exist;
 
-          done();
-        });
+            done();
+          });
+      });
+    });
+
+    describe("Members", function() {
+      it("Can create an member", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+              mutation ($inputMembers: inputMembers!) {
+                companies {
+                  members{
+                    create(member: $inputMembers) {
+                      id
+                    }
+                  }
+                }
+              }
+          `,
+            variables: {
+              inputMembers: {
+                name: "name",
+                mobile: 123,
+                email: "test@gmail.com",
+                regDate: "1233",
+                confirmed: false
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body).to.not.be.null;
+            expect(res.body.errors).to.not.exist;
+            expect(res.body.data.companies.members.create.id).to.be.a.string;
+
+            sharedInfo.memberId = res.body.data.companies.members.create.id;
+
+            done();
+          });
+      });
+
+      it("Can edit an member", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+              mutation ($inputEditMembers: inputEditMembers!) {
+                companies {
+                  members{
+                    update(member: $inputEditMembers) {
+                      id
+                    }
+                  }
+                }
+              }
+          `,
+            variables: {
+              inputEditMembers: {
+                id: sharedInfo.memberId,
+                name: "name updated",
+                mobile: 123,
+                email: "test@gmail.com",
+                regDate: "1233",
+                confirmed: false
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body).to.not.be.null;
+            expect(res.body.errors).to.not.exist;
+            expect(res.body.data.companies.members.update.id).to.be.a.string;
+
+            done();
+          });
+      });
+
+      it("Can delete an member", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+              mutation ($inputEditMembers: inputEditMembers!) {
+                companies {
+                  members{
+                    delete(member: $inputEditMembers) {
+                      id
+                    }
+                  }
+                }
+              }
+          `,
+            variables: {
+              inputEditMembers: {
+                id: sharedInfo.memberId
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body).to.not.be.null;
+            expect(res.body.errors).to.not.exist;
+
+            done();
+          });
+      });
+
+      it("Can restore an member", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+              mutation ($inputEditMembers: inputEditMembers!) {
+                companies {
+                  members{
+                    restore(member: $inputEditMembers) {
+                      id
+                    }
+                  }
+                }
+              }
+          `,
+            variables: {
+              inputEditMembers: {
+                id: sharedInfo.memberId
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body).to.not.be.null;
+            expect(res.body.errors).to.not.exist;
+
+            done();
+          });
+      });
+
+      it("Can fetch a restored agent", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `query($inputEditMembers:inputEditMembers){
+                member(member:$inputEditMembers){
+                  id,
+                  name
+                }
+              }
+            `,
+            variables: {
+              inputEditMembers: {
+                id: sharedInfo.memberId
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body).to.exist;
+            expect(res.body.data.member.name).to.exist;
+            expect(res.body.errors).to.not.exist;
+
+            done();
+          });
       });
     });
   });

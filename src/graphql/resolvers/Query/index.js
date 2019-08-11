@@ -5,6 +5,7 @@ import {
   single as expense
 } from "./companies/securities/expenses";
 import { list as agents, single as agent } from "./companies/agents";
+import { list as members, single as member } from "./companies/members";
 
 export default {
   companies,
@@ -15,5 +16,7 @@ export default {
   expense,
   agents,
   agent,
+  members,
+  member,
   hello: () => "test"
 };

@@ -12,6 +12,9 @@ type Query {
 
   agents: [agent]
   agent(agent: inputEditAgents): agent
+
+  members: [member]
+  member(member: inputEditMembers): member
 }
 
 type smsSettings {
@@ -82,7 +85,8 @@ type company {
   telephone: Float
   config: companyConfig
   securities: [security]
-  agent: [agent]
+  agents: [agent]
+  members: [member]
 }
 
 type Mutation {
@@ -121,6 +125,7 @@ type companyMutations {
   configurations: companyConfigMutations
   securities: companySecurities
   agents: agentMutations
+  members: memberMutations
 }
 
 input inputCompanyConfig {
@@ -345,4 +350,37 @@ type agentMutations {
   update(agent: inputEditAgents!): agent
   delete(agent: inputEditAgents!): agent
   restore(agent: inputEditAgents!): agent
+}
+
+type member {
+  id: String!
+  name: String!
+  mobile: Float!
+  email: String!
+  regDate: String!
+  confirmed: Boolean!
+}
+
+input inputMembers {
+  name: String!
+  mobile: Float!
+  email: String!
+  regDate: String!
+  confirmed: Boolean!
+}
+
+input inputEditMembers {
+  id: String!
+  name: String
+  mobile: Float
+  email: String
+  regDate: String
+  confirmed: Boolean
+}
+
+type memberMutations {
+  create(member: inputMembers!): member
+  update(member: inputEditMembers!): member
+  delete(member: inputEditMembers!): member
+  restore(member: inputEditMembers!): member
 }

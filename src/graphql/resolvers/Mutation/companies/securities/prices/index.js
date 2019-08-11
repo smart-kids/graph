@@ -1,7 +1,8 @@
 const uuid = require("uuidv4");
-const name = "agent";
+const name = "price";
 
 const { UserError } = require("graphql-errors");
+
 const create = async (data, { db: { collections } }) => {
   const id = uuid();
   const entry = Object.assign(data[name], { id, isDeleted: false });
@@ -11,7 +12,7 @@ const create = async (data, { db: { collections } }) => {
 
     return { id };
   } catch (err) {
-    console.log(err)
+    console.log(err);
     throw new UserError(err.details);
   }
 };
