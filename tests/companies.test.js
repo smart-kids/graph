@@ -8,6 +8,8 @@ chai.use(chaiHttp);
 chai.should();
 var expect = chai.expect;
 
+const sharedInfo = {};
+
 describe("Setup", () => {
   before(function(done) {
     this.timeout(1000); // wait for db connections etc.
@@ -39,8 +41,8 @@ describe("Setup", () => {
           done();
         });
     });
-  })
-})
+  });
+});
 
 describe("Companies", () => {
   before(function(done) {
@@ -79,8 +81,12 @@ describe("Companies", () => {
         })
         .end((err, res) => {
           res.should.have.status(200);
+          console.log();
           expect(res.body).to.not.be.null;
           expect(res.body.errors).to.not.exist;
+          expect(res.body.data.companies.create.id).to.be.a.string;
+
+          sharedInfo.companyId = res.body.data.companies.create.id;
 
           done();
         });
@@ -148,6 +154,100 @@ describe("Companies", () => {
 
           done();
         });
+    });
+
+    it("Updating a single company", done => {
+      chai
+        .request(app)
+        .post("/graph")
+        .set("content-type", "application/json")
+        .send({
+          query: `mutation ($inputCompany: inputUpdateCompany!) {
+            companies {
+              update(company: $inputCompany) {
+                id
+              }
+            }
+          }
+          `,
+          variables: {
+            inputCompany: {
+              id: sharedInfo.companyId,
+              name: "updated"
+            }
+          }
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body).to.exist;
+          expect(res.body.errors).to.not.exist;
+
+          done();
+        });
+    });
+
+    it("Fetch updated company", done => {
+      chai
+        .request(app)
+        .post("/graph")
+        .set("content-type", "application/json")
+        .send({
+          query: `query($inputCompany:inputUpdateCompany){
+            company(company:$inputCompany){
+              id,
+              name
+            }
+          }
+          `,
+          variables: {
+            inputCompany: {
+              id: sharedInfo.companyId
+            }
+          }
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body.data.company.name).to.equal("updated");
+          expect(res.body).to.exist;
+          expect(res.body.errors).to.not.exist;
+
+          done();
+        });
+    });
+
+    it("Destroy a company", done => {
+      chai
+        .request(app)
+        .post("/graph")
+        .set("content-type", "application/json")
+        .send({
+          query: `mutation ($inputCompany: inputUpdateCompany!) {
+            companies {
+              archive(company: $inputCompany) {
+                id
+              }
+            }
+          }          
+          `,
+          variables: {
+            inputCompany: {
+              id: sharedInfo.companyId
+            }
+          }
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body).to.exist;
+          expect(res.body.errors).to.not.exist;
+
+          done();
+        });
+    });
+
+    describe("Configurations", function() {
+      it("Can create a company configurations", done => {
+        done();
+      });
     });
   });
 });

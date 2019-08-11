@@ -1,6 +1,7 @@
 type Query {
   hello: String
   companies: [company]
+  company(company: inputUpdateCompany): company
 }
 
 type generalSettings {
@@ -93,9 +94,21 @@ input inputCompany {
   telephone: Float
 }
 
+input inputUpdateCompany {
+  id: String!
+  name: String
+  address: String
+  email: String
+  town: String
+  mobile: Float
+  physicalAddress: String
+  fax: String
+  telephone: Float
+}
+
 type companyMutations {
   create(company: inputCompany!): company
-  update(company: inputCompany): company
-  destroy(company: inputCompany): company
-  restore(company: inputCompany): company
+  update(company: inputUpdateCompany): company
+  archive(company: inputUpdateCompany): company
+  restore(company: inputUpdateCompany): company
 }
