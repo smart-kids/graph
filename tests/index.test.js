@@ -8,13 +8,13 @@ chai.use(chaiHttp);
 chai.should();
 var expect = chai.expect;
 
-describe("Companies", () => {
+describe("Setup", () => {
   before(function(done) {
     this.timeout(1000); // wait for db connections etc.
     setTimeout(done, 500);
   });
 
-  describe("GET /", function() {
+  describe("Health", function() {
     // Test to get all students record
     it("Health should return 200", done => {
       chai
@@ -22,6 +22,7 @@ describe("Companies", () => {
         .get("/health")
         .end((err, res) => {
           res.should.have.status(200);
+
           done();
         });
     });
@@ -34,11 +35,58 @@ describe("Companies", () => {
         .send({ query: "{hello}" })
         .end((err, res) => {
           res.should.have.status(200);
+
+          done();
+        });
+    });
+  })
+})
+
+describe("Companies", () => {
+  before(function(done) {
+    this.timeout(1000); // wait for db connections etc.
+    setTimeout(done, 500);
+  });
+
+  describe("Innitialization", function() {
+    it("Can create a company", done => {
+      chai
+        .request(app)
+        .post("/graph")
+        .set("content-type", "application/json")
+        .send({
+          query: `
+            mutation ($inputCompany: inputCompany!) {
+              companies {
+                create(company: $inputCompany) {
+                  id
+                }
+              }
+            }
+          `,
+          variables: {
+            inputCompany: {
+              name: "test",
+              address: "test",
+              email: "test",
+              town: "test",
+              mobile: 1234,
+              physicalAddress: "test",
+              fax: "test",
+              telephone: 1234
+            }
+          }
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body).to.not.be.null;
+          expect(res.body.errors).to.not.exist;
+
           done();
         });
     });
 
-    it("Can create a company", done => {
+    it("Can fail to create create a company on validation", done => {
       chai
         .request(app)
         .post("/graph")
@@ -69,6 +117,35 @@ describe("Companies", () => {
         .end((err, res) => {
           res.should.have.status(200);
           expect(res.body).to.not.be.null;
+          expect(res.body.errors).to.exist;
+
+          done();
+        });
+    });
+
+    it("Fetching companies returns existing company", done => {
+      chai
+        .request(app)
+        .post("/graph")
+        .set("content-type", "application/json")
+        .send({
+          query: `{
+            companies{
+              id,
+              name,
+              address,
+              email
+              physicalAddress,
+              fax,
+              telephone
+            }
+          }`
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body).to.exist;
+          expect(res.body.errors).to.not.exist;
+
           done();
         });
     });
