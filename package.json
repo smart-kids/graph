@@ -6,7 +6,7 @@
   "author": "gitomehbranson <sirbranson67@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "export NODE_ENV=test && mocha --require babel-register tests/*.js --exit",
+    "test": "export NODE_ENV=test && mocha --require babel-register test/*.js --exit",
     "dev": "nodemon --exec babel-node --presets babel-preset-env  ./src"
   },
   "dependencies": {
@@ -20,6 +20,7 @@
     "graphql-import-node": "^0.0.4",
     "graphql-tools": "^4.0.5",
     "morgan": "^1.9.1",
+    "rimraf": "^2.6.3",
     "uuidv4": "^4.0.0",
     "waterline": "^0.13.6"
   },

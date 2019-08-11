@@ -4,10 +4,6 @@ type Query {
   company(company: inputUpdateCompany): company
 }
 
-type generalSettings {
-  name: String
-}
-
 type smsSettings {
   smsPort: String
 }
@@ -57,7 +53,6 @@ type schemeCharges {
 }
 
 type companyConfig {
-  general: generalSettings
   mail: mailSettings
   sms: smsSettings
   transaction: transactionnSettings
@@ -76,6 +71,8 @@ type company {
   fax: String
   telephone: Float
   config: companyConfig
+  securities: [security]
+  security(security: inputEditCompanySecurities): security
 }
 
 type Mutation {
@@ -111,4 +108,113 @@ type companyMutations {
   update(company: inputUpdateCompany): company
   archive(company: inputUpdateCompany): company
   restore(company: inputUpdateCompany): company
+  configurations: companyConfigMutations
+  securities: companySecurities
+}
+
+input inputCompanyConfig {
+  company: String!
+  emailMailer: String
+  emailHost: String
+  emailEncrypt: String
+  emailFrom: String
+  emailUsername: String
+  emailPort: String
+  minimumSwitchDuration: Float
+  transfer: Float
+  printing: Float
+  minimumTransferDuration: Float
+  membership: Float
+  switch: Float
+  bounceCheque: Float
+  minimumNavChart: Float
+  dividendsTax: Float
+  exerciseTax: Float
+  withholdingResident: Float
+  maxJointMembers: Float
+  vat: Float
+  withholdingNonResident: Float
+  withdrawal: Float
+  duration: Float
+  minimumWithdrawalDuration: Float
+  smsPort: String
+}
+
+type companyConfigMutations {
+  create(configurations: inputCompanyConfig!): Boolean
+  update(configurations: inputCompanyConfig): Boolean
+}
+
+enum securityType {
+  ADMIN
+  RATE
+}
+
+type security {
+  id: String
+  company: String!
+  code: String!
+  name: String!
+  type: securityType!
+  abbreviation: String!
+  frequency: Float
+
+  adminFee: Float!
+  managementFee: Float!
+
+  currency: String
+  currencyCode: String
+
+  accountNumber: Float
+  disbursementAccount: Float
+
+  Description: String
+}
+
+input inputCompanySecurities {
+  company: String!
+  code: String!
+  name: String!
+  type: securityType!
+  abbreviation: String!
+  frequency: Float
+
+  adminFee: Float!
+  managementFee: Float!
+
+  currency: String
+  currencyCode: String
+
+  accountNumber: Float
+  disbursementAccount: Float
+
+  Description: String
+}
+
+input inputEditCompanySecurities {
+  id: String!
+  company: String
+  code: String
+  name: String
+  type: securityType
+  abbreviation: String
+  frequency: Float
+
+  adminFee: Float
+  managementFee: Float
+
+  currency: String
+  currencyCode: String
+
+  accountNumber: Float
+  disbursementAccount: Float
+
+  Description: String
+}
+
+type companySecurities {
+  create(security: inputCompanySecurities!): security
+  update(security: inputEditCompanySecurities!): security
+  delete(security: inputEditCompanySecurities!): security
+  restore(security: inputEditCompanySecurities!): security
 }

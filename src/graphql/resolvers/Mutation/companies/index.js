@@ -1,6 +1,9 @@
 const uuid = require("uuidv4");
 const name = "company";
 
+import configurations from "./configurations";
+import securities from "./securities";
+
 const { UserError } = require("graphql-errors");
 
 const create = async (data, { db: { collections } }) => {
@@ -66,6 +69,8 @@ export default () => {
     create,
     update,
     archive,
-    restore
+    restore,
+    configurations,
+    securities
   };
 };
