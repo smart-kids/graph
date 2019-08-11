@@ -6,8 +6,10 @@
   "author": "gitomehbranson <sirbranson67@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "export NODE_ENV=test && mocha --require babel-register test/*.js --exit",
-    "dev": "nodemon --exec babel-node --presets babel-preset-env  ./src"
+    "test": "export NODE_ENV=test && mocha --require babel-register --inspect test/*.js --exit",
+    "dev": "nodemon --exec babel-node --presets babel-preset-env --inspect  ./src",
+    "start": "babel-node ./src",
+    "debug": "babel-node debug ./src"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
@@ -26,6 +28,7 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
