@@ -14,6 +14,7 @@ import companies from "./graphql/resolvers/Mutation/companies/model";
 import configurations from "./graphql/resolvers/Mutation/companies/configurations/model";
 import securities from "./graphql/resolvers/Mutation/companies/securities/model";
 import securityExpenses from "./graphql/resolvers/Mutation/companies/securities/expenses/model";
+import agents from "./graphql/resolvers/Mutation/companies/agents/model";
 
 import typeDefs from "./graphql/typeDefs";
 import resolvers from "./graphql/index";
@@ -46,6 +47,7 @@ waterline.registerModel(companies);
 waterline.registerModel(configurations);
 waterline.registerModel(securities);
 waterline.registerModel(securityExpenses);
+waterline.registerModel(agents);
 
 waterline.initialize(config, (err, db) => {
   if (err) {

@@ -700,42 +700,45 @@ describe("Companies", () => {
             .end((err, res) => {
               res.should.have.status(200);
               expect(res.body).to.exist;
-              expect(res.body.data.companies.securities.expenses.create.id).to.exist;
-              expect(res.body.data.companies.securities.expenses.create.id).to.be.a.string;
+              expect(res.body.data.companies.securities.expenses.create.id).to
+                .exist;
+              expect(res.body.data.companies.securities.expenses.create.id).to
+                .be.a.string;
               expect(res.body.errors).to.not.exist;
 
-              sharedInfo.expensesId = res.body.data.companies.securities.expenses.create.id
+              sharedInfo.expensesId =
+                res.body.data.companies.securities.expenses.create.id;
               done();
             });
         });
 
         it("Can fetch security expenses", done => {
           chai
-          .request(app)
-          .post("/graph")
-          .set("content-type", "application/json")
-          .send({
-            query: `
+            .request(app)
+            .post("/graph")
+            .set("content-type", "application/json")
+            .send({
+              query: `
               query($inputEditSecurityExpense:inputEditSecurityExpense){
                 expense(expense:$inputEditSecurityExpense){
                   id
                 }
               }
             `,
-            variables: {
-              inputEditSecurityExpense: {
-                id: sharedInfo.expensesId
+              variables: {
+                inputEditSecurityExpense: {
+                  id: sharedInfo.expensesId
+                }
               }
-            }
-          })
-          .end((err, res) => {
-            res.should.have.status(200);
-            expect(res.body.data.expense.id).to.exist;
-            expect(res.body).to.exist;
-            expect(res.body.errors).to.not.exist;
+            })
+            .end((err, res) => {
+              res.should.have.status(200);
+              expect(res.body.data.expense.id).to.exist;
+              expect(res.body).to.exist;
+              expect(res.body.errors).to.not.exist;
 
-            done();
-          });
+              done();
+            });
         });
 
         it("Can edit security expenses", done => {
@@ -776,8 +779,10 @@ describe("Companies", () => {
             .end((err, res) => {
               res.should.have.status(200);
               expect(res.body).to.exist;
-              expect(res.body.data.companies.securities.expenses.update.id).to.exist;
-              expect(res.body.data.companies.securities.expenses.update.id).to.be.a.string;
+              expect(res.body.data.companies.securities.expenses.update.id).to
+                .exist;
+              expect(res.body.data.companies.securities.expenses.update.id).to
+                .be.a.string;
               expect(res.body.errors).to.not.exist;
 
               done();
@@ -786,11 +791,11 @@ describe("Companies", () => {
 
         it("Can delete security expenses", done => {
           chai
-          .request(app)
-          .post("/graph")
-          .set("content-type", "application/json")
-          .send({
-            query: `
+            .request(app)
+            .post("/graph")
+            .set("content-type", "application/json")
+            .send({
+              query: `
             mutation ($inputEditSecurityExpense: inputEditSecurityExpense!) {
               companies {
                 securities {
@@ -803,28 +808,28 @@ describe("Companies", () => {
               }
             }
         `,
-            variables: {
-              inputEditSecurityExpense: {
-                id: sharedInfo.expensesId,
+              variables: {
+                inputEditSecurityExpense: {
+                  id: sharedInfo.expensesId
+                }
               }
-            }
-          })
-          .end((err, res) => {
-            res.should.have.status(200);
-            expect(res.body).to.exist;
-            expect(res.body.errors).to.not.exist;
+            })
+            .end((err, res) => {
+              res.should.have.status(200);
+              expect(res.body).to.exist;
+              expect(res.body.errors).to.not.exist;
 
-            done();
-          });
+              done();
+            });
         });
 
         it("Can restore security expenses", done => {
           chai
-          .request(app)
-          .post("/graph")
-          .set("content-type", "application/json")
-          .send({
-            query: `
+            .request(app)
+            .post("/graph")
+            .set("content-type", "application/json")
+            .send({
+              query: `
             mutation ($inputEditSecurityExpense: inputEditSecurityExpense!) {
               companies {
                 securities {
@@ -837,22 +842,216 @@ describe("Companies", () => {
               }
             }
         `,
+              variables: {
+                inputEditSecurityExpense: {
+                  id: sharedInfo.expensesId
+                }
+              }
+            })
+            .end((err, res) => {
+              res.should.have.status(200);
+              expect(res.body).to.exist;
+              expect(res.body.errors).to.not.exist;
+
+              done();
+            });
+        });
+
+        it("Can fetch restored security expenses", done => {
+          done();
+        });
+      });
+    });
+
+    describe("Agents", function() {
+      it("Can create an agent", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+              mutation ($inputAgents: inputAgents!) {
+                companies {
+                  agents{
+                    create(agent: $inputAgents) {
+                      id
+                    }
+                  }
+                }
+              }
+          `,
             variables: {
-              inputEditSecurityExpense: {
-                id: sharedInfo.expensesId,
+              inputAgents: {
+                surname: "test",
+                othername: "test",
+                dob: "2/2/2002",
+                gender: "test",
+                agentType: "test",
+                bank: "test",
+                bankAccountNumber: 234,
+                postalAddress: "test",
+                kraPinNo: 123,
+                idPassportNumber: 123,
+                mobileNumber: 123,
+                email: "test",
+                agentCategory: "test",
+                bankBranch: "test",
+                postalCode: 123,
+                physicalAddress: "test"
               }
             }
           })
           .end((err, res) => {
             res.should.have.status(200);
-            expect(res.body).to.exist;
+            expect(res.body).to.not.be.null;
+            expect(res.body.errors).to.not.exist;
+            expect(res.body.data.companies.agents.create.id).to.be.a.string;
+
+            sharedInfo.agentId = res.body.data.companies.agents.create.id;
+
+            done();
+          });
+      });
+
+      it("Can edit an agent", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+              mutation ($inputEditAgents: inputEditAgents!) {
+                companies {
+                  agents{
+                    update(agent: $inputEditAgents) {
+                      id
+                    }
+                  }
+                }
+              }
+          `,
+            variables: {
+              inputEditAgents: {
+                id: sharedInfo.agentId,
+                surname: "test edit",
+                othername: "test",
+                dob: "2/2/2002",
+                gender: "test",
+                agentType: "test",
+                bank: "test",
+                bankAccountNumber: 234,
+                postalAddress: "test",
+                kraPinNo: 123,
+                idPassportNumber: 123,
+                mobileNumber: 123,
+                email: "test",
+                agentCategory: "test",
+                bankBranch: "test",
+                postalCode: 123,
+                physicalAddress: "test"
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body).to.not.be.null;
+            expect(res.body.errors).to.not.exist;
+            expect(res.body.data.companies.agents.update.id).to.be.a.string;
+
+            done();
+          });
+      });
+
+      it("Can delete an agent", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+              mutation ($inputEditAgents: inputEditAgents!) {
+                companies {
+                  agents{
+                    delete(agent: $inputEditAgents) {
+                      id
+                    }
+                  }
+                }
+              }
+          `,
+            variables: {
+              inputEditAgents: {
+                id: sharedInfo.agentId
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body).to.not.be.null;
             expect(res.body.errors).to.not.exist;
 
             done();
           });
-        });
+      });
 
-        it("Can fetch restored security expenses", done => {
+      it("Can restore an agent", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+              mutation ($inputEditAgents: inputEditAgents!) {
+                companies {
+                  agents{
+                    restore(agent: $inputEditAgents) {
+                      id
+                    }
+                  }
+                }
+              }
+          `,
+            variables: {
+              inputEditAgents: {
+                id: sharedInfo.agentId
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body).to.not.be.null;
+            expect(res.body.errors).to.not.exist;
+
+            done();
+          });
+      });
+
+      it("Can fetch a restored agent", done => {
+        chai
+        .request(app)
+        .post("/graph")
+        .set("content-type", "application/json")
+        .send({
+          query: `query($inputEditAgents:inputEditAgents){
+            agent(agent:$inputEditAgents){
+              id,
+              surname
+            }
+          }
+          `,
+          variables: {
+            inputEditAgents: {
+              id: sharedInfo.agentId
+            }
+          }
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body).to.exist;
+          expect(res.body.data.agent.surname).to.exist;
+          expect(res.body.errors).to.not.exist;
+
           done();
         });
       });

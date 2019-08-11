@@ -39,6 +39,7 @@ export default Waterline.Collection.extend({
     minimumWithdrawalDuration: { type: "number" },
 
     // sms settings
-    smsPort: { type: "string" }
+    smsPort: { type: "string" },
+    isDeleted: { type: "boolean", required: true }
   }
 });

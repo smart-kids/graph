@@ -3,6 +3,7 @@ const name = "company";
 
 import configurations from "./configurations";
 import securities from "./securities";
+import agents from "./agents";
 
 const { UserError } = require("graphql-errors");
 
@@ -71,6 +72,7 @@ export default () => {
     archive,
     restore,
     configurations,
-    securities
+    securities,
+    agents
   };
 };

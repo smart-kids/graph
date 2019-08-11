@@ -1,11 +1,17 @@
 type Query {
   hello: String
+
   companies: [company]
   company(company: inputUpdateCompany): company
-  securities(security: inputEditCompanySecurities): security
+
+  securities: [security]
   security(security: inputEditCompanySecurities): security
-  expenses(expense: inputEditSecurityExpense): securityExpense
+
+  expenses: [securityExpense]
   expense(expense: inputEditSecurityExpense): securityExpense
+
+  agents: [agent]
+  agent(agent: inputEditAgents): agent
 }
 
 type smsSettings {
@@ -76,6 +82,7 @@ type company {
   telephone: Float
   config: companyConfig
   securities: [security]
+  agent: [agent]
 }
 
 type Mutation {
@@ -113,6 +120,7 @@ type companyMutations {
   restore(company: inputUpdateCompany): company
   configurations: companyConfigMutations
   securities: companySecurities
+  agents: agentMutations
 }
 
 input inputCompanyConfig {
@@ -271,4 +279,70 @@ type securityExpenses {
   update(expense: inputEditSecurityExpense!): securityExpense
   delete(expense: inputEditSecurityExpense!): securityExpense
   restore(expense: inputEditSecurityExpense!): securityExpense
+}
+
+type agent {
+  id: String!
+  surname: String!
+  othername: String!
+  dob: String!
+  gender: String!
+  agentType: String!
+  bank: String!
+  bankAccountNumber: Float!
+  postalAddress: String!
+  kraPinNo: Float!
+  idPassportNumber: Float!
+  mobileNumber: Float!
+  email: String!
+  agentCategory: String!
+  bankBranch: String!
+  postalCode: Float!
+  physicalAddress: String!
+}
+
+input inputAgents {
+  surname: String!
+  othername: String!
+  dob: String!
+  gender: String!
+  agentType: String!
+  bank: String!
+  bankAccountNumber: Float!
+  postalAddress: String!
+  kraPinNo: Float!
+  idPassportNumber: Float!
+  mobileNumber: Float!
+  email: String!
+  agentCategory: String!
+  bankBranch: String!
+  postalCode: Float!
+  physicalAddress: String!
+}
+
+input inputEditAgents {
+  id: String!
+  surname: String
+  othername: String
+  dob: String
+  gender: String
+  agentType: String
+  bank: String
+  bankAccountNumber: Float
+  postalAddress: String
+  kraPinNo: Float
+  idPassportNumber: Float
+  mobileNumber: Float
+  email: String
+  agentCategory: String
+  bankBranch: String
+  postalCode: Float
+  physicalAddress: String
+}
+
+type agentMutations {
+  create(agent: inputAgents!): agent
+  update(agent: inputEditAgents!): agent
+  delete(agent: inputEditAgents!): agent
+  restore(agent: inputEditAgents!): agent
 }
