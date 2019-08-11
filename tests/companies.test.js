@@ -264,7 +264,65 @@ describe("Companies", () => {
         })
         .end((err, res) => {
           res.should.have.status(200);
-          expect(res.body.data.company).to.not.exist
+          expect(res.body.data.company).to.not.exist;
+          expect(res.body).to.exist;
+          expect(res.body.errors).to.not.exist;
+
+          done();
+        });
+    });
+
+    it("Restore a company", done => {
+      chai
+        .request(app)
+        .post("/graph")
+        .set("content-type", "application/json")
+        .send({
+          query: `mutation ($inputCompany: inputUpdateCompany!) {
+            companies {
+              restore(company: $inputCompany) {
+                id
+              }
+            }
+          }          
+          `,
+          variables: {
+            inputCompany: {
+              id: sharedInfo.companyId
+            }
+          }
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body).to.exist;
+          expect(res.body.errors).to.not.exist;
+
+          done();
+        });
+    });
+
+    it("Can Fetch restored company", done => {
+      chai
+        .request(app)
+        .post("/graph")
+        .set("content-type", "application/json")
+        .send({
+          query: `query($inputCompany:inputUpdateCompany){
+            company(company:$inputCompany){
+              id,
+              name
+            }
+          }
+          `,
+          variables: {
+            inputCompany: {
+              id: sharedInfo.companyId
+            }
+          }
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body.data.company.name).to.exist;
           expect(res.body).to.exist;
           expect(res.body.errors).to.not.exist;
 

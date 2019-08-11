@@ -14,6 +14,7 @@ export default Waterline.Collection.extend({
     mobile: { type: "number" },
     physicalAddress: { type: "string" },
     fax: { type: "string" },
-    telephone: { type: "number", required: true }
+    telephone: { type: "number", required: true },
+    isDeleted: { type: "boolean", required: true }
   }
 });
