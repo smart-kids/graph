@@ -549,10 +549,9 @@ describe("Companies", () => {
           .send({
             query: `
               query($inputCompanySecurities:inputEditCompanySecurities){
-                companies {
-                  security(security:$inputCompanySecurities){
-                    id
-                  }
+                security(security:$inputCompanySecurities){
+                  id,
+                  name
                 }
               }
             `,
@@ -563,9 +562,100 @@ describe("Companies", () => {
             }
           })
           .end((err, res) => {
-            console.log(res.body);
             res.should.have.status(200);
-            expect(res.body.data.company.name).to.equal("updated");
+            expect(res.body.data.security.id).to.exist;
+            expect(res.body).to.exist;
+            expect(res.body.errors).to.not.exist;
+
+            done();
+          });
+      });
+
+      it("Can delete a company security", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+              mutation ($inputCompanySecurities: inputEditCompanySecurities!) {
+                companies {
+                  securities {
+                    delete(security:$inputCompanySecurities){
+                      id
+                    }
+                  }
+                }
+              }
+          `,
+            variables: {
+              inputCompanySecurities: {
+                id: sharedInfo.securityId
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body).to.exist;
+            expect(res.body.errors).to.not.exist;
+            done();
+          });
+      });
+
+      it("Can restore a company security", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+              mutation ($inputCompanySecurities: inputEditCompanySecurities!) {
+                companies {
+                  securities {
+                    restore(security:$inputCompanySecurities){
+                      id
+                    }
+                  }
+                }
+              }
+          `,
+            variables: {
+              inputCompanySecurities: {
+                id: sharedInfo.securityId
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body).to.exist;
+            expect(res.body.errors).to.not.exist;
+            done();
+          });
+      });
+
+      it("Fetch restored company security", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+              query($inputCompanySecurities:inputEditCompanySecurities){
+                security(security:$inputCompanySecurities){
+                  id,
+                  name
+                }
+              }
+            `,
+            variables: {
+              inputCompanySecurities: {
+                id: sharedInfo.securityId
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body.data.security.id).to.exist;
             expect(res.body).to.exist;
             expect(res.body.errors).to.not.exist;
 

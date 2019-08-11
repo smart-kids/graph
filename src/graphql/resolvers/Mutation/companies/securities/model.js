@@ -8,38 +8,22 @@ export default Waterline.Collection.extend({
   attributes: {
     id: { type: "string", required: true },
     company: { type: "string", required: true },
-    // mail configs
-    emailMailer: { type: "string" },
-    emailHost: { type: "string" },
-    emailEncrypt: { type: "string" },
-    emailFrom: { type: "string" },
-    emailUsername: { type: "string" },
-    emailPort: { type: "string" },
+    code: { type: "string", required: true },
+    name: { type: "string", required: true },
+    type: { type: "string", required: true },
+    abbreviation: { type: "string", required: true },
+    frequency: { type: "number", required: true },
 
-    // charge settings
-    minimumSwitchDuration: { type: "number" },
-    transfer: { type: "number" },
-    printing: { type: "number" },
-    minimumTransferDuration: { type: "number" },
-    membership: { type: "number" },
-    switch: { type: "number" },
-    bounceCheque: { type: "number" },
+    adminFee: { type: "string", required: true },
+    managementFee: { type: "number", required: true },
 
-    // system params
-    minimumNavChart: { type: "number" },
-    dividendsTax: { type: "number" },
-    exerciseTax: { type: "number" },
-    withholdingResident: { type: "number" },
-    maxJointMembers: { type: "number" },
-    vat: { type: "number" },
-    withholdingNonResident: { type: "number" },
+    currency: { type: "string", required: true },
+    currencyCode: { type: "string", required: true },
 
-    // transaction settings
-    withdrawal: { type: "number" },
-    duration: { type: "number" },
-    minimumWithdrawalDuration: { type: "number" },
+    accountNumber: { type: "number", required: true },
+    disbursementAccount: { type: "number", required: true },
 
-    // sms settings
-    smsPort: { type: "string" }
+    Description: { type: "string", required: true },
+    isDeleted: { type: "boolean", required: true }
   }
 });

@@ -1,4 +1,4 @@
-const name = "company";
+const name = "expenses";
 
 const list = async (root, args, { db: { collections } }) => {
   const entries = await collections[name].find({
@@ -24,6 +24,7 @@ const single = async (root, args, { db: { collections } }) => {
   const entry = await collections[name].findOne({
     where: { id, isDeleted: false }
   });
+
   return entry;
 };
 

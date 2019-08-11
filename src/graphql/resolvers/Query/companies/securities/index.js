@@ -1,4 +1,4 @@
-const name = "company";
+const name = "security";
 
 const list = async (root, args, { db: { collections } }) => {
   const entries = await collections[name].find({
