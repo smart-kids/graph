@@ -4,6 +4,8 @@ type Query {
   company(company: inputUpdateCompany): company
   securities(security: inputEditCompanySecurities): security
   security(security: inputEditCompanySecurities): security
+  expenses(expense: inputEditSecurityExpense): securityExpense
+  expense(expense: inputEditSecurityExpense): securityExpense
 }
 
 type smsSettings {
@@ -170,6 +172,8 @@ type security {
   disbursementAccount: Float
 
   Description: String
+
+  expenses: [securityExpense]
 }
 
 input inputCompanySecurities {
@@ -218,4 +222,53 @@ type companySecurities {
   update(security: inputEditCompanySecurities!): security
   delete(security: inputEditCompanySecurities!): security
   restore(security: inputEditCompanySecurities!): security
+  expenses: securityExpenses
+}
+
+type securityExpense {
+  id: String!
+  name: String!
+  minimumAmount: Float!
+  security: security!
+  rate: Float!
+
+  controls: Boolean!
+  vat: Boolean!
+  exercise: Boolean!
+
+  remark: String
+}
+
+input inputSecurityExpense {
+  name: String!
+  minimumAmount: Float!
+  security: String!
+  rate: Float!
+
+  controls: Boolean!
+  vat: Boolean!
+  exercise: Boolean!
+
+  remark: String
+}
+
+input inputEditSecurityExpense {
+  id: String!
+  name: String
+  minimumAmount: Float
+  security: String
+  rate: Float
+
+  controls: Boolean
+  vat: Boolean
+  exercise: Boolean
+
+  remark: String
+}
+
+type securityExpenses {
+  create(expense: inputSecurityExpense!): securityExpense
+  update(expense: inputEditSecurityExpense!): securityExpense
+  delete(expense: inputEditSecurityExpense!): securityExpense
+  restore(expense: inputEditSecurityExpense!): securityExpense
 }

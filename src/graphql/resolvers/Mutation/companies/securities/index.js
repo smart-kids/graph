@@ -1,6 +1,8 @@
 const uuid = require("uuidv4");
 const name = "security";
 
+import expenses from "./expenses";
+
 const { UserError } = require("graphql-errors");
 
 const create = async (data, { db: { collections } }) => {
@@ -12,7 +14,6 @@ const create = async (data, { db: { collections } }) => {
 
     return { id };
   } catch (err) {
-    console.log(err);
     throw new UserError(err.details);
   }
 };
@@ -35,6 +36,7 @@ const update = async (data, { db: { collections } }) => {
 export default () => {
   return {
     create,
-    update
+    update,
+    expenses
   };
 };

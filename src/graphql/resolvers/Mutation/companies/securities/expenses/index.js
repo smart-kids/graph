@@ -1,5 +1,5 @@
 const uuid = require("uuidv4");
-const name = "security";
+const name = "expense";
 
 const { UserError } = require("graphql-errors");
 

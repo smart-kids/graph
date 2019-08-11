@@ -13,6 +13,7 @@ import sailsDiskAdapter from "sails-disk";
 import companies from "./graphql/resolvers/Mutation/companies/model";
 import configurations from "./graphql/resolvers/Mutation/companies/configurations/model";
 import securities from "./graphql/resolvers/Mutation/companies/securities/model";
+import securityExpenses from "./graphql/resolvers/Mutation/companies/securities/expenses/model";
 
 import typeDefs from "./graphql/typeDefs";
 import resolvers from "./graphql/index";
@@ -44,6 +45,7 @@ var waterline = new Waterline();
 waterline.registerModel(companies);
 waterline.registerModel(configurations);
 waterline.registerModel(securities);
+waterline.registerModel(securityExpenses);
 
 waterline.initialize(config, (err, db) => {
   if (err) {

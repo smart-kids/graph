@@ -642,8 +642,7 @@ describe("Companies", () => {
             query: `
               query($inputCompanySecurities:inputEditCompanySecurities){
                 security(security:$inputCompanySecurities){
-                  id,
-                  name
+                  id
                 }
               }
             `,
@@ -661,6 +660,201 @@ describe("Companies", () => {
 
             done();
           });
+      });
+
+      describe("Expenses", function() {
+        it("Can create security expenses", done => {
+          chai
+            .request(app)
+            .post("/graph")
+            .set("content-type", "application/json")
+            .send({
+              query: `
+              mutation ($inputSecurityExpense: inputSecurityExpense!) {
+                companies {
+                  securities {
+                    expenses{
+                      create(expense:$inputSecurityExpense){
+                        id
+                      }
+                    }
+                  }
+                }
+              }
+          `,
+              variables: {
+                inputSecurityExpense: {
+                  name: "test",
+                  minimumAmount: 2,
+                  rate: 2,
+
+                  controls: true,
+                  vat: true,
+                  exercise: true,
+
+                  remark: "test",
+                  security: sharedInfo.securityId
+                }
+              }
+            })
+            .end((err, res) => {
+              res.should.have.status(200);
+              expect(res.body).to.exist;
+              expect(res.body.data.companies.securities.expenses.create.id).to.exist;
+              expect(res.body.data.companies.securities.expenses.create.id).to.be.a.string;
+              expect(res.body.errors).to.not.exist;
+
+              sharedInfo.expensesId = res.body.data.companies.securities.expenses.create.id
+              done();
+            });
+        });
+
+        it("Can fetch security expenses", done => {
+          chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+              query($inputEditSecurityExpense:inputEditSecurityExpense){
+                expense(expense:$inputEditSecurityExpense){
+                  id
+                }
+              }
+            `,
+            variables: {
+              inputEditSecurityExpense: {
+                id: sharedInfo.expensesId
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body.data.expense.id).to.exist;
+            expect(res.body).to.exist;
+            expect(res.body.errors).to.not.exist;
+
+            done();
+          });
+        });
+
+        it("Can edit security expenses", done => {
+          chai
+            .request(app)
+            .post("/graph")
+            .set("content-type", "application/json")
+            .send({
+              query: `
+              mutation ($inputEditSecurityExpense: inputEditSecurityExpense!) {
+                companies {
+                  securities {
+                    expenses{
+                      update(expense:$inputEditSecurityExpense){
+                        id
+                      }
+                    }
+                  }
+                }
+              }
+          `,
+              variables: {
+                inputEditSecurityExpense: {
+                  id: sharedInfo.expensesId,
+                  name: "test edited",
+                  minimumAmount: 2,
+                  rate: 2,
+
+                  controls: true,
+                  vat: true,
+                  exercise: true,
+
+                  remark: "test",
+                  security: sharedInfo.securityId
+                }
+              }
+            })
+            .end((err, res) => {
+              res.should.have.status(200);
+              expect(res.body).to.exist;
+              expect(res.body.data.companies.securities.expenses.update.id).to.exist;
+              expect(res.body.data.companies.securities.expenses.update.id).to.be.a.string;
+              expect(res.body.errors).to.not.exist;
+
+              done();
+            });
+        });
+
+        it("Can delete security expenses", done => {
+          chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+            mutation ($inputEditSecurityExpense: inputEditSecurityExpense!) {
+              companies {
+                securities {
+                  expenses{
+                    delete(expense:$inputEditSecurityExpense){
+                      id
+                    }
+                  }
+                }
+              }
+            }
+        `,
+            variables: {
+              inputEditSecurityExpense: {
+                id: sharedInfo.expensesId,
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body).to.exist;
+            expect(res.body.errors).to.not.exist;
+
+            done();
+          });
+        });
+
+        it("Can restore security expenses", done => {
+          chai
+          .request(app)
+          .post("/graph")
+          .set("content-type", "application/json")
+          .send({
+            query: `
+            mutation ($inputEditSecurityExpense: inputEditSecurityExpense!) {
+              companies {
+                securities {
+                  expenses{
+                    restore(expense:$inputEditSecurityExpense){
+                      id
+                    }
+                  }
+                }
+              }
+            }
+        `,
+            variables: {
+              inputEditSecurityExpense: {
+                id: sharedInfo.expensesId,
+              }
+            }
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+            expect(res.body).to.exist;
+            expect(res.body.errors).to.not.exist;
+
+            done();
+          });
+        });
+
+        it("Can fetch restored security expenses", done => {
+          done();
+        });
       });
     });
   });
