@@ -37,14 +37,12 @@ const archive = async (data, { db: { collections } }) => {
   const { id } = data[name];
 
   try {
-    console.log(id);
     await collections[name].destroyOne({ id });
 
     return {
       id
     };
   } catch (err) {
-    console.log(err);
     throw new UserError(err.details);
   }
 };

@@ -81,7 +81,6 @@ describe("Companies", () => {
         })
         .end((err, res) => {
           res.should.have.status(200);
-          console.log();
           expect(res.body).to.not.be.null;
           expect(res.body.errors).to.not.exist;
           expect(res.body.data.companies.create.id).to.be.a.string;
@@ -237,6 +236,35 @@ describe("Companies", () => {
         })
         .end((err, res) => {
           res.should.have.status(200);
+          expect(res.body).to.exist;
+          expect(res.body.errors).to.not.exist;
+
+          done();
+        });
+    });
+
+    it("Cannot Fetch deleted company", done => {
+      chai
+        .request(app)
+        .post("/graph")
+        .set("content-type", "application/json")
+        .send({
+          query: `query($inputCompany:inputUpdateCompany){
+            company(company:$inputCompany){
+              id,
+              name
+            }
+          }
+          `,
+          variables: {
+            inputCompany: {
+              id: sharedInfo.companyId
+            }
+          }
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body.data.company).to.not.exist
           expect(res.body).to.exist;
           expect(res.body.errors).to.not.exist;
 
