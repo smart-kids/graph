@@ -1222,6 +1222,7 @@ describe("Companies", () => {
             res.should.have.status(200);
             expect(res.body).to.exist;
             expect(res.body.data.member.name).to.exist;
+            expect(res.body.data.member.id).to.exist;
             expect(res.body.errors).to.not.exist;
 
             done();
