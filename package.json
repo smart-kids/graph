@@ -6,8 +6,11 @@
   "author": "gitomehbranson <sirbranson67@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "export NODE_ENV=test && mocha --require babel-register --inspect test/*.js --exit",
-    "dev": "nodemon --exec babel-node --presets babel-preset-env  ./src",
+    "test": "export NODE_ENV=test && mocha --require babel-register --inspect test/**/*.js --exit",
+    "dev": "nodemon --exec babel-node --presets babel-preset-env  ./src/server",
+    "build": "babel ./src --out-dir dist --source-maps ",
+    "deploy": "yarn build && gcloud functions deploy smartkids-graph --trigger-http --region=us-central1 --runtime=nodejs10 --entry-point=default",
+    "test-deployment": "yarn build && node dist/server",
     "start": "babel-node ./src",
     "debug": "babel-node debug ./src"
   },
@@ -19,12 +22,15 @@
     "express-graphql": "^0.9.0",
     "graphql": "^14.4.2",
     "graphql-errors": "^2.1.0",
+    "graphql-import": "^0.7.1",
     "graphql-import-node": "^0.0.4",
     "graphql-tools": "^4.0.5",
     "morgan": "^1.9.1",
     "rimraf": "^2.6.3",
+    "source-map-support": "^0.5.13",
     "uuidv4": "^4.0.0",
-    "waterline": "^0.13.6"
+    "waterline": "^0.13.6",
+    "sails-disk": "^1.1.2"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -34,7 +40,6 @@
     "chai-http": "^4.0.0",
     "mocha": "^5.1.1",
     "nodemon": "^1.17.4",
-    "nyc": "^14.1.1",
-    "sails-disk": "^1.1.2"
+    "nyc": "^14.1.1"
   }
 }

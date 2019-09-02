@@ -1,0 +1,265 @@
+type Query {
+  hello: String
+
+  admins:[admin]
+  admin:admin
+
+  students:[student]
+  student:student
+
+  parents:[parent]
+  parent:parent
+
+  drivers:[driver]
+  driver:driver
+
+  buses:[bus]
+  bus:bus
+  
+  trips:[trip]
+  trip:trip
+
+  routes:[trip]
+  route:trip
+}
+
+type Mutation {
+  hello: String
+
+  admins:adminMutations
+  students:studentMutations
+  parents:parentMutations
+  drivers:driverMutations
+  buses:busMutations
+  trips:tripMutations
+  routes:routeMutations
+}
+
+# admin things
+type admin {
+  id:String
+  username: String
+  email: String
+  password: String
+}
+
+input Iadmin {
+  username: String!
+  email: String!
+  password: String!
+}
+
+input Uadmin {
+  id:String!
+  username: String
+  email: String
+  password: String
+}
+
+type adminMutations {
+  create(admin: Iadmin!): admin
+  update(admin: Uadmin!): admin
+  delete(admin: Uadmin!): admin
+  restore(admin: Uadmin!): admin
+}
+
+
+# driver things
+type driver {
+  id:String
+  username: String
+  email: String
+  phone: String
+  password: String
+}
+
+input Idriver {
+  username: String
+  email: String
+  phone: String
+  password: String
+}
+
+input Udriver {
+  id:String!
+  username: String
+  email: String
+  phone: String
+  password: String
+}
+
+type driverMutations {
+  create(driver: Idriver!): driver
+  update(driver: Udriver!): driver
+  delete(driver: Udriver!): driver
+  restore(driver: Udriver!): driver
+}
+
+# bus things
+type bus {
+  id:String
+  make: String
+  plate: String
+  size: Float
+}
+
+input Ibus {
+  make: String
+  plate: String
+  size: Float
+}
+
+input Ubus {
+  id:String!
+  make: String
+  plate: String
+  size: Float
+}
+
+type busMutations {
+  create(bus: Ibus!): bus
+  update(bus: Ubus!): bus
+  delete(bus: Ubus!): bus
+  restore(bus: Ubus!): bus
+}
+
+# loc things
+type loc {
+  id:String
+  lat: Float
+  lng: Float
+}
+
+input Iloc {
+  lat: Float
+  lng: Float
+}
+
+input Uloc {
+  id:String!
+  lat: Float
+  lng: Float
+}
+
+type locMutations {
+  create(loc: Iloc!): loc
+  update(loc: Uloc!): loc
+  delete(loc: Uloc!): loc
+  restore(loc: Uloc!): loc
+}
+
+# trip things
+type trip {
+  id:String
+  time: Float
+  path: [loc]
+  bus: bus
+}
+
+input Itrip {
+  time: Float
+  path: [Iloc]
+  bus: String
+}
+
+input Utrip {
+  id:String!
+  time: Float
+  path: [Iloc]
+  bus: String
+}
+
+type tripMutations {
+  create(trip: Itrip!): trip
+  update(trip: Utrip!): trip
+  delete(trip: Utrip!): trip
+  restore(trip: Utrip!): trip
+}
+
+enum gender {
+  MALE
+  FEMALE
+}
+
+# student things
+type student {
+  id:String
+  name: String
+  route: route
+  gender: gender
+  parent: parent
+}
+
+input Istudent {
+  name: String
+  route: String
+  gender: gender
+  parent: String
+}
+
+input Ustudent {
+  id:String!
+  name: String
+  route: String
+  gender: gender
+  parent: String
+}
+
+type studentMutations {
+  create(student: Istudent!): student
+  update(student: Ustudent!): student
+  delete(student: Ustudent!): student
+  restore(student: Ustudent!): student
+}
+
+type route {
+  id:String
+  name: String
+}
+
+input Iroute {
+  name: String
+}
+
+input Uroute {
+  id:String!
+  name: String
+}
+
+type routeMutations {
+  create(route: Iroute!): route
+  update(route: Uroute!): route
+  delete(route: Uroute!): route
+  restore(route: Uroute!): route
+}
+
+# parent things
+type parent {
+  id:String
+  name: String,
+  phone:String,
+  email:String
+  gender:gender
+}
+
+input Iparent {
+  name: String,
+  phone:String,
+  email:String
+  gender:gender
+}
+
+input Uparent {
+  id:String!
+  name: String,
+  phone:String,
+  email:String
+  gender:gender
+}
+
+type parentMutations {
+  create(parent: Iparent!): parent
+  update(parent: Uparent!): parent
+  delete(parent: Uparent!): parent
+  restore(parent: Uparent!): parent
+}
