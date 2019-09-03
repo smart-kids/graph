@@ -38,11 +38,11 @@ var config = {
     disk: DiskAdapter,
   },
   datastores: {
-    default: {
+    postgres: {
       adapter: "postgres",
       url: DB_URL,
     },
-    disk: {
+    default: {
       adapter: "disk",
       filePath: '/tmp'
     }
