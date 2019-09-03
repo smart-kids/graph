@@ -7,7 +7,9 @@ import { makeExecutableSchema } from "graphql-tools";
 import graphqlHTTP from "express-graphql";
 import morgan from "morgan";
 import Waterline from "waterline"
-import sailsDiskAdapter from "sails-disk";
+import DiskAdapter from "sails-disk";
+import MongoAdapter from "sails-mongo";
+import PostgresAdapter from "sails-postgresql"
 import { importSchema } from 'graphql-import'
 
 import admins from "./graphql/resolvers/Mutation/admins/model";
@@ -24,7 +26,7 @@ let schema = makeExecutableSchema({ typeDefs, resolvers });
 // const router = express();
 var router = express.Router()
 
-const { NODE_ENV, PORT = 3000 } = process.env;
+const { NODE_ENV, DB_URL } = process.env;
 
 if (NODE_ENV !== "test") router.use(morgan("tiny"));
 
@@ -32,12 +34,17 @@ router.get("/health", (req, res) => res.send());
 
 var config = {
   adapters: {
-    disk: sailsDiskAdapter,
-    filePath: '/tmp'
+    postgres: PostgresAdapter,
+    disk: DiskAdapter,
   },
   datastores: {
     default: {
-      adapter: "disk"
+      adapter: "postgres",
+      url: DB_URL,
+    },
+    disk: {
+      adapter: "disk",
+      filePath: '/tmp'
     }
   }
 };
