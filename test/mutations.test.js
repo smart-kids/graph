@@ -68,7 +68,7 @@ describe("Admins", () => {
         `,
         variables: {
           "Iadmin": {
-            "username": "test",
+            "username": "new admin",
             "email": "test",
             "password": "test"
           }
@@ -103,7 +103,7 @@ describe("Admins", () => {
         variables: {
           "admin": {
             "id": sharedInfo.adminId,
-            "username": "tested"
+            "username": "updated admin"
           }
         }
       })
@@ -125,7 +125,7 @@ describe("Admins", () => {
         query: `
           mutation ($Iadmin: Uadmin!) {
             admins {
-              delete(admin: $Iadmin) {
+              archive(admin: $Iadmin) {
                 id
               }
             }
@@ -141,7 +141,7 @@ describe("Admins", () => {
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
-        expect(res.body.data.admins.delete).to.be.null;
+        expect(res.body.data.admins.archive.id).to.be.a.string;
         done();
       });
   });
@@ -274,7 +274,7 @@ describe("Routes", () => {
         query: `
           mutation ($Iroute: Uroute!) {
             routes {
-              delete(route: $Iroute) {
+              archive(route: $Iroute) {
                 id
               }
             }
@@ -290,7 +290,7 @@ describe("Routes", () => {
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
-        expect(res.body.data.routes.delete).to.be.null;
+        expect(res.body.data.routes.archive.id).to.be.a.string;
         done();
       });
   });
@@ -424,7 +424,7 @@ describe("Schedule", () => {
         query: `
           mutation ($Ischedule: Uschedule!) {
             schedules {
-              delete(schedule: $Ischedule) {
+              archive(schedule: $Ischedule) {
                 id
               }
             }
@@ -440,7 +440,7 @@ describe("Schedule", () => {
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
-        expect(res.body.data.schedules.delete).to.be.null;
+        expect(res.body.data.schedules.archive.id).to.be.a.string;
         done();
       });
   });
@@ -580,7 +580,7 @@ describe("Drivers", () => {
         query: `
           mutation ($Idriver: Udriver!) {
             drivers {
-              delete(driver: $Idriver) {
+              archive(driver: $Idriver) {
                 id
               }
             }
@@ -596,7 +596,7 @@ describe("Drivers", () => {
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
-        expect(res.body.data.drivers.delete).to.be.null;
+        expect(res.body.data.drivers.archive.id).to.be.a.string;
         done();
       });
   });
@@ -734,7 +734,7 @@ describe("Busses", () => {
         query: `
           mutation ($Ibus: Ubus!) {
             buses {
-              delete(bus: $Ibus) {
+              archive(bus: $Ibus) {
                 id
               }
             }
@@ -750,7 +750,7 @@ describe("Busses", () => {
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
-        expect(res.body.data.buses.delete).to.be.null;
+        expect(res.body.data.buses.archive.id).to.be.a.string;
         done();
       });
   });
@@ -889,7 +889,7 @@ describe("Students", () => {
         query: `
           mutation ($Istudent: Ustudent!) {
             students {
-              delete(student: $Istudent) {
+              archive(student: $Istudent) {
                 id
               }
             }
@@ -905,7 +905,7 @@ describe("Students", () => {
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
-        expect(res.body.data.students.delete).to.be.null;
+        expect(res.body.data.students.archive.id).to.be.a.string;
         done();
       });
   });
@@ -1075,7 +1075,7 @@ describe("Parent", () => {
         query: `
           mutation ($Iparent: Uparent!) {
             parents {
-              delete(parent: $Iparent) {
+              archive(parent: $Iparent) {
                 id
               }
             }
@@ -1091,7 +1091,7 @@ describe("Parent", () => {
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
-        expect(res.body.data.parents.delete).to.be.null;
+        expect(res.body.data.parents.archive.id).to.be.a.string;
         done();
       });
   });

@@ -63,7 +63,7 @@ input Uadmin {
 type adminMutations {
   create(admin: Iadmin!): admin
   update(admin: Uadmin!): admin
-  delete(admin: Uadmin!): admin
+  archive(admin: Uadmin!): admin
   restore(admin: Uadmin!): admin
 }
 
@@ -95,7 +95,7 @@ input Udriver {
 type driverMutations {
   create(driver: Idriver!): driver
   update(driver: Udriver!): driver
-  delete(driver: Udriver!): driver
+  archive(driver: Udriver!): driver
   restore(driver: Udriver!): driver
 }
 
@@ -123,7 +123,7 @@ input Ubus {
 type busMutations {
   create(bus: Ibus!): bus
   update(bus: Ubus!): bus
-  delete(bus: Ubus!): bus
+  archive(bus: Ubus!): bus
   restore(bus: Ubus!): bus
 }
 
@@ -148,7 +148,7 @@ input Uloc {
 type locMutations {
   create(loc: Iloc!): loc
   update(loc: Uloc!): loc
-  delete(loc: Uloc!): loc
+  archive(loc: Uloc!): loc
   restore(loc: Uloc!): loc
 }
 
@@ -176,7 +176,7 @@ input Utrip {
 type tripMutations {
   create(trip: Itrip!): trip
   update(trip: Utrip!): trip
-  delete(trip: Utrip!): trip
+  archive(trip: Utrip!): trip
   restore(trip: Utrip!): trip
 }
 
@@ -212,7 +212,7 @@ input Ustudent {
 type studentMutations {
   create(student: Istudent!): student
   update(student: Ustudent!): student
-  delete(student: Ustudent!): student
+  archive(student: Ustudent!): student
   restore(student: Ustudent!): student
 }
 
@@ -234,7 +234,7 @@ input Uroute {
 type routeMutations {
   create(route: Iroute!): route
   update(route: Uroute!): route
-  delete(route: Uroute!): route
+  archive(route: Uroute!): route
   restore(route: Uroute!): route
 }
 
@@ -265,7 +265,7 @@ input Uschedule {
 type scheduleMutations {
   create(schedule: Ischedule!): schedule
   update(schedule: Uschedule!): schedule
-  delete(schedule: Uschedule!): schedule
+  archive(schedule: Uschedule!): schedule
   restore(schedule: Uschedule!): schedule
 }
 
@@ -296,6 +296,6 @@ input Uparent {
 type parentMutations {
   create(parent: Iparent!): parent
   update(parent: Uparent!): parent
-  delete(parent: Uparent!): parent
+  archive(parent: Uparent!): parent
   restore(parent: Uparent!): parent
 }

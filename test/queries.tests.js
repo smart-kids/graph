@@ -69,13 +69,7 @@ describe("Setup For Queries", () => {
           buses {
             plate
             make
-            size,
-            history{
-              time,
-              route{
-                name
-              }
-            }
+            size
           },
           drivers {
             id,

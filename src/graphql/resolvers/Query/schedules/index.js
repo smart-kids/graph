@@ -32,7 +32,7 @@ const nested = {
   schedule: {
     async route(root, args, { db: { collections } }) {
       // test here
-      const entry = await collections["route"].findOne({
+      const entry = await collections["route"].find({
         where: { id: root.route, isDeleted: false }
       });
       return entry;

@@ -1,10 +1,10 @@
-const uuid = require("uuidv4");
+import { ObjectId } from "mongodb"
 const { name } = require("./about.js")
 
 const { UserError } = require("graphql-errors");
 
 const create = async (data, { db: { collections } }) => {
-  const id = uuid();
+  const id = new ObjectId().toHexString();
   const entry = Object.assign(data[name], { id, isDeleted: false });
 
   try {
