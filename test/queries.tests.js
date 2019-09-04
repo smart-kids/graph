@@ -69,7 +69,13 @@ describe("Setup For Queries", () => {
           buses {
             plate
             make
-            size
+            size,
+            history{
+              time,
+              route{
+                name
+              }
+            }
           },
           drivers {
             id,
@@ -83,7 +89,6 @@ describe("Setup For Queries", () => {
           }
           routes{
             id,
-            time,
             path{
               lat,
               lng
@@ -93,7 +98,8 @@ describe("Setup For Queries", () => {
             id,
             time,
             route{
-              id
+              id,
+              name
             }
           }
         }` })
@@ -106,6 +112,8 @@ describe("Setup For Queries", () => {
           const parent = res.body.data.parents[0]
           const route = res.body.data.routes[0]
           const driver = res.body.data.drivers[0]
+          const schedule = res.body.data.schedules[0]
+
 
           // students
           expect(student.id).to.be.a.string;
@@ -129,6 +137,12 @@ describe("Setup For Queries", () => {
           // routes
           expect(route.id).to.be.a.string;
           expect(route.name).to.be.a.string;
+
+          // schedules
+          expect(schedule.id).to.be.a.string;
+          expect(schedule.name).to.be.a.string;
+          expect(schedule.time).to.be.a.string;
+          expect(schedule.route.name).to.be.a.string;
 
           done();
         });

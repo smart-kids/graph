@@ -368,7 +368,8 @@ describe("Schedule", () => {
         `,
         variables: {
           "Ischedule": {
-            "name": "marwa"
+            "name": "schedule 1",
+            route:sharedInfo.routeId
           }
         }
       })

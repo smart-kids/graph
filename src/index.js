@@ -29,7 +29,7 @@ let schema = makeExecutableSchema({ typeDefs, resolvers });
 // const router = express();
 var router = express.Router()
 
-const { NODE_ENV, DB_URL } = process.env;
+const { NODE_ENV, DB_URL='pg url here' } = process.env;
 
 if (NODE_ENV !== "test") router.use(morgan("tiny"), cors());
 

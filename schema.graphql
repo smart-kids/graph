@@ -242,15 +242,24 @@ type routeMutations {
 type schedule {
   id:String
   name: String
+  time: String
+  route:route
+  bus:bus
 }
 
 input Ischedule {
   name: String
+  time: String
+  route:String
+  bus:String
 }
 
 input Uschedule {
   id:String!
   name: String
+  time: String
+  route:String
+  bus:String
 }
 
 type scheduleMutations {
