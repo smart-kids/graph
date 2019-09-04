@@ -8,10 +8,7 @@ export default Waterline.Collection.extend({
 
   attributes: {
     id: { type: "string", required: true },
-    names: { type: "string", required: true },
-    route: { type: "string", required: true },
-    gender: { type: "string", required: true },
-    parent: { type: "string", required: true },
+    name: { type: "string", required: true },
     isDeleted: { type: "boolean", required: true }
   }
 });

@@ -1,0 +1,5 @@
+# Make sure to place 'runner' under '*' object.
+'*':
+  'runner':
+    'scopes':
+      'js': 'babel-node'

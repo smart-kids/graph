@@ -27,23 +27,4 @@ const single = async (root, args, { db: { collections } }) => {
   return entry;
 };
 
-const nested = {
-  student: {
-    async route(root, args, { db: { collections } }) {
-      // test here
-      const entry = await collections["route"].findOne({
-        where: { id: root.route, isDeleted: false }
-      });
-      return entry;
-    },
-    async parent(root, args, { db: { collections } }) {
-      // test here
-      const entry = await collections["parent"].findOne({
-        where: { id: root.parent, isDeleted: false }
-      });
-      return entry;
-    }
-  }
-}
-
-export { list, single, listDeleted, nested };
+export { list, single, listDeleted };

@@ -4,6 +4,7 @@ import drivers from "./drivers";
 import buses from "./buses";
 import students from "./students";
 import parents from "./parents";
+import schedules from "./schedules";
 
 export default {
   admins,
@@ -12,6 +13,7 @@ export default {
   buses,
   students,
   parents,
+  schedules,
   hello() {
     return "hello mutation";
   }

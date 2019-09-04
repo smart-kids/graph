@@ -350,6 +350,156 @@ describe("Routes", () => {
   });
 })
 
+describe("Schedule", () => {
+  it("Can create an schedule", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ischedule: Ischedule!) {
+            schedules {
+              create(schedule: $Ischedule) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          "Ischedule": {
+            "name": "marwa"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.schedules.create.id).to.be.a.string;
+
+        sharedInfo.scheduleId = res.body.data.schedules.create.id
+        done();
+      });
+  });
+
+  it("Can update an schedule", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($schedule: Uschedule!) {
+            schedules {
+              update(schedule: $schedule) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          "schedule": {
+            "id": sharedInfo.scheduleId,
+            "name": "tested"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.schedules.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an schedule", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ischedule: Uschedule!) {
+            schedules {
+              delete(schedule: $Ischedule) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "Ischedule": {
+            "id": sharedInfo.scheduleId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.schedules.delete).to.be.null;
+        done();
+      });
+  });
+
+  it("Can restore an schedule", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ischedule: Uschedule!) {
+            schedules {
+              restore(schedule: $Ischedule) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "Ischedule": {
+            "id": sharedInfo.scheduleId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.schedules.restore.id).to.be.string;
+        done();
+      });
+  });
+
+  it("Can fetch restored schedule", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        {
+          schedules{
+            id
+          }
+        }        
+        `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.schedules[0].id).to.be.a.string;
+
+        done();
+      });
+  });
+})
+
+
 describe("Drivers", () => {
   it("Can create an driver", done => {
     chai
@@ -677,8 +827,8 @@ describe("Students", () => {
         `,
         variables: {
           "Istudent": {
-            "name": "marwa",
-            "route": "test",
+            "names": "marwa",
+            "route": sharedInfo.routeId,
             "gender": "FEMALE",
             "parent": "test"
           }
@@ -713,8 +863,8 @@ describe("Students", () => {
         variables: {
           "student": {
             "id": sharedInfo.studentId,
-            "name": "marwa",
-            "route": "test",
+            "names": "marwa",
+            "route": sharedInfo.routeId,
             "gender": "MALE",
             "parent": "test"
           }
@@ -846,6 +996,37 @@ describe("Parent", () => {
         expect(res.body.data.parents.create.id).to.be.a.string;
 
         sharedInfo.parentId = res.body.data.parents.create.id
+        done();
+      });
+  });
+
+  it("Can update an student to add the parent", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        mutation ($student: Ustudent!) {
+          students {
+            update(student: $student) {
+              id
+            }
+          }
+        }                 
+        `,
+        variables: {
+          "student": {
+            "id": sharedInfo.studentId,
+            "parent": sharedInfo.parentId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.students.update.id).to.be.a.string;
         done();
       });
   });

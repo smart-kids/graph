@@ -11,6 +11,7 @@ import DiskAdapter from "sails-disk";
 import MongoAdapter from "sails-mongo";
 import PostgresAdapter from "sails-postgresql"
 import { importSchema } from 'graphql-import'
+import cors from "cors"
 
 import admins from "./graphql/resolvers/Mutation/admins/model";
 import routes from "./graphql/resolvers/Mutation/routes/model";
@@ -18,6 +19,8 @@ import drivers from "./graphql/resolvers/Mutation/drivers/model";
 import buses from "./graphql/resolvers/Mutation/buses/model";
 import students from "./graphql/resolvers/Mutation/students/model";
 import parents from "./graphql/resolvers/Mutation/parents/model";
+import schedule from "./graphql/resolvers/Mutation/schedules/model";
+
 import resolvers from "./graphql/index";
 
 const typeDefs = importSchema('./schema.graphql')
@@ -28,7 +31,7 @@ var router = express.Router()
 
 const { NODE_ENV, DB_URL } = process.env;
 
-if (NODE_ENV !== "test") router.use(morgan("tiny"));
+if (NODE_ENV !== "test") router.use(morgan("tiny"), cors());
 
 router.get("/health", (req, res) => res.send());
 
@@ -57,6 +60,7 @@ waterline.registerModel(drivers);
 waterline.registerModel(buses);
 waterline.registerModel(students);
 waterline.registerModel(parents);
+waterline.registerModel(schedule);
 
 waterline.initialize(config, (err, db) => {
   if (err) {

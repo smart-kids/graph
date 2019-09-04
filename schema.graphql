@@ -20,7 +20,10 @@ type Query {
   trip:trip
 
   routes:[trip]
-  route:trip
+  route:trip,
+
+  schedules:[schedule],
+  schedule:schedule
 }
 
 type Mutation {
@@ -33,6 +36,7 @@ type Mutation {
   buses:busMutations
   trips:tripMutations
   routes:routeMutations
+  schedules:scheduleMutations
 }
 
 # admin things
@@ -184,14 +188,14 @@ enum gender {
 # student things
 type student {
   id:String
-  name: String
+  names: String
   route: route
   gender: gender
   parent: parent
 }
 
 input Istudent {
-  name: String
+  names: String
   route: String
   gender: gender
   parent: String
@@ -199,7 +203,7 @@ input Istudent {
 
 input Ustudent {
   id:String!
-  name: String
+  names: String
   route: String
   gender: gender
   parent: String
@@ -212,6 +216,7 @@ type studentMutations {
   restore(student: Ustudent!): student
 }
 
+# route things
 type route {
   id:String
   name: String
@@ -231,6 +236,28 @@ type routeMutations {
   update(route: Uroute!): route
   delete(route: Uroute!): route
   restore(route: Uroute!): route
+}
+
+# route things
+type schedule {
+  id:String
+  name: String
+}
+
+input Ischedule {
+  name: String
+}
+
+input Uschedule {
+  id:String!
+  name: String
+}
+
+type scheduleMutations {
+  create(schedule: Ischedule!): schedule
+  update(schedule: Uschedule!): schedule
+  delete(schedule: Uschedule!): schedule
+  restore(schedule: Uschedule!): schedule
 }
 
 # parent things
