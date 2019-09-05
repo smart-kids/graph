@@ -11,7 +11,7 @@ export default Waterline.Collection.extend({
     username: { type: "string", required: true },
     email: { type: "string", required: true },
     phone: { type: "string", required: true },
-    password: { type: "string", required: true },
+    password: { type: "string", required: false },
     isDeleted: { type: "boolean", required: true }
   }
 });
