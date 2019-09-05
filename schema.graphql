@@ -1,47 +1,47 @@
 type Query {
   hello: String
 
-  admins:[admin]
-  admin:admin
+  admins: [admin]
+  admin: admin
 
-  students:[student]
-  student:student
+  students: [student]
+  student: student
 
-  parents:[parent]
-  parent:parent
+  parents: [parent]
+  parent: parent
 
-  drivers:[driver]
-  driver:driver
+  drivers: [driver]
+  driver: driver
 
-  buses:[bus]
-  bus:bus
-  
-  trips:[trip]
-  trip:trip
+  buses: [bus]
+  bus: bus
 
-  routes:[trip]
-  route:trip,
+  trips: [trip]
+  trip: trip
 
-  schedules:[schedule],
-  schedule:schedule
+  routes: [route]
+  route: route
+
+  schedules: [schedule]
+  schedule: schedule
 }
 
 type Mutation {
   hello: String
 
-  admins:adminMutations
-  students:studentMutations
-  parents:parentMutations
-  drivers:driverMutations
-  buses:busMutations
-  trips:tripMutations
-  routes:routeMutations
-  schedules:scheduleMutations
+  admins: adminMutations
+  students: studentMutations
+  parents: parentMutations
+  drivers: driverMutations
+  buses: busMutations
+  trips: tripMutations
+  routes: routeMutations
+  schedules: scheduleMutations
 }
 
 # admin things
 type admin {
-  id:String
+  id: String
   username: String
   email: String
   password: String
@@ -54,7 +54,7 @@ input Iadmin {
 }
 
 input Uadmin {
-  id:String!
+  id: String!
   username: String
   email: String
   password: String
@@ -67,10 +67,9 @@ type adminMutations {
   restore(admin: Uadmin!): admin
 }
 
-
 # driver things
 type driver {
-  id:String
+  id: String
   username: String
   email: String
   phone: String
@@ -85,7 +84,7 @@ input Idriver {
 }
 
 input Udriver {
-  id:String!
+  id: String!
   username: String
   email: String
   phone: String
@@ -101,7 +100,7 @@ type driverMutations {
 
 # bus things
 type bus {
-  id:String
+  id: String
   make: String
   plate: String
   size: Float
@@ -114,7 +113,7 @@ input Ibus {
 }
 
 input Ubus {
-  id:String!
+  id: String!
   make: String
   plate: String
   size: Float
@@ -129,7 +128,7 @@ type busMutations {
 
 # loc things
 type loc {
-  id:String
+  id: String
   lat: Float
   lng: Float
 }
@@ -140,7 +139,7 @@ input Iloc {
 }
 
 input Uloc {
-  id:String!
+  id: String!
   lat: Float
   lng: Float
 }
@@ -154,22 +153,22 @@ type locMutations {
 
 # trip things
 type trip {
-  id:String
+  id: String
   time: Float
-  path: [loc]
+  route: route
   bus: bus
 }
 
 input Itrip {
   time: Float
-  path: [Iloc]
+  route: String
   bus: String
 }
 
 input Utrip {
-  id:String!
+  id: String!
   time: Float
-  path: [Iloc]
+  route: String
   bus: String
 }
 
@@ -187,7 +186,7 @@ enum gender {
 
 # student things
 type student {
-  id:String
+  id: String
   names: String
   route: route
   gender: gender
@@ -202,7 +201,7 @@ input Istudent {
 }
 
 input Ustudent {
-  id:String!
+  id: String!
   names: String
   route: String
   gender: gender
@@ -218,8 +217,9 @@ type studentMutations {
 
 # route things
 type route {
-  id:String
+  id: String
   name: String
+  path: [loc]
 }
 
 input Iroute {
@@ -227,8 +227,9 @@ input Iroute {
 }
 
 input Uroute {
-  id:String!
+  id: String!
   name: String
+  path: [Iloc]
 }
 
 type routeMutations {
@@ -240,26 +241,26 @@ type routeMutations {
 
 # route things
 type schedule {
-  id:String
+  id: String
   name: String
   time: String
-  route:route
-  bus:bus
+  route: route
+  bus: bus
 }
 
 input Ischedule {
   name: String
   time: String
-  route:String
-  bus:String
+  route: String
+  bus: String
 }
 
 input Uschedule {
-  id:String!
+  id: String!
   name: String
   time: String
-  route:String
-  bus:String
+  route: String
+  bus: String
 }
 
 type scheduleMutations {
@@ -271,26 +272,26 @@ type scheduleMutations {
 
 # parent things
 type parent {
-  id:String
-  name: String,
-  phone:String,
-  email:String
-  gender:gender
+  id: String
+  name: String
+  phone: String
+  email: String
+  gender: gender
 }
 
 input Iparent {
-  name: String,
-  phone:String,
-  email:String
-  gender:gender
+  name: String
+  phone: String
+  email: String
+  gender: gender
 }
 
 input Uparent {
-  id:String!
-  name: String,
-  phone:String,
-  email:String
-  gender:gender
+  id: String!
+  name: String
+  phone: String
+  email: String
+  gender: gender
 }
 
 type parentMutations {

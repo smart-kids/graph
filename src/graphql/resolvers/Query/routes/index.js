@@ -27,4 +27,16 @@ const single = async (root, args, { db: { collections } }) => {
   return entry;
 };
 
-export { list, single, listDeleted };
+const nested = {
+  route: {
+    async path(root, args, { db: { collections } }) {
+      // test here
+      const entry = await collections["paths"].findOne({
+        where: { id: root.route, isDeleted: false }
+      });
+      return entry;
+    },
+  }
+}
+
+export { list, single, listDeleted, nested };

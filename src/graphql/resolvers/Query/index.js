@@ -1,5 +1,5 @@
 import { list as admins, single as admin } from "./admins";
-import { list as routes, single as route } from "./routes";
+import { list as routes, single as route, nested as Nroutes } from "./routes";
 import { list as drivers, single as driver } from "./drivers";
 import { list as buses, single as bus } from "./buses";
 import { list as students, single as student, nested as Nstudent } from "./students";
@@ -8,7 +8,7 @@ import { list as parents, single as parent } from "./parents";
 
 const nested = {};
 
-Object.assign(nested, Nstudent, Nschedule)
+Object.assign(nested, Nstudent, Nschedule, Nroutes)
 
 const Query = {
   admins,
