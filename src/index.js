@@ -29,7 +29,7 @@ let schema = makeExecutableSchema({ typeDefs, resolvers });
 // const router = express();
 var router = express.Router()
 
-const { NODE_ENV, DB_URL = 'pg url here' } = process.env;
+const { NODE_ENV, DB_URL = 'db url here' } = process.env;
 
 if (NODE_ENV !== "test") router.use(morgan("tiny"), cors());
 
@@ -39,21 +39,20 @@ var config = {
   adapters: {
     // postgres: PostgresAdapter,
     mongo: MongoAdapter,
-    // disk: DiskAdapter,
+    disk: DiskAdapter,
   },
   datastores: {
     // postgres: {
     //   adapter: "postgres",
     //   url: DB_URL,
     // },
-    default: {
+    default: NODE_ENV !== 'development' ? {
       adapter: 'mongo',
       url: DB_URL
-    },
-    // disk: {
-    //   adapter: "disk",
-    //   filePath: '/tmp'
-    // }
+    } : {
+        adapter: "disk",
+        filePath: '/tmp'
+      }
   }
 };
 
