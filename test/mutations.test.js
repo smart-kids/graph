@@ -1052,7 +1052,7 @@ describe("Parent", () => {
             "id": sharedInfo.parentId,
             "name": "marwaed",
             "phone": "test",
-            "email": "FEMALE",
+            "email": "email@email.com",
             "gender": "MALE"
           }
         }
