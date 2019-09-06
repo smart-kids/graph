@@ -95,6 +95,12 @@ describe("Setup For Queries", () => {
               id,
               name
             }
+            bus{
+              id,
+              make,
+              size
+              plate
+            }
           }
         }` })
         .end((err, res) => {
@@ -137,6 +143,7 @@ describe("Setup For Queries", () => {
           expect(schedule.name).to.be.a.string;
           expect(schedule.time).to.be.a.string;
           expect(schedule.route.name).to.be.a.string;
+          expect(schedule.bus.make).to.be.a.string;
 
           done();
         });

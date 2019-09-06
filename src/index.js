@@ -46,7 +46,7 @@ var config = {
     //   adapter: "postgres",
     //   url: DB_URL,
     // },
-    default: NODE_ENV !== 'development' ? {
+    default: !['development', "test"].includes(NODE_ENV) ? {
       adapter: 'mongo',
       url: DB_URL
     } : {

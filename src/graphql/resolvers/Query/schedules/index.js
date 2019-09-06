@@ -37,6 +37,13 @@ const nested = {
       });
       return entry;
     },
+    async bus(root, args, { db: { collections } }) {
+      // test here
+      const entry = await collections["bus"].find({
+        where: { id: root.bus, isDeleted: false }
+      });
+      return entry;
+    },
   }
 }
 

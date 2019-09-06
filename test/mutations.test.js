@@ -369,7 +369,9 @@ describe("Schedule", () => {
         variables: {
           "Ischedule": {
             "name": "schedule 1",
-            route:sharedInfo.routeId
+            time:new Date().toLocaleTimeString(),
+            route:sharedInfo.routeId,
+            bus:sharedInfo.busId
           }
         }
       })
@@ -402,7 +404,7 @@ describe("Schedule", () => {
         variables: {
           "schedule": {
             "id": sharedInfo.scheduleId,
-            "name": "tested"
+            "name": "Schedule 1 edited"
           }
         }
       })
