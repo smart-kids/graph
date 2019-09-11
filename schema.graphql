@@ -263,7 +263,7 @@ input Ischedule {
   name: String
   time: String
   route: String
-  days:[day]
+  days:String
   bus: String
 }
 
@@ -271,7 +271,7 @@ input Uschedule {
   id: String!
   name: String
   time: String
-  days:[day]
+  days:String
   route: String
   bus: String
 }
