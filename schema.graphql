@@ -239,11 +239,22 @@ type routeMutations {
   restore(route: Uroute!): route
 }
 
-# route things
+# schedule things
+enum day {
+  MONDAY
+  TEUSDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
 type schedule {
   id: String
   name: String
   time: String
+  days:[day]
   route: route
   bus: bus
 }
@@ -252,6 +263,7 @@ input Ischedule {
   name: String
   time: String
   route: String
+  days:[day]
   bus: String
 }
 
@@ -259,6 +271,7 @@ input Uschedule {
   id: String!
   name: String
   time: String
+  days:[day]
   route: String
   bus: String
 }

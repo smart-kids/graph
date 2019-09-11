@@ -31,18 +31,21 @@ const single = async (root, args, { db: { collections } }) => {
 const nested = {
   schedule: {
     async route(root, args, { db: { collections } }) {
-      // test here
+      console.log(root)
       const entry = await collections["route"].find({
         where: { id: root.route, isDeleted: false }
       });
       return entry;
     },
     async bus(root, args, { db: { collections } }) {
-      // test here
       const entry = await collections["bus"].find({
-        where: { id: root.bus, isDeleted: false }
+        // where: { isDeleted: false }
       });
       return entry;
+    },
+    async days(root, args, { db: { collections } }) {
+      if (root.days)
+        return root.days.split(",");
     },
   }
 }

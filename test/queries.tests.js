@@ -91,6 +91,8 @@ describe("Setup For Queries", () => {
           schedules{
             id,
             time,
+            name,
+            days,
             route{
               id,
               name
@@ -142,6 +144,7 @@ describe("Setup For Queries", () => {
           expect(schedule.id).to.be.a.string;
           expect(schedule.name).to.be.a.string;
           expect(schedule.time).to.be.a.string;
+          expect(schedule.days).to.be.instanceof(Array);;
           expect(schedule.route.name).to.be.a.string;
           expect(schedule.bus.make).to.be.a.string;
 

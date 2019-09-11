@@ -5,6 +5,7 @@ const { UserError } = require("graphql-errors");
 
 const create = async (data, { db: { collections } }) => {
   const id = new ObjectId().toHexString();
+  data[name].days = data[name].days.join(",")
   const entry = Object.assign(data[name], { id, isDeleted: false });
 
   try {

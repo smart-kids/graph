@@ -350,159 +350,6 @@ describe("Routes", () => {
   });
 })
 
-describe("Schedule", () => {
-  it("Can create an schedule", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($Ischedule: Ischedule!) {
-            schedules {
-              create(schedule: $Ischedule) {
-                id
-              }
-            }
-          }            
-        `,
-        variables: {
-          "Ischedule": {
-            "name": "schedule 1",
-            time:new Date().toLocaleTimeString(),
-            route:sharedInfo.routeId,
-            bus:sharedInfo.busId
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.schedules.create.id).to.be.a.string;
-
-        sharedInfo.scheduleId = res.body.data.schedules.create.id
-        done();
-      });
-  });
-
-  it("Can update an schedule", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($schedule: Uschedule!) {
-            schedules {
-              update(schedule: $schedule) {
-                id
-              }
-            }
-          }            
-        `,
-        variables: {
-          "schedule": {
-            "id": sharedInfo.scheduleId,
-            "name": "Schedule 1 edited"
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.schedules.update.id).to.be.a.string;
-        done();
-      });
-  });
-
-  it("Can nuke an schedule", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($Ischedule: Uschedule!) {
-            schedules {
-              archive(schedule: $Ischedule) {
-                id
-              }
-            }
-          }                  
-        `,
-        variables: {
-          "Ischedule": {
-            "id": sharedInfo.scheduleId
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.schedules.archive.id).to.be.a.string;
-        done();
-      });
-  });
-
-  it("Can restore an schedule", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($Ischedule: Uschedule!) {
-            schedules {
-              restore(schedule: $Ischedule) {
-                id
-              }
-            }
-          }                  
-        `,
-        variables: {
-          "Ischedule": {
-            "id": sharedInfo.scheduleId
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        // expect(res.body.data.schedules.restore.id).to.be.string;
-        done();
-      });
-  });
-
-  it("Can fetch restored schedule", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-        {
-          schedules{
-            id
-          }
-        }        
-        `
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.schedules[0].id).to.be.a.string;
-
-        done();
-      });
-  });
-})
-
-
 describe("Drivers", () => {
   it("Can create an driver", done => {
     chai
@@ -1147,6 +994,159 @@ describe("Parent", () => {
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.parents[0].id).to.be.a.string;
+
+        done();
+      });
+  });
+})
+
+describe("Schedule", () => {
+  it("Can create an schedule", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ischedule: Ischedule!) {
+            schedules {
+              create(schedule: $Ischedule) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          "Ischedule": {
+            "name": "schedule 1",
+            time: new Date().toLocaleTimeString(),
+            route: sharedInfo.routeId,
+            days: ["MONDAY", "TEUSDAY"],
+            bus: sharedInfo.busId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.schedules.create.id).to.be.a.string;
+
+        sharedInfo.scheduleId = res.body.data.schedules.create.id
+        done();
+      });
+  });
+
+  it("Can update an schedule", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($schedule: Uschedule!) {
+            schedules {
+              update(schedule: $schedule) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          "schedule": {
+            "id": sharedInfo.scheduleId,
+            "name": "Schedule 1 edited"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.schedules.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an schedule", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ischedule: Uschedule!) {
+            schedules {
+              archive(schedule: $Ischedule) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "Ischedule": {
+            "id": sharedInfo.scheduleId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.schedules.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an schedule", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ischedule: Uschedule!) {
+            schedules {
+              restore(schedule: $Ischedule) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "Ischedule": {
+            "id": sharedInfo.scheduleId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.schedules.restore.id).to.be.string;
+        done();
+      });
+  });
+
+  it("Can fetch restored schedule", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        {
+          schedules{
+            id
+          }
+        }        
+        `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.schedules[0].id).to.be.a.string;
 
         done();
       });
