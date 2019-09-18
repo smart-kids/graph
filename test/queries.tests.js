@@ -96,6 +96,8 @@ describe("Setup For Queries", () => {
           }
           routes{
             id,
+            name,
+            description
             path{
               lat,
               lng
@@ -156,6 +158,7 @@ describe("Setup For Queries", () => {
           // routes
           expect(route.id).to.be.a.string;
           expect(route.name).to.be.a.string;
+          expect(route.description).to.be.a.string;
 
           // schedules
           expect(schedule.id).to.be.a.string;

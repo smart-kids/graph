@@ -231,16 +231,20 @@ type studentMutations {
 type route {
   id: String
   name: String
+  description: String
   path: [loc]
 }
 
 input Iroute {
   name: String
+  description: String
+  path: [Iloc]
 }
 
 input Uroute {
   id: String!
   name: String
+  description: String
   path: [Iloc]
 }
 

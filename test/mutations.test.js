@@ -219,7 +219,8 @@ describe("Routes", () => {
         `,
         variables: {
           "Iroute": {
-            "name": "marwa"
+            "name": "marwa",
+            "description": "marwa"
           }
         }
       })
@@ -252,7 +253,8 @@ describe("Routes", () => {
         variables: {
           "route": {
             "id": sharedInfo.routeId,
-            "name": "tested"
+            "name": "tested",
+            "description": "descr"
           }
         }
       })
