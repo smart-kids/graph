@@ -27,4 +27,23 @@ const single = async (root, args, { db: { collections } }) => {
   return entry;
 };
 
-export { list, single, listDeleted };
+const nested = {
+  [name]: {
+    async driver(root, args, { db: { collections } }) {
+      const entry = await collections["driver"].findOne({
+        where: { id: root.driver, isDeleted: false }
+      });
+      return entry;
+    }
+  },
+  driver: {
+    async bus(root, args, { db: { collections } }) {
+      const entry = await collections["bus"].findOne({
+        where: { driver: root.id, isDeleted: false }
+      });
+      return entry;
+    }
+  }
+}
+
+export { list, single, listDeleted, nested };

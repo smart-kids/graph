@@ -31,7 +31,6 @@ const single = async (root, args, { db: { collections } }) => {
 const nested = {
   schedule: {
     async route(root, args, { db: { collections } }) {
-      console.log(root)
       const entry = await collections["route"].findOne({
         where: { id: root.route, isDeleted: false }
       });
@@ -49,6 +48,5 @@ const nested = {
     },
   }
 }
-
 
 export { list, single, listDeleted, nested };

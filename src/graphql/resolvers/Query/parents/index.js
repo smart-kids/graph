@@ -27,4 +27,16 @@ const single = async (root, args, { db: { collections } }) => {
   return entry;
 };
 
-export { list, single, listDeleted };
+const nested = {
+  parent: {
+    async students(root, args, { db: { collections } }) {
+      const entry = await collections["student"].find({
+        where: { parent: root.parent, isDeleted: false }
+      });
+      return entry;
+    }
+  }
+}
+
+
+export { list, single, listDeleted, nested };

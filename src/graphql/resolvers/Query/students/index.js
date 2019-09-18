@@ -30,16 +30,20 @@ const single = async (root, args, { db: { collections } }) => {
 const nested = {
   student: {
     async route(root, args, { db: { collections } }) {
-      // test here
       const entry = await collections["route"].findOne({
         where: { id: root.route, isDeleted: false }
       });
       return entry;
     },
     async parent(root, args, { db: { collections } }) {
-      // test here
       const entry = await collections["parent"].findOne({
         where: { id: root.parent, isDeleted: false }
+      });
+      return entry;
+    },
+    async parent2(root, args, { db: { collections } }) {
+      const entry = await collections["parent"].findOne({
+        where: { id: root.parent2, isDeleted: false }
       });
       return entry;
     }

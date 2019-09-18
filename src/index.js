@@ -31,27 +31,25 @@ var router = express.Router()
 
 const { NODE_ENV, DB_URL = 'db url here' } = process.env;
 
-if (NODE_ENV !== "test") router.use(morgan("tiny"), cors());
+if (NODE_ENV !== "test") router.use(morgan("tiny"), cors({
+  origin: ['development', "test"].includes(NODE_ENV) ? '*' : 'https://smart-kids-admin-staging.netlify.com',
+  optionsSuccessStatus: 200
+}));
 
 router.get("/health", (req, res) => res.send());
 
 var config = {
   adapters: {
-    // postgres: PostgresAdapter,
     mongo: MongoAdapter,
     disk: DiskAdapter,
   },
   datastores: {
-    // postgres: {
-    //   adapter: "postgres",
-    //   url: DB_URL,
-    // },
     default: !['development', "test"].includes(NODE_ENV) ? {
       adapter: 'mongo',
       url: DB_URL
     } : {
         adapter: "disk",
-        filePath: '/tmp'
+        // filePath: '/tmp'
       }
   }
 };

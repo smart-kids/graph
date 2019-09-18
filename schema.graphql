@@ -74,6 +74,7 @@ type driver {
   email: String
   phone: String
   password: String
+  bus: bus
 }
 
 input Idriver {
@@ -81,6 +82,7 @@ input Idriver {
   email: String
   phone: String
   password: String
+  bus: String
 }
 
 input Udriver {
@@ -89,6 +91,7 @@ input Udriver {
   email: String
   phone: String
   password: String
+  bus: String
 }
 
 type driverMutations {
@@ -104,12 +107,14 @@ type bus {
   make: String
   plate: String
   size: Float
+  driver: driver
 }
 
 input Ibus {
   make: String
   plate: String
   size: Float
+  driver: String
 }
 
 input Ubus {
@@ -117,6 +122,7 @@ input Ubus {
   make: String
   plate: String
   size: Float
+  driver: String
 }
 
 type busMutations {
@@ -190,22 +196,28 @@ type student {
   names: String
   route: route
   gender: gender
+  registration: String
   parent: parent
+  parent2: parent
 }
 
 input Istudent {
   names: String
   route: String
   gender: gender
+  registration: String
   parent: String
+  parent2: String
 }
 
 input Ustudent {
   id: String!
   names: String
   route: String
+  registration: String
   gender: gender
   parent: String
+  parent2: String
 }
 
 type studentMutations {
@@ -290,6 +302,7 @@ type parent {
   phone: String
   email: String
   gender: gender
+  students:[student]
 }
 
 input Iparent {

@@ -526,7 +526,8 @@ describe("Busses", () => {
           "Ibus": {
             "make": "marwa",
             "plate": "test",
-            "size": 2
+            "size": 2,
+            driver: sharedInfo.driverId
           }
         }
       })
@@ -659,6 +660,197 @@ describe("Busses", () => {
   });
 })
 
+describe("Parent", () => {
+  it("Can create an parent", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iparent: Iparent!) {
+            parents {
+              create(parent: $Iparent) {
+                id
+              }
+            }
+          }
+        `,
+        variables: {
+          "Iparent": {
+            "name": "marwa",
+            "phone": "test",
+            "email": "FEMALE",
+            "gender": "MALE"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.parents.create.id).to.be.a.string;
+
+        sharedInfo.parentId = res.body.data.parents.create.id
+        done();
+      });
+  });
+
+  it("Create second parent", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iparent: Iparent!) {
+            parents {
+              create(parent: $Iparent) {
+                id
+              }
+            }
+          }
+        `,
+        variables: {
+          "Iparent": {
+            "name": "marwa 2",
+            "phone": "test",
+            "email": "FEMALE",
+            "gender": "MALE"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.parents.create.id).to.be.a.string;
+
+        sharedInfo.parent2Id = res.body.data.parents.create.id
+        done();
+      });
+  });
+
+  it("Can update an parent", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        mutation ($parent: Uparent!) {
+          parents {
+            update(parent: $parent) {
+              id
+            }
+          }
+        }
+      `,
+        variables: {
+          "parent": {
+            "id": sharedInfo.parentId,
+            "name": "marwaed",
+            "phone": "test",
+            "email": "email@email.com",
+            "gender": "MALE"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.parents.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an parent", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iparent: Uparent!) {
+            parents {
+              archive(parent: $Iparent) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "Iparent": {
+            "id": sharedInfo.parentId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.parents.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an parent", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iparent: Uparent!) {
+            parents {
+              restore(parent: $Iparent) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "Iparent": {
+            "id": sharedInfo.parentId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.parents.restore.id).to.be.string;
+        done();
+      });
+  });
+
+  it("Can fetch restored parent", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        {
+          parents{
+            id
+          }
+        }        
+        `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.parents[0].id).to.be.a.string;
+
+        done();
+      });
+  });
+})
+
+
 describe("Students", () => {
   it("Can create an student", done => {
     chai
@@ -680,7 +872,9 @@ describe("Students", () => {
             "names": "marwa",
             "route": sharedInfo.routeId,
             "gender": "FEMALE",
-            "parent": "test"
+            registration: "1234",
+            "parent": sharedInfo.parentId,
+            "parent2": sharedInfo.parent2Id
           }
         }
       })
@@ -814,191 +1008,6 @@ describe("Students", () => {
   });
 })
 
-describe("Parent", () => {
-  it("Can create an parent", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($Iparent: Iparent!) {
-            parents {
-              create(parent: $Iparent) {
-                id
-              }
-            }
-          }
-        `,
-        variables: {
-          "Iparent": {
-            "name": "marwa",
-            "phone": "test",
-            "email": "FEMALE",
-            "gender": "MALE"
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.parents.create.id).to.be.a.string;
-
-        sharedInfo.parentId = res.body.data.parents.create.id
-        done();
-      });
-  });
-
-  it("Can update an student to add the parent", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-        mutation ($student: Ustudent!) {
-          students {
-            update(student: $student) {
-              id
-            }
-          }
-        }                 
-        `,
-        variables: {
-          "student": {
-            "id": sharedInfo.studentId,
-            "parent": sharedInfo.parentId
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.students.update.id).to.be.a.string;
-        done();
-      });
-  });
-
-  it("Can update an parent", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-        mutation ($parent: Uparent!) {
-          parents {
-            update(parent: $parent) {
-              id
-            }
-          }
-        }
-      `,
-        variables: {
-          "parent": {
-            "id": sharedInfo.parentId,
-            "name": "marwaed",
-            "phone": "test",
-            "email": "email@email.com",
-            "gender": "MALE"
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.parents.update.id).to.be.a.string;
-        done();
-      });
-  });
-
-  it("Can nuke an parent", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($Iparent: Uparent!) {
-            parents {
-              archive(parent: $Iparent) {
-                id
-              }
-            }
-          }                  
-        `,
-        variables: {
-          "Iparent": {
-            "id": sharedInfo.parentId
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.parents.archive.id).to.be.a.string;
-        done();
-      });
-  });
-
-  it("Can restore an parent", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($Iparent: Uparent!) {
-            parents {
-              restore(parent: $Iparent) {
-                id
-              }
-            }
-          }                  
-        `,
-        variables: {
-          "Iparent": {
-            "id": sharedInfo.parentId
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        // expect(res.body.data.parents.restore.id).to.be.string;
-        done();
-      });
-  });
-
-  it("Can fetch restored parent", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-        {
-          parents{
-            id
-          }
-        }        
-        `
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.parents[0].id).to.be.a.string;
-
-        done();
-      });
-  });
-})
 
 describe("Schedule", () => {
   it("Can create an schedule", done => {
@@ -1021,7 +1030,7 @@ describe("Schedule", () => {
             "name": "schedule 1",
             time: new Date().toLocaleTimeString(),
             route: sharedInfo.routeId,
-            days: ["MONDAY", "TEUSDAY"],
+            days: "MONDAY,TEUSDAY",
             bus: sharedInfo.busId
           }
         }

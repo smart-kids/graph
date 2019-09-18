@@ -65,6 +65,9 @@ describe("Setup For Queries", () => {
             parent{
               name
             }
+            parent2{
+              name
+            }
           }
           buses {
             plate
@@ -76,10 +79,20 @@ describe("Setup For Queries", () => {
             username,
             email,
             phone
+            bus {
+              id
+              plate
+              make
+              size
+            },
           },
           parents{
             id,
             name
+            students{
+              id
+              names
+            }
           }
           routes{
             id,
@@ -120,8 +133,7 @@ describe("Setup For Queries", () => {
           // students
           expect(student.id).to.be.a.string;
           expect(student.names).to.be.a.string;
-          expect(student.parent.name).to.be.a.string;
-          expect(student.parent.id).to.be.a.string;
+          expect(student.parent2.id).to.be.a.string;
 
           // busses
           expect(bus.plate).to.be.a.string;
@@ -131,10 +143,15 @@ describe("Setup For Queries", () => {
           expect(driver.username).to.be.a.string;
           expect(driver.email).to.be.a.string;
           expect(driver.phone).to.be.a.string;
+          expect(driver.bus).to.exist;
+          expect(driver.bus.id).to.be.a.string;
+          expect(driver.bus.username).to.be.a.string;
 
           // parents
           expect(parent.name).to.be.a.string;
           expect(parent.id).to.be.a.string;
+          expect(parent.students).to.be.instanceof(Array);
+          expect(parent.students[0].names).to.be.a.string;
 
           // routes
           expect(route.id).to.be.a.string;
@@ -144,7 +161,7 @@ describe("Setup For Queries", () => {
           expect(schedule.id).to.be.a.string;
           expect(schedule.name).to.be.a.string;
           expect(schedule.time).to.be.a.string;
-          expect(schedule.days).to.be.instanceof(Array);;
+          expect(schedule.days).to.be.instanceof(Array);
           expect(schedule.route.name).to.be.a.string;
           expect(schedule.bus.make).to.be.a.string;
 
