@@ -24,6 +24,9 @@ type Query {
 
   schedules: [schedule]
   schedule: schedule
+
+  events: [event]
+  event: event 
 }
 
 type Mutation {
@@ -37,6 +40,7 @@ type Mutation {
   trips: tripMutations
   routes: routeMutations
   schedules: scheduleMutations
+  events: eventMutations
 }
 
 # admin things
@@ -130,6 +134,43 @@ type busMutations {
   update(bus: Ubus!): bus
   archive(bus: Ubus!): bus
   restore(bus: Ubus!): bus
+}
+
+enum eventType {
+  CHECKEDOFF
+  CHECKEDON
+}
+
+
+# event things
+type event {
+  id: String
+  student: student
+  time: String
+  type: eventType
+  trip:trip
+}
+
+input Ievent {
+  student: String
+  time: String
+  type: String
+  trip:String
+}
+
+input Uevent {
+  id: String!
+  student: String
+  time: String
+  type: String
+  trip:String
+}
+
+type eventMutations {
+  create(event: Ievent!): event
+  update(event: Uevent!): event
+  archive(event: Uevent!): event
+  restore(event: Uevent!): event
 }
 
 # loc things
@@ -233,7 +274,7 @@ type route {
   name: String
   description: String
   path: [loc]
-  students:[student]
+  students: [student]
 }
 
 input Iroute {
@@ -271,7 +312,7 @@ type schedule {
   id: String
   name: String
   time: String
-  days:[day]
+  days: [day]
   route: route
   bus: bus
 }
@@ -280,7 +321,7 @@ input Ischedule {
   name: String
   time: String
   route: String
-  days:String
+  days: String
   bus: String
 }
 
@@ -288,7 +329,7 @@ input Uschedule {
   id: String!
   name: String
   time: String
-  days:String
+  days: String
   route: String
   bus: String
 }
@@ -307,7 +348,7 @@ type parent {
   phone: String
   email: String
   gender: gender
-  students:[student]
+  students: [student]
 }
 
 input Iparent {
