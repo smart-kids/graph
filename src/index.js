@@ -3,14 +3,18 @@ import "graphql-import-node";
 import "babel-polyfill";
 
 import express from "express";
-import { makeExecutableSchema } from "graphql-tools";
+import {
+  makeExecutableSchema
+} from "graphql-tools";
 import graphqlHTTP from "express-graphql";
 import morgan from "morgan";
 import Waterline from "waterline"
 import DiskAdapter from "sails-disk";
 import MongoAdapter from "sails-mongo";
 import PostgresAdapter from "sails-postgresql"
-import { importSchema } from 'graphql-import'
+import {
+  importSchema
+} from 'graphql-import'
 import cors from "cors"
 
 import admins from "./graphql/resolvers/Mutation/admins/model";
@@ -21,16 +25,23 @@ import students from "./graphql/resolvers/Mutation/students/model";
 import parents from "./graphql/resolvers/Mutation/parents/model";
 import schedule from "./graphql/resolvers/Mutation/schedules/model";
 import event from "./graphql/resolvers/Mutation/event/model";
+import scheduleEvent from "./graphql/resolvers/Mutation/schedule-events/model";
 
 import resolvers from "./graphql/index";
 
 const typeDefs = importSchema('./schema.graphql')
-let schema = makeExecutableSchema({ typeDefs, resolvers });
+let schema = makeExecutableSchema({
+  typeDefs,
+  resolvers
+});
 
 // const router = express();
 var router = express.Router()
 
-const { NODE_ENV, DB_URL = 'db url here' } = process.env;
+const {
+  NODE_ENV,
+  DB_URL = 'db url here'
+} = process.env;
 
 if (NODE_ENV !== "test") router.use(morgan("tiny"), cors({
   origin: ['development', "test"].includes(NODE_ENV) ? '*' : 'https://smart-kids-admin-staging.netlify.com',
@@ -49,9 +60,9 @@ var config = {
       adapter: 'mongo',
       url: DB_URL
     } : {
-        adapter: "disk",
-        // filePath: '/tmp'
-      }
+      adapter: "disk",
+      // filePath: '/tmp'
+    }
   }
 };
 
@@ -65,6 +76,7 @@ waterline.registerModel(students);
 waterline.registerModel(parents);
 waterline.registerModel(schedule);
 waterline.registerModel(event);
+waterline.registerModel(scheduleEvent);
 
 waterline.initialize(config, (err, db) => {
   if (err) {

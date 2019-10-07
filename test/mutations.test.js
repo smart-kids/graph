@@ -40,7 +40,9 @@ describe("Setup", () => {
         .request(app)
         .post("/graph")
         .set("content-type", "application/json")
-        .send({ query: "{hello}" })
+        .send({
+          query: "{hello}"
+        })
         .end((err, res) => {
           res.should.have.status(200);
 
@@ -1310,6 +1312,157 @@ describe("Event", () => {
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.events[0].id).to.be.a.string;
+
+        done();
+      });
+  });
+})
+
+describe("Schedule Events", () => {
+  it("Can create a schedule event", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($IscheduleEvent: IscheduleEvent!) {
+            scheduleEvents {
+              create(scheduleEvent: $IscheduleEvent) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          "IscheduleEvent": {
+            driver: sharedInfo.driverId,
+            startedAt: new Date().toLocaleTimeString(),
+            trip: sharedInfo.scheduleId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.scheduleEvents.create.id).to.be.a.string;
+
+        sharedInfo.scheduleEventId = res.body.data.scheduleEvents.create.id
+        done();
+      });
+  });
+
+  it("Can update an schedule event", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($scheduleEvent: UscheduleEvent!) {
+            scheduleEvents {
+              update(scheduleEvent: $scheduleEvent) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          "scheduleEvent": {
+            "id": sharedInfo.scheduleEventId,
+            completedAt: new Date().toLocaleTimeString(),
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.scheduleEvents.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an scheduleEvent", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($IscheduleEvent: UscheduleEvent!) {
+            scheduleEvents {
+              archive(scheduleEvent: $IscheduleEvent) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "IscheduleEvent": {
+            "id": sharedInfo.scheduleEventId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.scheduleEvents.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an scheduleEvent", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($IscheduleEvent: UscheduleEvent!) {
+            scheduleEvents {
+              restore(scheduleEvent: $IscheduleEvent) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "IscheduleEvent": {
+            "id": sharedInfo.scheduleEventId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.scheduleEvents.restore.id).to.be.string;
+        done();
+      });
+  });
+
+  it("Can fetch restored scheduleEvent", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        {
+          scheduleEvents{
+            id
+          }
+        }        
+        `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.scheduleEvents[0].id).to.be.a.string;
 
         done();
       });
