@@ -2,6 +2,7 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
 var rimraf = require("rimraf");
+import moment from "moment";
 import app from "../src/server";
 
 // Configure chai
@@ -16,13 +17,13 @@ rimraf(".tmp/localDiskDb/*", () => {
 });
 
 describe("Setup", () => {
-  before(function (done) {
+  before(function(done) {
     this.timeout(1000); // wait for db connections etc.
 
     setTimeout(done, 500);
   });
 
-  describe("OPS", function () {
+  describe("OPS", function() {
     // Test to get all students record
     it("Health check should return 200", done => {
       chai
@@ -67,10 +68,10 @@ describe("Admins", () => {
           }            
         `,
         variables: {
-          "Iadmin": {
-            "username": "new admin",
-            "email": "test",
-            "password": "test"
+          Iadmin: {
+            username: "new admin",
+            email: "test",
+            password: "test"
           }
         }
       })
@@ -80,7 +81,7 @@ describe("Admins", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.admins.create.id).to.be.a.string;
 
-        sharedInfo.adminId = res.body.data.admins.create.id
+        sharedInfo.adminId = res.body.data.admins.create.id;
         done();
       });
   });
@@ -101,9 +102,9 @@ describe("Admins", () => {
           }            
         `,
         variables: {
-          "admin": {
-            "id": sharedInfo.adminId,
-            "username": "updated admin"
+          admin: {
+            id: sharedInfo.adminId,
+            username: "updated admin"
           }
         }
       })
@@ -132,8 +133,8 @@ describe("Admins", () => {
           }                  
         `,
         variables: {
-          "Iadmin": {
-            "id": sharedInfo.adminId
+          Iadmin: {
+            id: sharedInfo.adminId
           }
         }
       })
@@ -162,8 +163,8 @@ describe("Admins", () => {
           }                  
         `,
         variables: {
-          "Iadmin": {
-            "id": sharedInfo.adminId
+          Iadmin: {
+            id: sharedInfo.adminId
           }
         }
       })
@@ -199,7 +200,7 @@ describe("Admins", () => {
         done();
       });
   });
-})
+});
 
 describe("Routes", () => {
   it("Can create an route", done => {
@@ -218,9 +219,9 @@ describe("Routes", () => {
           }            
         `,
         variables: {
-          "Iroute": {
-            "name": "marwa",
-            "description": "marwa"
+          Iroute: {
+            name: "marwa",
+            description: "marwa"
           }
         }
       })
@@ -230,7 +231,7 @@ describe("Routes", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.routes.create.id).to.be.a.string;
 
-        sharedInfo.routeId = res.body.data.routes.create.id
+        sharedInfo.routeId = res.body.data.routes.create.id;
         done();
       });
   });
@@ -251,10 +252,10 @@ describe("Routes", () => {
           }            
         `,
         variables: {
-          "route": {
-            "id": sharedInfo.routeId,
-            "name": "tested",
-            "description": "descr"
+          route: {
+            id: sharedInfo.routeId,
+            name: "tested",
+            description: "descr"
           }
         }
       })
@@ -283,8 +284,8 @@ describe("Routes", () => {
           }                  
         `,
         variables: {
-          "Iroute": {
-            "id": sharedInfo.routeId
+          Iroute: {
+            id: sharedInfo.routeId
           }
         }
       })
@@ -313,8 +314,8 @@ describe("Routes", () => {
           }                  
         `,
         variables: {
-          "Iroute": {
-            "id": sharedInfo.routeId
+          Iroute: {
+            id: sharedInfo.routeId
           }
         }
       })
@@ -350,7 +351,7 @@ describe("Routes", () => {
         done();
       });
   });
-})
+});
 
 describe("Drivers", () => {
   it("Can create an driver", done => {
@@ -369,11 +370,11 @@ describe("Drivers", () => {
           }
       `,
         variables: {
-          "Idriver": {
-            "username": "marwa",
-            "email": "test",
-            "phone": "test",
-            "password": "12345"
+          Idriver: {
+            username: "marwa",
+            email: "test",
+            phone: "test",
+            password: "12345"
           }
         }
       })
@@ -383,7 +384,7 @@ describe("Drivers", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.drivers.create.id).to.be.a.string;
 
-        sharedInfo.driverId = res.body.data.drivers.create.id
+        sharedInfo.driverId = res.body.data.drivers.create.id;
         done();
       });
   });
@@ -404,12 +405,12 @@ describe("Drivers", () => {
           }            
         `,
         variables: {
-          "driver": {
-            "id": sharedInfo.driverId,
-            "username": "marwaed",
-            "email": "test",
-            "phone": "test",
-            "password": "12345"
+          driver: {
+            id: sharedInfo.driverId,
+            username: "marwaed",
+            email: "test",
+            phone: "test",
+            password: "12345"
           }
         }
       })
@@ -438,8 +439,8 @@ describe("Drivers", () => {
           }                  
         `,
         variables: {
-          "Idriver": {
-            "id": sharedInfo.driverId
+          Idriver: {
+            id: sharedInfo.driverId
           }
         }
       })
@@ -468,8 +469,8 @@ describe("Drivers", () => {
           }                  
         `,
         variables: {
-          "Idriver": {
-            "id": sharedInfo.driverId
+          Idriver: {
+            id: sharedInfo.driverId
           }
         }
       })
@@ -505,8 +506,7 @@ describe("Drivers", () => {
         done();
       });
   });
-})
-
+});
 
 describe("Busses", () => {
   it("Can create an bus", done => {
@@ -525,10 +525,10 @@ describe("Busses", () => {
         }
         `,
         variables: {
-          "Ibus": {
-            "make": "marwa",
-            "plate": "test",
-            "size": 2,
+          Ibus: {
+            make: "marwa",
+            plate: "test",
+            size: 2,
             driver: sharedInfo.driverId
           }
         }
@@ -539,7 +539,7 @@ describe("Busses", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.buses.create.id).to.be.a.string;
 
-        sharedInfo.busId = res.body.data.buses.create.id
+        sharedInfo.busId = res.body.data.buses.create.id;
         done();
       });
   });
@@ -560,11 +560,11 @@ describe("Busses", () => {
           }            
         `,
         variables: {
-          "bus": {
-            "id": sharedInfo.busId,
-            "make": "marwaed",
-            "plate": "test",
-            "size": 3
+          bus: {
+            id: sharedInfo.busId,
+            make: "marwaed",
+            plate: "test",
+            size: 3
           }
         }
       })
@@ -593,8 +593,8 @@ describe("Busses", () => {
           }                  
         `,
         variables: {
-          "Ibus": {
-            "id": sharedInfo.busId
+          Ibus: {
+            id: sharedInfo.busId
           }
         }
       })
@@ -623,8 +623,8 @@ describe("Busses", () => {
           }                  
         `,
         variables: {
-          "Ibus": {
-            "id": sharedInfo.busId
+          Ibus: {
+            id: sharedInfo.busId
           }
         }
       })
@@ -660,7 +660,7 @@ describe("Busses", () => {
         done();
       });
   });
-})
+});
 
 describe("Parent", () => {
   it("Can create an parent", done => {
@@ -679,11 +679,11 @@ describe("Parent", () => {
           }
         `,
         variables: {
-          "Iparent": {
-            "name": "marwa",
-            "phone": "test",
-            "email": "FEMALE",
-            "gender": "MALE"
+          Iparent: {
+            name: "marwa",
+            phone: "test",
+            email: "FEMALE",
+            gender: "MALE"
           }
         }
       })
@@ -693,7 +693,7 @@ describe("Parent", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.parents.create.id).to.be.a.string;
 
-        sharedInfo.parentId = res.body.data.parents.create.id
+        sharedInfo.parentId = res.body.data.parents.create.id;
         done();
       });
   });
@@ -714,11 +714,11 @@ describe("Parent", () => {
           }
         `,
         variables: {
-          "Iparent": {
-            "name": "marwa 2",
-            "phone": "test",
-            "email": "FEMALE",
-            "gender": "MALE"
+          Iparent: {
+            name: "marwa 2",
+            phone: "test",
+            email: "FEMALE",
+            gender: "MALE"
           }
         }
       })
@@ -728,7 +728,7 @@ describe("Parent", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.parents.create.id).to.be.a.string;
 
-        sharedInfo.parent2Id = res.body.data.parents.create.id
+        sharedInfo.parent2Id = res.body.data.parents.create.id;
         done();
       });
   });
@@ -749,12 +749,12 @@ describe("Parent", () => {
         }
       `,
         variables: {
-          "parent": {
-            "id": sharedInfo.parentId,
-            "name": "marwaed",
-            "phone": "test",
-            "email": "email@email.com",
-            "gender": "MALE"
+          parent: {
+            id: sharedInfo.parentId,
+            name: "marwaed",
+            phone: "test",
+            email: "email@email.com",
+            gender: "MALE"
           }
         }
       })
@@ -783,8 +783,8 @@ describe("Parent", () => {
           }                  
         `,
         variables: {
-          "Iparent": {
-            "id": sharedInfo.parentId
+          Iparent: {
+            id: sharedInfo.parentId
           }
         }
       })
@@ -813,8 +813,8 @@ describe("Parent", () => {
           }                  
         `,
         variables: {
-          "Iparent": {
-            "id": sharedInfo.parentId
+          Iparent: {
+            id: sharedInfo.parentId
           }
         }
       })
@@ -850,8 +850,7 @@ describe("Parent", () => {
         done();
       });
   });
-})
-
+});
 
 describe("Students", () => {
   it("Can create an student", done => {
@@ -870,13 +869,13 @@ describe("Students", () => {
           }
         `,
         variables: {
-          "Istudent": {
-            "names": "marwa",
-            "route": sharedInfo.routeId,
-            "gender": "FEMALE",
+          Istudent: {
+            names: "marwa",
+            route: sharedInfo.routeId,
+            gender: "FEMALE",
             registration: "1234",
-            "parent": sharedInfo.parentId,
-            "parent2": sharedInfo.parent2Id
+            parent: sharedInfo.parentId,
+            parent2: sharedInfo.parent2Id
           }
         }
       })
@@ -886,7 +885,7 @@ describe("Students", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.students.create.id).to.be.a.string;
 
-        sharedInfo.studentId = res.body.data.students.create.id
+        sharedInfo.studentId = res.body.data.students.create.id;
         done();
       });
   });
@@ -907,12 +906,12 @@ describe("Students", () => {
         }                 
         `,
         variables: {
-          "student": {
-            "id": sharedInfo.studentId,
-            "names": "marwa",
-            "route": sharedInfo.routeId,
-            "gender": "MALE",
-            "parent": "test"
+          student: {
+            id: sharedInfo.studentId,
+            names: "marwa",
+            route: sharedInfo.routeId,
+            gender: "MALE",
+            parent: "test"
           }
         }
       })
@@ -941,8 +940,8 @@ describe("Students", () => {
           }                  
         `,
         variables: {
-          "Istudent": {
-            "id": sharedInfo.studentId
+          Istudent: {
+            id: sharedInfo.studentId
           }
         }
       })
@@ -971,8 +970,8 @@ describe("Students", () => {
           }                  
         `,
         variables: {
-          "Istudent": {
-            "id": sharedInfo.studentId
+          Istudent: {
+            id: sharedInfo.studentId
           }
         }
       })
@@ -1008,8 +1007,7 @@ describe("Students", () => {
         done();
       });
   });
-})
-
+});
 
 describe("Schedule", () => {
   it("Can create an schedule", done => {
@@ -1028,9 +1026,12 @@ describe("Schedule", () => {
           }            
         `,
         variables: {
-          "Ischedule": {
-            "name": "schedule 1",
-            time: new Date().toLocaleTimeString(),
+          Ischedule: {
+            name: "schedule 1",
+            time: new Date().toISOString(),
+            end_time: moment(new Date())
+              .add(30, "m")
+              .toISOString(),
             route: sharedInfo.routeId,
             days: "MONDAY,TEUSDAY",
             bus: sharedInfo.busId
@@ -1043,7 +1044,7 @@ describe("Schedule", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.schedules.create.id).to.be.a.string;
 
-        sharedInfo.scheduleId = res.body.data.schedules.create.id
+        sharedInfo.scheduleId = res.body.data.schedules.create.id;
         done();
       });
   });
@@ -1064,9 +1065,9 @@ describe("Schedule", () => {
           }            
         `,
         variables: {
-          "schedule": {
-            "id": sharedInfo.scheduleId,
-            "name": "Schedule 1 edited"
+          schedule: {
+            id: sharedInfo.scheduleId,
+            name: "Schedule 1 edited"
           }
         }
       })
@@ -1095,8 +1096,8 @@ describe("Schedule", () => {
           }                  
         `,
         variables: {
-          "Ischedule": {
-            "id": sharedInfo.scheduleId
+          Ischedule: {
+            id: sharedInfo.scheduleId
           }
         }
       })
@@ -1125,8 +1126,8 @@ describe("Schedule", () => {
           }                  
         `,
         variables: {
-          "Ischedule": {
-            "id": sharedInfo.scheduleId
+          Ischedule: {
+            id: sharedInfo.scheduleId
           }
         }
       })
@@ -1162,7 +1163,7 @@ describe("Schedule", () => {
         done();
       });
   });
-})
+});
 
 describe("Trips", () => {
   it("Can create an trip", done => {
@@ -1181,10 +1182,9 @@ describe("Trips", () => {
         }
         `,
         variables: {
-          "Itrip": {
-            "startedAt": +new Date(),
-            "completedAt": +new Date(),
-            schedule:sharedInfo.scheduleId
+          Itrip: {
+            startedAt: new Date().toISOString(),
+            schedule: sharedInfo.scheduleId
           }
         }
       })
@@ -1194,7 +1194,43 @@ describe("Trips", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.trips.create.id).to.be.a.string;
 
-        sharedInfo.tripId = res.body.data.trips.create.id
+        sharedInfo.tripId = res.body.data.trips.create.id;
+        done();
+      });
+  });
+
+  // dont add this id's to shared data
+  it("Can create a completed trip", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        mutation ($Itrip: Itrip!) {
+          trips {
+            create(trip: $Itrip) {
+              id
+            }
+          }
+        }
+        `,
+        variables: {
+          Itrip: {
+            startedAt: new Date().toISOString(),
+            completedAt: moment(new Date())
+              .add(40, "m")
+              .toISOString(),
+            schedule: sharedInfo.scheduleId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.trips.create.id).to.be.a.string;
+
         done();
       });
   });
@@ -1215,11 +1251,11 @@ describe("Trips", () => {
           }            
         `,
         variables: {
-          "trip": {
+          trip: {
             id: sharedInfo.tripId,
-            "startedAt": +new Date(),
-            "completedAt": +new Date(),
-            schedule:sharedInfo.scheduleId
+            startedAt: +new Date(),
+            completedAt: +new Date(),
+            schedule: sharedInfo.scheduleId
           }
         }
       })
@@ -1248,8 +1284,8 @@ describe("Trips", () => {
           }                  
         `,
         variables: {
-          "Itrip": {
-            "id": sharedInfo.tripId
+          Itrip: {
+            id: sharedInfo.tripId
           }
         }
       })
@@ -1278,8 +1314,8 @@ describe("Trips", () => {
           }                  
         `,
         variables: {
-          "Itrip": {
-            "id": sharedInfo.tripId
+          Itrip: {
+            id: sharedInfo.tripId
           }
         }
       })
@@ -1315,7 +1351,7 @@ describe("Trips", () => {
         done();
       });
   });
-})
+});
 
 describe("Event", () => {
   it("Can create an event", done => {
@@ -1334,8 +1370,8 @@ describe("Event", () => {
           }            
         `,
         variables: {
-          "Ievent": {
-            "student": sharedInfo.studentId,
+          Ievent: {
+            student: sharedInfo.studentId,
             time: new Date().toLocaleTimeString(),
             type: "CHECKEDOFF",
             trip: sharedInfo.tripId
@@ -1348,7 +1384,7 @@ describe("Event", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.events.create.id).to.be.a.string;
 
-        sharedInfo.eventId = res.body.data.events.create.id
+        sharedInfo.eventId = res.body.data.events.create.id;
         done();
       });
   });
@@ -1369,9 +1405,9 @@ describe("Event", () => {
           }            
         `,
         variables: {
-          "event": {
-            "id": sharedInfo.eventId,
-            time: new Date().toLocaleTimeString(),
+          event: {
+            id: sharedInfo.eventId,
+            time: new Date().toLocaleTimeString()
           }
         }
       })
@@ -1400,8 +1436,8 @@ describe("Event", () => {
           }                  
         `,
         variables: {
-          "Ievent": {
-            "id": sharedInfo.eventId
+          Ievent: {
+            id: sharedInfo.eventId
           }
         }
       })
@@ -1430,8 +1466,8 @@ describe("Event", () => {
           }                  
         `,
         variables: {
-          "Ievent": {
-            "id": sharedInfo.eventId
+          Ievent: {
+            id: sharedInfo.eventId
           }
         }
       })
@@ -1467,7 +1503,7 @@ describe("Event", () => {
         done();
       });
   });
-})
+});
 
 describe("Complaint", () => {
   it("Can create an complaint", done => {
@@ -1490,8 +1526,8 @@ describe("Complaint", () => {
           }            
         `,
         variables: {
-          "Icomplaint": {
-            "parent": sharedInfo.parentId,
+          Icomplaint: {
+            parent: sharedInfo.parentId,
             time: new Date().toLocaleTimeString(),
             content: "Complaining"
           }
@@ -1503,7 +1539,7 @@ describe("Complaint", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.complaints.create.id).to.be.a.string;
 
-        sharedInfo.complaintId = res.body.data.complaints.create.id
+        sharedInfo.complaintId = res.body.data.complaints.create.id;
         done();
       });
   });
@@ -1524,9 +1560,9 @@ describe("Complaint", () => {
           }            
         `,
         variables: {
-          "complaint": {
-            "id": sharedInfo.complaintId,
-            time: new Date().toLocaleTimeString(),
+          complaint: {
+            id: sharedInfo.complaintId,
+            time: new Date().toLocaleTimeString()
           }
         }
       })
@@ -1555,8 +1591,8 @@ describe("Complaint", () => {
           }                  
         `,
         variables: {
-          "Icomplaint": {
-            "id": sharedInfo.complaintId
+          Icomplaint: {
+            id: sharedInfo.complaintId
           }
         }
       })
@@ -1585,8 +1621,8 @@ describe("Complaint", () => {
           }                  
         `,
         variables: {
-          "Icomplaint": {
-            "id": sharedInfo.complaintId
+          Icomplaint: {
+            id: sharedInfo.complaintId
           }
         }
       })
@@ -1622,7 +1658,7 @@ describe("Complaint", () => {
         done();
       });
   });
-})
+});
 
 describe("Location Reporting", () => {
   it("Can create an locReport", done => {
@@ -1641,8 +1677,8 @@ describe("Location Reporting", () => {
           }            
         `,
         variables: {
-          "IlocReport": {
-            "trip": sharedInfo.tripId,
+          IlocReport: {
+            trip: sharedInfo.tripId,
             time: new Date().toLocaleTimeString(),
             loc: {
               lat: 1.234,
@@ -1657,7 +1693,7 @@ describe("Location Reporting", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.locReports.create.id).to.be.a.string;
 
-        sharedInfo.locReportId = res.body.data.locReports.create.id
+        sharedInfo.locReportId = res.body.data.locReports.create.id;
         done();
       });
   });
@@ -1678,9 +1714,9 @@ describe("Location Reporting", () => {
           }            
         `,
         variables: {
-          "locReport": {
-            "id": sharedInfo.locReportId,
-            time: new Date().toLocaleTimeString(),
+          locReport: {
+            id: sharedInfo.locReportId,
+            time: new Date().toLocaleTimeString()
           }
         }
       })
@@ -1709,8 +1745,8 @@ describe("Location Reporting", () => {
           }                  
         `,
         variables: {
-          "IlocReport": {
-            "id": sharedInfo.locReportId
+          IlocReport: {
+            id: sharedInfo.locReportId
           }
         }
       })
@@ -1739,8 +1775,8 @@ describe("Location Reporting", () => {
           }                  
         `,
         variables: {
-          "IlocReport": {
-            "id": sharedInfo.locReportId
+          IlocReport: {
+            id: sharedInfo.locReportId
           }
         }
       })
@@ -1776,4 +1812,4 @@ describe("Location Reporting", () => {
         done();
       });
   });
-})
+});

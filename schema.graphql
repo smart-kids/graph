@@ -265,8 +265,8 @@ type locReportMutations {
 # trip things
 type trip {
   id: String
-  startedAt: Float
-  completedAt: Float
+  startedAt: String
+  completedAt: String
   bus:bus,
   driver:driver,
   schedule: schedule
@@ -275,15 +275,15 @@ type trip {
 }
 
 input Itrip {
-  startedAt: Float
-  completedAt: Float
+  startedAt: String
+  completedAt: String
   schedule: String
 }
 
 input Utrip {
   id: String!
-  startedAt: Float
-  completedAt: Float
+  startedAt: String
+  completedAt: String
   schedule: String
 }
 
@@ -381,6 +381,7 @@ type schedule {
   id: String
   name: String
   time: String
+  end_time: String
   days: [day]
   route: route
   bus: bus
@@ -390,6 +391,7 @@ type schedule {
 input Ischedule {
   name: String
   time: String
+  end_time: String
   route: String
   days: String
   bus: String
@@ -399,6 +401,7 @@ input Uschedule {
   id: String!
   name: String
   time: String
+  end_time: String
   days: String
   route: String
   bus: String

@@ -137,6 +137,32 @@ describe("Setup For Queries", () => {
               lng
             }
           }
+          trips {
+            startedAt,
+            completedAt
+            bus{
+              id,
+              make
+            }
+            driver{
+              id
+            }
+            locReports{
+              id
+              time
+              loc{
+                lat
+                lng
+              }
+            }
+            events{
+              time,
+              type,
+              student{
+                id
+              }
+            }
+          }
           schedules{
             id,
             time,
@@ -183,6 +209,7 @@ describe("Setup For Queries", () => {
         })
         .end((err, res) => {
           res.should.have.status(200);
+
           expect(res.body.errors).to.not.exist;
 
           const student = res.body.data.students[0];

@@ -1,5 +1,5 @@
 var Waterline = require("waterline");
-const { name: identity } = require("./about.js")
+const { name: identity } = require("./about.js");
 
 export default Waterline.Collection.extend({
   identity,
@@ -9,10 +9,11 @@ export default Waterline.Collection.extend({
   attributes: {
     id: { type: "string", required: true },
     startedAt: { type: "string", required: true },
-    completedAt: { type: "string", required: true },
+    completedAt: { type: "string", required: false },
     schedule: { type: "string", required: true },
+    isCancelled: { type: "boolean", defaultsTo: false },
     driver: { type: "string", required: false },
     bus: { type: "string", required: false },
-    isDeleted: { type: "boolean", required: true }
+    isDeleted: { type: "boolean", defaultsTo: false }
   }
 });

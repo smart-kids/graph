@@ -26,6 +26,7 @@
     "graphql-import": "^0.7.1",
     "graphql-import-node": "^0.0.4",
     "graphql-tools": "^4.0.5",
+    "moment": "^2.24.0",
     "mongodb": "^3.3.2",
     "morgan": "^1.9.1",
     "rimraf": "^2.6.3",

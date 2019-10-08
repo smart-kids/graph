@@ -103,7 +103,7 @@ export default Waterline.Collection.extend({
     physicalAddress: { type: "string" },
     fax: { type: "string" },
     telephone: { type: "number", required: true },
-    isDeleted: { type: "boolean", required: true }
+    isDeleted: { type: "boolean", defaultsTo: false }
   }
 });
 &nbsp;</pre></td></tr>

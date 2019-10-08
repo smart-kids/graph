@@ -11,6 +11,6 @@ export default Waterline.Collection.extend({
     time: { type: "string", required: true },
     loc: { type: "string", required: true },
     trip: { type: "string", required: true },
-    isDeleted: { type: "boolean", required: true }
+    isDeleted: { type: "boolean", defaultsTo: false }
   }
 });
