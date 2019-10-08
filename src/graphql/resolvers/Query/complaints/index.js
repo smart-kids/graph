@@ -29,21 +29,9 @@ const single = async (root, args, { db: { collections } }) => {
 
 const nested = {
   [name]: {
-    async bus(root, args, { db: { collections } }) {
-      const entry = await collections["bus"].findOne({
-        where: { id: root.bus, isDeleted: false }
-      });
-      return entry;
-    },
-    async driver(root, args, { db: { collections } }) {
-      const entry = await collections["driver"].findOne({
-        where: { id: root.driver, isDeleted: false }
-      });
-      return entry;
-    },
-    async events(root, args, { db: { collections } }) {
-      const entry = await collections["event"].find({
-        where: { trip: root.id, isDeleted: false }
+    async parent(root, args, { db: { collections } }) {
+      const entry = await collections["parent"].findOne({
+        where: { id: root.parent, isDeleted: false }
       });
       return entry;
     }

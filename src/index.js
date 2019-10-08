@@ -22,6 +22,7 @@ import parents from "./graphql/resolvers/Mutation/parents/model";
 import schedule from "./graphql/resolvers/Mutation/schedules/model";
 import event from "./graphql/resolvers/Mutation/event/model";
 import trip from "./graphql/resolvers/Mutation/trip/model";
+import complaint from "./graphql/resolvers/Mutation/complaints/model"
 
 import resolvers from "./graphql/index";
 
@@ -67,6 +68,7 @@ waterline.registerModel(parents);
 waterline.registerModel(schedule);
 waterline.registerModel(event);
 waterline.registerModel(trip);
+waterline.registerModel(complaint);
 
 waterline.initialize(config, (err, db) => {
   if (err) {

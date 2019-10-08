@@ -74,6 +74,13 @@ describe("Setup For Queries", () => {
             make
             size
           },
+          complaints{
+            id
+            time
+            parent{
+              id
+            }
+          }
           drivers {
             id,
             username,
@@ -89,9 +96,28 @@ describe("Setup For Queries", () => {
           parents{
             id,
             name
+            complaints{
+              id,
+              content
+            }
             students{
               id
-              names
+              names,
+              events{
+                type
+                trip{
+                  startedAt,
+                  completedAt,
+                  bus{
+                    id,
+                    make,
+                    plate
+                  },
+                  driver{
+                    username
+                  }
+                }
+              }
             }
           }
           routes{
@@ -128,13 +154,19 @@ describe("Setup For Queries", () => {
               driver{
                 id
               }
+              events{
+                time,
+                type,
+                student{
+                  id
+                }
+              }
             }
           }
         }`
         })
         .end((err, res) => {
           res.should.have.status(200);
-
           expect(res.body.errors).to.not.exist;
 
           const student = res.body.data.students[0];
@@ -143,6 +175,7 @@ describe("Setup For Queries", () => {
           const route = res.body.data.routes[0];
           const driver = res.body.data.drivers[0];
           const schedule = res.body.data.schedules[0];
+          const complaint = res.body.data.complaints[0];
 
           // students
           expect(student.id).to.be.a.string;
@@ -167,10 +200,22 @@ describe("Setup For Queries", () => {
           expect(parent.students).to.be.instanceof(Array);
           expect(parent.students[0].names).to.be.a.string;
 
+          expect(parent.students[0].events).to.be.instanceof(Array);
+
+          expect(parent.complaints).to.be.instanceof(Array);
+          expect(parent.complaints[0].id).to.be.a.string;
+
           // routes
           expect(route.id).to.be.a.string;
           expect(route.name).to.be.a.string;
           expect(route.description).to.be.a.string;
+
+          // complaints
+          
+          expect(complaint.id).to.be.a.string;
+          expect(complaint.content).to.be.a.string;
+          expect(complaint.parent).to.exist;
+          expect(complaint.parent.id).to.be.a.string;
 
           // schedules
           expect(schedule.id).to.be.a.string;
@@ -184,6 +229,11 @@ describe("Setup For Queries", () => {
           expect(schedule.trips).to.be.instanceof(Array);
           expect(schedule.trips[0].bus.id).to.be.a.string;
           expect(schedule.trips[0].driver.id).to.be.a.string;
+
+          // trip events
+          expect(schedule.trips[0].events).to.be.instanceof(Array);
+          expect(schedule.trips[0].events[0].student).to.exist;
+          expect(schedule.trips[0].events[0].student.id).to.be.a.string;
 
           done();
         });

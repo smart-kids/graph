@@ -34,6 +34,12 @@ const nested = {
         where: { parent: root.parent, isDeleted: false }
       });
       return entry;
+    },
+    async complaints(root, args, { db: { collections } }) {
+      const entry = await collections["complaint"].find({
+        where: { parent: root.id, isDeleted: false }
+      });
+      return entry;
     }
   }
 }

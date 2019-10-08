@@ -1164,158 +1164,6 @@ describe("Schedule", () => {
   });
 })
 
-describe("Event", () => {
-  it("Can create an event", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($Ievent: Ievent!) {
-            events {
-              create(event: $Ievent) {
-                id
-              }
-            }
-          }            
-        `,
-        variables: {
-          "Ievent": {
-            "student": sharedInfo.studentId,
-            time: new Date().toLocaleTimeString(),
-            type: "CHECKEDOFF",
-            trip: sharedInfo.scheduleId
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.events.create.id).to.be.a.string;
-
-        sharedInfo.eventId = res.body.data.events.create.id
-        done();
-      });
-  });
-
-  it("Can update an event", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($event: Uevent!) {
-            events {
-              update(event: $event) {
-                id
-              }
-            }
-          }            
-        `,
-        variables: {
-          "event": {
-            "id": sharedInfo.eventId,
-            time: new Date().toLocaleTimeString(),
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.events.update.id).to.be.a.string;
-        done();
-      });
-  });
-
-  it("Can nuke an event", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($Ievent: Uevent!) {
-            events {
-              archive(event: $Ievent) {
-                id
-              }
-            }
-          }                  
-        `,
-        variables: {
-          "Ievent": {
-            "id": sharedInfo.eventId
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.events.archive.id).to.be.a.string;
-        done();
-      });
-  });
-
-  it("Can restore an event", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($Ievent: Uevent!) {
-            events {
-              restore(event: $Ievent) {
-                id
-              }
-            }
-          }                  
-        `,
-        variables: {
-          "Ievent": {
-            "id": sharedInfo.eventId
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        // expect(res.body.data.events.restore.id).to.be.string;
-        done();
-      });
-  });
-
-  it("Can fetch restored event", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-        {
-          events{
-            id
-          }
-        }        
-        `
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        // expect(res.body.data.events[0].id).to.be.a.string;
-
-        done();
-      });
-  });
-})
-
 describe("Trips", () => {
   it("Can create an trip", done => {
     chai
@@ -1463,6 +1311,313 @@ describe("Trips", () => {
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.trips[0].id).to.be.a.string;
+
+        done();
+      });
+  });
+})
+
+describe("Event", () => {
+  it("Can create an event", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ievent: Ievent!) {
+            events {
+              create(event: $Ievent) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          "Ievent": {
+            "student": sharedInfo.studentId,
+            time: new Date().toLocaleTimeString(),
+            type: "CHECKEDOFF",
+            trip: sharedInfo.tripId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.events.create.id).to.be.a.string;
+
+        sharedInfo.eventId = res.body.data.events.create.id
+        done();
+      });
+  });
+
+  it("Can update an event", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($event: Uevent!) {
+            events {
+              update(event: $event) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          "event": {
+            "id": sharedInfo.eventId,
+            time: new Date().toLocaleTimeString(),
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.events.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an event", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ievent: Uevent!) {
+            events {
+              archive(event: $Ievent) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "Ievent": {
+            "id": sharedInfo.eventId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.events.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an event", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ievent: Uevent!) {
+            events {
+              restore(event: $Ievent) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "Ievent": {
+            "id": sharedInfo.eventId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.events.restore.id).to.be.string;
+        done();
+      });
+  });
+
+  it("Can fetch restored event", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        {
+          events{
+            id
+          }
+        }        
+        `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.events[0].id).to.be.a.string;
+
+        done();
+      });
+  });
+})
+
+describe("Complaint", () => {
+  it("Can create an complaint", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Icomplaint: Icomplaint!) {
+            complaints {
+              create(complaint: $Icomplaint) {
+                id,
+                time,
+                parent{
+                  id
+                }
+              }
+            }
+          }            
+        `,
+        variables: {
+          "Icomplaint": {
+            "parent": sharedInfo.parentId,
+            time: new Date().toLocaleTimeString(),
+            content: "Complaining"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.complaints.create.id).to.be.a.string;
+
+        sharedInfo.complaintId = res.body.data.complaints.create.id
+        done();
+      });
+  });
+
+  it("Can update an complaint", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($complaint: Ucomplaint!) {
+            complaints {
+              update(complaint: $complaint) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          "complaint": {
+            "id": sharedInfo.complaintId,
+            time: new Date().toLocaleTimeString(),
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.complaints.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an complaint", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Icomplaint: Ucomplaint!) {
+            complaints {
+              archive(complaint: $Icomplaint) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "Icomplaint": {
+            "id": sharedInfo.complaintId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.complaints.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an complaint", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Icomplaint: Ucomplaint!) {
+            complaints {
+              restore(complaint: $Icomplaint) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "Icomplaint": {
+            "id": sharedInfo.complaintId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.complaints.restore.id).to.be.string;
+        done();
+      });
+  });
+
+  it("Can fetch restored complaint", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        {
+          complaints{
+            id
+          }
+        }        
+        `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.complaints[0].id).to.be.a.string;
 
         done();
       });
