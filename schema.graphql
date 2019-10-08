@@ -203,6 +203,8 @@ type trip {
   id: String
   startedAt: Float
   completedAt: Float
+  bus:bus,
+  driver:driver,
   schedule: schedule
 }
 

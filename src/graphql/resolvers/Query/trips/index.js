@@ -28,10 +28,16 @@ const single = async (root, args, { db: { collections } }) => {
 };
 
 const nested = {
-  schedule: {
+  [name]: {
     async bus(root, args, { db: { collections } }) {
-      const entry = await collections["schedule"].findOne({
-        where: { driver: root.schedule, isDeleted: false }
+      const entry = await collections["bus"].findOne({
+        where: { id: root.bus, isDeleted: false }
+      });
+      return entry;
+    },
+    async driver(root, args, { db: { collections } }) {
+      const entry = await collections["driver"].findOne({
+        where: { id: root.driver, isDeleted: false }
       });
       return entry;
     }

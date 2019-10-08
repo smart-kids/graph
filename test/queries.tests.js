@@ -121,6 +121,13 @@ describe("Setup For Queries", () => {
             trips {
               startedAt,
               completedAt
+              bus{
+                id,
+                make
+              }
+              driver{
+                id
+              }
             }
           }
         }`
@@ -172,6 +179,11 @@ describe("Setup For Queries", () => {
           expect(schedule.days).to.be.instanceof(Array);
           expect(schedule.route.name).to.be.a.string;
           expect(schedule.bus.make).to.be.a.string;
+
+          // trips
+          expect(schedule.trips).to.be.instanceof(Array);
+          expect(schedule.trips[0].bus.id).to.be.a.string;
+          expect(schedule.trips[0].driver.id).to.be.a.string;
 
           done();
         });

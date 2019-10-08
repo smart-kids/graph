@@ -8,6 +8,16 @@ const create = async (data, { db: { collections } }) => {
   const entry = Object.assign(data[name], { id, isDeleted: false });
 
   // attatch data from the schedule
+  const schedule = await collections["schedule"].findOne({
+    where: { id: data.schedule, isDeleted: false }
+  });
+
+  const bus = await collections["bus"].findOne({
+    where: { id: schedule.bus, isDeleted: false }
+  });
+
+  entry.bus = schedule.bus
+  entry.driver = bus.driver
   
   try {
     await collections[name].create(entry);
