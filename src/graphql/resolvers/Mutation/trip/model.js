@@ -8,7 +8,7 @@ export default Waterline.Collection.extend({
 
   attributes: {
     id: { type: "string", required: true },
-    startedAt: { type: "string", required: true },
+    startedAt: { type: "string", required: false },
     completedAt: { type: "string", required: false },
     schedule: { type: "string", required: true },
     isCancelled: { type: "boolean", defaultsTo: false },

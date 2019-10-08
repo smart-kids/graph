@@ -1,3 +1,5 @@
+import schedules from "../../Mutation/schedules/index.js";
+
 const { name } = require("./about.js")
 
 const list = async (root, args, { db: { collections } }) => {
@@ -50,6 +52,12 @@ const nested = {
     async locReports(root, args, { db: { collections } }) {
       const entry = await collections["locreport"].find({
         where: { trip: root.id, isDeleted: false }
+      });
+      return entry;
+    },
+    async schedule(root, args, { db: { collections } }) {
+      const entry = await collections["schedule"].findOne({
+        where: { id: root.schedule, isDeleted: false }
       });
       return entry;
     }

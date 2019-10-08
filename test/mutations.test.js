@@ -1235,6 +1235,70 @@ describe("Trips", () => {
       });
   });
 
+  it("Can create a incomplete trip", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        mutation ($Itrip: Itrip!) {
+          trips {
+            create(trip: $Itrip) {
+              id
+            }
+          }
+        }
+        `,
+        variables: {
+          Itrip: {
+            startedAt: new Date().toISOString(),
+            schedule: sharedInfo.scheduleId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.trips.create.id).to.be.a.string;
+
+        done();
+      });
+  });
+
+  it("Can create a incomplete trip", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        mutation ($Itrip: Itrip!) {
+          trips {
+            create(trip: $Itrip) {
+              id
+            }
+          }
+        }
+        `,
+        variables: {
+          Itrip: {
+            isCancelled: true,
+            schedule: sharedInfo.scheduleId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.trips.create.id).to.be.a.string;
+
+        done();
+      });
+  });
+
   it("Can update an trip", done => {
     chai
       .request(app)
@@ -1253,8 +1317,8 @@ describe("Trips", () => {
         variables: {
           trip: {
             id: sharedInfo.tripId,
-            startedAt: +new Date(),
-            completedAt: +new Date(),
+            startedAt: new Date().toISOString(),
+            completedAt: new Date().toISOString(),
             schedule: sharedInfo.scheduleId
           }
         }

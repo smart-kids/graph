@@ -267,6 +267,7 @@ type trip {
   id: String
   startedAt: String
   completedAt: String
+  isCancelled: Boolean
   bus:bus,
   driver:driver,
   schedule: schedule
@@ -277,6 +278,7 @@ type trip {
 input Itrip {
   startedAt: String
   completedAt: String
+  isCancelled: Boolean
   schedule: String
 }
 
@@ -284,6 +286,7 @@ input Utrip {
   id: String!
   startedAt: String
   completedAt: String
+  isCancelled: Boolean
   schedule: String
 }
 
