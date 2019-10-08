@@ -116,6 +116,14 @@ describe("Setup For Queries", () => {
                   driver{
                     username
                   }
+                  locReports { 
+                    id
+                    time
+                    loc{
+                      lat
+                      lng
+                    }
+                  }
                 }
               }
             }
@@ -153,6 +161,14 @@ describe("Setup For Queries", () => {
               }
               driver{
                 id
+              }
+              locReports{
+                id
+                time
+                loc{
+                  lat
+                  lng
+                }
               }
               events{
                 time,
@@ -234,6 +250,14 @@ describe("Setup For Queries", () => {
           expect(schedule.trips[0].events).to.be.instanceof(Array);
           expect(schedule.trips[0].events[0].student).to.exist;
           expect(schedule.trips[0].events[0].student.id).to.be.a.string;
+
+          // trip locReports
+          expect(schedule.trips[0].locReports).to.be.instanceof(Array);
+          expect(schedule.trips[0].locReports[0].id).to.be.a.string;
+          expect(schedule.trips[0].locReports[0].time).to.be.a.string;
+          expect(schedule.trips[0].locReports[0].loc).to.exist;
+          expect(schedule.trips[0].locReports[0].loc.lat).to.be.a.string;
+          expect(schedule.trips[0].locReports[0].loc.lng).to.be.a.string;
 
           done();
         });

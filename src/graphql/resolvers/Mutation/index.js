@@ -8,6 +8,7 @@ import schedules from "./schedules";
 import events from "./event";
 import trips from "./trip";
 import complaints from "./complaints"
+import locReports from "./location-reports"
 
 export default {
   admins,
@@ -20,6 +21,7 @@ export default {
   events,
   trips,
   complaints,
+  locReports,
   hello() {
     return "hello mutation";
   }

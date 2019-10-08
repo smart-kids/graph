@@ -46,6 +46,12 @@ const nested = {
         where: { trip: root.id, isDeleted: false }
       });
       return entry;
+    },
+    async locReports(root, args, { db: { collections } }) {
+      const entry = await collections["locreport"].find({
+        where: { trip: root.id, isDeleted: false }
+      });
+      return entry;
     }
   }
 }

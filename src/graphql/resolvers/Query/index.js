@@ -19,10 +19,11 @@ import {
 } from "./parents";
 import { list as trips, single as trip, nested as Ntrip } from "./trips";
 import { list as complaints, single as complaint, nested as Ncomplaint } from "./complaints";
+import { list as locReports, single as locReport, nested as NlocReport } from "./location-reports";
 
 const nested = {};
 
-Object.assign(nested, Nstudent, Nschedule, Nroutes, Nbuses, Nparents, Ntrip, Ncomplaint);
+Object.assign(nested, Nstudent, Nschedule, Nroutes, Nbuses, Nparents, Ntrip, Ncomplaint, NlocReport);
 
 const Query = {
   admins,
@@ -51,6 +52,9 @@ const Query = {
 
   complaints,
   complaint,
+
+  locReports,
+  locReport,
 
   hello: () => "hey"
 };

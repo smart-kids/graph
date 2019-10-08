@@ -1623,3 +1623,157 @@ describe("Complaint", () => {
       });
   });
 })
+
+describe("Location Reporting", () => {
+  it("Can create an locReport", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($IlocReport: IlocReport!) {
+            locReports {
+              create(locreport: $IlocReport) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          "IlocReport": {
+            "trip": sharedInfo.tripId,
+            time: new Date().toLocaleTimeString(),
+            loc: {
+              lat: 1.234,
+              lng: -0.456
+            }
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.locReports.create.id).to.be.a.string;
+
+        sharedInfo.locReportId = res.body.data.locReports.create.id
+        done();
+      });
+  });
+
+  it("Can update an locReport", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($locReport: UlocReport!) {
+            locReports {
+              update(locreport: $locReport) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          "locReport": {
+            "id": sharedInfo.locReportId,
+            time: new Date().toLocaleTimeString(),
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.locReports.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an locReport", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($IlocReport: UlocReport!) {
+            locReports {
+              archive(locreport: $IlocReport) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "IlocReport": {
+            "id": sharedInfo.locReportId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.locReports.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an locReport", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($IlocReport: UlocReport!) {
+            locReports {
+              restore(locreport: $IlocReport) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          "IlocReport": {
+            "id": sharedInfo.locReportId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.locReports.restore.id).to.be.string;
+        done();
+      });
+  });
+
+  it("Can fetch restored locReport", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        {
+          locReports{
+            id
+          }
+        }        
+        `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.locReports[0].id).to.be.a.string;
+
+        done();
+      });
+  });
+})

@@ -30,6 +30,9 @@ type Query {
 
   complaints:[complaint]
   complaint: complaint
+
+  locReports: [locReport]
+  locReport: locReport
 }
 
 type Mutation {
@@ -45,6 +48,7 @@ type Mutation {
   schedules: scheduleMutations
   events: eventMutations
   complaints: complaintMutations
+  locReports: locReportMutations
 }
 
 # admin things
@@ -230,6 +234,34 @@ type locMutations {
   restore(loc: Uloc!): loc
 }
 
+# locReport things
+type locReport {
+  id: String
+  time: String
+  loc: loc
+  trip: trip
+}
+
+input IlocReport {
+  time: String
+  loc: Iloc
+  trip: String
+}
+
+input UlocReport {
+  id: String!
+  time: String
+  loc: Iloc
+  trip: String
+}
+
+type locReportMutations {
+  create(locreport: IlocReport!): locReport
+  update(locreport: UlocReport!): locReport
+  archive(locreport: UlocReport!): locReport
+  restore(locreport: UlocReport!): locReport
+}
+
 # trip things
 type trip {
   id: String
@@ -239,6 +271,7 @@ type trip {
   driver:driver,
   schedule: schedule
   events:[event]
+  locReports: [locReport]
 }
 
 input Itrip {
