@@ -27,31 +27,14 @@ const single = async (root, args, { db: { collections } }) => {
   return entry;
 };
 
-
 const nested = {
   schedule: {
-    async route(root, args, { db: { collections } }) {
-      const entry = await collections["route"].findOne({
-        where: { id: root.route, isDeleted: false }
-      });
-      return entry;
-    },
-    async trips(root, args, { db: { collections } }) {
-      const entry = await collections["trip"].find({
-        where: { schedule: root.id, isDeleted: false }
-      });
-      return entry;
-    },
     async bus(root, args, { db: { collections } }) {
-      const entry = await collections["bus"].findOne({
-        where: { id: root.bus, isDeleted: false }
+      const entry = await collections["schedule"].findOne({
+        where: { driver: root.schedule, isDeleted: false }
       });
       return entry;
-    },
-    async days(root, args, { db: { collections } }) {
-      if (root.days)
-        return root.days.split(",");
-    },
+    }
   }
 }
 

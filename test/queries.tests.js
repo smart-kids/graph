@@ -1,4 +1,4 @@
-require("./mutations.test.js")
+require("./mutations.test.js");
 
 // Import the dependencies for testing
 import chai from "chai";
@@ -14,13 +14,13 @@ var expect = chai.expect;
 const sharedInfo = {};
 
 describe("Setup For Queries", () => {
-  before(function (done) {
+  before(function(done) {
     this.timeout(1000); // wait for db connections etc.
 
     setTimeout(done, 500);
   });
 
-  describe("OPS", function () {
+  describe("OPS", function() {
     // Test to get all students record
     it("Health check should return 200", done => {
       chai
@@ -47,7 +47,7 @@ describe("Setup For Queries", () => {
     });
   });
 
-  describe("Graph", function () {
+  describe("Graph", function() {
     // Test to get all students record
     it("Graphql responds fetching the whole tree", done => {
       chai
@@ -118,19 +118,24 @@ describe("Setup For Queries", () => {
               size
               plate
             }
+            trips {
+              startedAt,
+              completedAt
+            }
           }
-        }` })
+        }`
+        })
         .end((err, res) => {
           res.should.have.status(200);
+
           expect(res.body.errors).to.not.exist;
 
-          const student = res.body.data.students[0]
-          const bus = res.body.data.buses[0]
-          const parent = res.body.data.parents[0]
-          const route = res.body.data.routes[0]
-          const driver = res.body.data.drivers[0]
-          const schedule = res.body.data.schedules[0]
-
+          const student = res.body.data.students[0];
+          const bus = res.body.data.buses[0];
+          const parent = res.body.data.parents[0];
+          const route = res.body.data.routes[0];
+          const driver = res.body.data.drivers[0];
+          const schedule = res.body.data.schedules[0];
 
           // students
           expect(student.id).to.be.a.string;

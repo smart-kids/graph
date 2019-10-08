@@ -201,22 +201,22 @@ type locMutations {
 # trip things
 type trip {
   id: String
-  time: Float
-  route: route
-  bus: bus
+  startedAt: Float
+  completedAt: Float
+  schedule: schedule
 }
 
 input Itrip {
-  time: Float
-  route: String
-  bus: String
+  startedAt: Float
+  completedAt: Float
+  schedule: String
 }
 
 input Utrip {
   id: String!
-  time: Float
-  route: String
-  bus: String
+  startedAt: Float
+  completedAt: Float
+  schedule: String
 }
 
 type tripMutations {
@@ -315,6 +315,7 @@ type schedule {
   days: [day]
   route: route
   bus: bus
+  trips:[trip]
 }
 
 input Ischedule {
