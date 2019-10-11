@@ -1,5 +1,5 @@
-import { ObjectId } from "mongodb"
-const { name } = require("./about.js")
+import { ObjectId } from "mongodb";
+const { name } = require("./about.js");
 
 const { UserError } = require("graphql-errors");
 
@@ -9,16 +9,16 @@ const create = async (data, { db: { collections } }) => {
 
   // attatch data from the schedule
   const schedule = await collections["schedule"].findOne({
-    where: { id: data.schedule, isDeleted: false }
+    where: { id: data[name].schedule, isDeleted: false }
   });
 
   const bus = await collections["bus"].findOne({
     where: { id: schedule.bus, isDeleted: false }
   });
 
-  entry.bus = schedule.bus
-  entry.driver = bus.driver
-  
+  entry.bus = schedule.bus;
+  entry.driver = bus.driver;
+
   try {
     await collections[name].create(entry);
 
