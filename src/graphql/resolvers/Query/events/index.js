@@ -1,4 +1,4 @@
-const { name } = require("./about.js")
+const { name } = require("./about.js");
 
 const list = async (root, args, { db: { collections } }) => {
   const entries = await collections[name].find({
@@ -28,14 +28,32 @@ const single = async (root, args, { db: { collections } }) => {
 };
 
 const nested = {
-  [name]: {
-    async student(root, args, { db: { collections } }) {
+  event: {
+    async student(
+      root,
+      args,
+      {
+        db: { collections }
+      }
+    ) {
       const entry = await collections["student"].findOne({
         where: { id: root.student, isDeleted: false }
       });
       return entry;
+    },
+    async trip(
+      root,
+      args,
+      {
+        db: { collections }
+      }
+    ) {
+      const entry = await collections["trip"].findOne({
+        where: { id: root.trip, isDeleted: false }
+      });
+      return entry;
     }
   }
-}
+};
 
 export { list, single, listDeleted, nested };
