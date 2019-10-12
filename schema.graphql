@@ -346,6 +346,7 @@ type route {
   name: String
   description: String
   path: [loc]
+  schedule:schedule,
   students: [student]
 }
 
