@@ -56,9 +56,11 @@ const nested = {
       return entry;
     },
     async schedule(root, args, { db: { collections } }) {
+      console.log(root);
       const entry = await collections["schedule"].findOne({
         where: { id: root.schedule, isDeleted: false }
       });
+      console.log(entry);
       return entry;
     }
   }
