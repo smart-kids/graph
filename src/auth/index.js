@@ -6,6 +6,7 @@ import express from "express";
 import Joi from "joi"
 import jwt from "jsonwebtoken"
 import bodyParser from "body-parser"
+import sms from "../utils/sms"
 
 const validator = require('express-joi-validation').createValidator({})
 
@@ -41,17 +42,43 @@ router.use(bodyParser.json())
 
 router.get("/health", (req, res) => res.send());
 
-const bodySchema = Joi.object({
-    user: Joi.string().required(),
-    password: Joi.string().required()
-})
+
 
 router.use(
-    "/login",
-    validator.body(bodySchema),
+    "/verifySMSauth",
+    validator.body(Joi.object({
+        user: Joi.string().required(),
+        password: Joi.string().required()
+    })),
     async (req, res) => {
         const { db: { collections } } = req.app.locals
         const { user, password } = req.body
+
+        // check the token
+        const data = await collections["OTP"].findOne({ password, used: false })
+
+        if (data) {
+            var token = jwt.sign(data, config.secret);
+            return res.send({
+                token,
+                data
+            })
+        }
+
+        return res.status(401).send({ message: "OTP not found, or already used" })
+    }
+);
+
+
+
+router.use(
+    "/login",
+    validator.body(Joi.object({
+        user: Joi.string().required()
+    })),
+    async (req, res) => {
+        const { db: { collections } } = req.app.locals
+        const { user } = req.body
 
         // check drivers numbers
         const driver = await collections["driver"].findOne({ username: user, isDeleted: false })
@@ -63,16 +90,17 @@ router.use(
         const admin = await collections["admin"].findOne({ username: user, isDeleted: false })
 
         const returnAuth = () => {
-            const data = {
-                admin,
-                parent,
-                driver
-            }
+            const password = makeid()
+            // send sms to phone
+            sms({ data: { password, phone: "+254711657108" } })
 
-            var token = jwt.sign(data, config.secret);
-            return res.send({
-                token,
-                data
+            collections["OTP"].create({
+                user: {
+                    driver,
+                    parent,
+                    admin
+                },
+                password
             })
         }
 
