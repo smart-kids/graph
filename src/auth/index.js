@@ -62,7 +62,7 @@ router.use(
         // check admins list
         const admin = await collections["admin"].findOne({ username: user, isDeleted: false })
 
-        if (!driver || !parent || !admin) {
+        const returnAuth = () => {
             const data = {
                 admin,
                 parent,
@@ -74,6 +74,18 @@ router.use(
                 token,
                 data
             })
+        }
+
+        if (driver) {
+            returnAuth(driver)
+        }
+
+        if (parent) {
+            returnAuth(parent)
+        }
+
+        if (admin) {
+            returnAuth(admin)
         }
 
         return res.status(401).send({ message: "User not found, Please contact an administrator" })
