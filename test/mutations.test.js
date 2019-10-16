@@ -17,13 +17,13 @@ rimraf(".tmp/localDiskDb/*", () => {
 });
 
 describe("Setup", () => {
-  before(function(done) {
+  before(function (done) {
     this.timeout(1000); // wait for db connections etc.
 
     setTimeout(done, 500);
   });
 
-  describe("OPS", function() {
+  describe("OPS", function () {
     // Test to get all students record
     it("Health check should return 200", done => {
       chai
