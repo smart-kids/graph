@@ -130,7 +130,7 @@ export default Waterline.Collection.extend({
     disbursementAccount: { type: "number", required: true },
 &nbsp;
     Description: { type: "string", required: true },
-    isDeleted: { type: "boolean", required: true }
+    isDeleted: { type: "boolean", defaultsTo: false }
   }
 });
 &nbsp;</pre></td></tr>

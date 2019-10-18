@@ -2,6 +2,7 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
 var rimraf = require("rimraf");
+import moment from "moment";
 import app from "../src/server";
 
 // Configure chai
@@ -69,10 +70,10 @@ describe("Admins", () => {
           }            
         `,
         variables: {
-          "Iadmin": {
-            "username": "new admin",
-            "email": "test",
-            "password": "test"
+          Iadmin: {
+            username: "new admin",
+            email: "test",
+            password: "test"
           }
         }
       })
@@ -82,7 +83,7 @@ describe("Admins", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.admins.create.id).to.be.a.string;
 
-        sharedInfo.adminId = res.body.data.admins.create.id
+        sharedInfo.adminId = res.body.data.admins.create.id;
         done();
       });
   });
@@ -103,9 +104,9 @@ describe("Admins", () => {
           }            
         `,
         variables: {
-          "admin": {
-            "id": sharedInfo.adminId,
-            "username": "updated admin"
+          admin: {
+            id: sharedInfo.adminId,
+            username: "updated admin"
           }
         }
       })
@@ -134,8 +135,8 @@ describe("Admins", () => {
           }                  
         `,
         variables: {
-          "Iadmin": {
-            "id": sharedInfo.adminId
+          Iadmin: {
+            id: sharedInfo.adminId
           }
         }
       })
@@ -164,8 +165,8 @@ describe("Admins", () => {
           }                  
         `,
         variables: {
-          "Iadmin": {
-            "id": sharedInfo.adminId
+          Iadmin: {
+            id: sharedInfo.adminId
           }
         }
       })
@@ -201,7 +202,7 @@ describe("Admins", () => {
         done();
       });
   });
-})
+});
 
 describe("Routes", () => {
   it("Can create an route", done => {
@@ -220,9 +221,9 @@ describe("Routes", () => {
           }            
         `,
         variables: {
-          "Iroute": {
-            "name": "marwa",
-            "description": "marwa"
+          Iroute: {
+            name: "marwa",
+            description: "marwa"
           }
         }
       })
@@ -232,7 +233,7 @@ describe("Routes", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.routes.create.id).to.be.a.string;
 
-        sharedInfo.routeId = res.body.data.routes.create.id
+        sharedInfo.routeId = res.body.data.routes.create.id;
         done();
       });
   });
@@ -253,10 +254,10 @@ describe("Routes", () => {
           }            
         `,
         variables: {
-          "route": {
-            "id": sharedInfo.routeId,
-            "name": "tested",
-            "description": "descr"
+          route: {
+            id: sharedInfo.routeId,
+            name: "tested",
+            description: "descr"
           }
         }
       })
@@ -285,8 +286,8 @@ describe("Routes", () => {
           }                  
         `,
         variables: {
-          "Iroute": {
-            "id": sharedInfo.routeId
+          Iroute: {
+            id: sharedInfo.routeId
           }
         }
       })
@@ -315,8 +316,8 @@ describe("Routes", () => {
           }                  
         `,
         variables: {
-          "Iroute": {
-            "id": sharedInfo.routeId
+          Iroute: {
+            id: sharedInfo.routeId
           }
         }
       })
@@ -352,7 +353,7 @@ describe("Routes", () => {
         done();
       });
   });
-})
+});
 
 describe("Drivers", () => {
   it("Can create an driver", done => {
@@ -371,11 +372,11 @@ describe("Drivers", () => {
           }
       `,
         variables: {
-          "Idriver": {
-            "username": "marwa",
-            "email": "test",
-            "phone": "test",
-            "password": "12345"
+          Idriver: {
+            username: "marwa",
+            email: "test",
+            phone: "test",
+            password: "12345"
           }
         }
       })
@@ -385,7 +386,7 @@ describe("Drivers", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.drivers.create.id).to.be.a.string;
 
-        sharedInfo.driverId = res.body.data.drivers.create.id
+        sharedInfo.driverId = res.body.data.drivers.create.id;
         done();
       });
   });
@@ -406,12 +407,12 @@ describe("Drivers", () => {
           }            
         `,
         variables: {
-          "driver": {
-            "id": sharedInfo.driverId,
-            "username": "marwaed",
-            "email": "test",
-            "phone": "test",
-            "password": "12345"
+          driver: {
+            id: sharedInfo.driverId,
+            username: "marwaed",
+            email: "test",
+            phone: "test",
+            password: "12345"
           }
         }
       })
@@ -440,8 +441,8 @@ describe("Drivers", () => {
           }                  
         `,
         variables: {
-          "Idriver": {
-            "id": sharedInfo.driverId
+          Idriver: {
+            id: sharedInfo.driverId
           }
         }
       })
@@ -470,8 +471,8 @@ describe("Drivers", () => {
           }                  
         `,
         variables: {
-          "Idriver": {
-            "id": sharedInfo.driverId
+          Idriver: {
+            id: sharedInfo.driverId
           }
         }
       })
@@ -507,8 +508,7 @@ describe("Drivers", () => {
         done();
       });
   });
-})
-
+});
 
 describe("Busses", () => {
   it("Can create an bus", done => {
@@ -527,10 +527,10 @@ describe("Busses", () => {
         }
         `,
         variables: {
-          "Ibus": {
-            "make": "marwa",
-            "plate": "test",
-            "size": 2,
+          Ibus: {
+            make: "marwa",
+            plate: "test",
+            size: 2,
             driver: sharedInfo.driverId
           }
         }
@@ -541,7 +541,7 @@ describe("Busses", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.buses.create.id).to.be.a.string;
 
-        sharedInfo.busId = res.body.data.buses.create.id
+        sharedInfo.busId = res.body.data.buses.create.id;
         done();
       });
   });
@@ -562,11 +562,11 @@ describe("Busses", () => {
           }            
         `,
         variables: {
-          "bus": {
-            "id": sharedInfo.busId,
-            "make": "marwaed",
-            "plate": "test",
-            "size": 3
+          bus: {
+            id: sharedInfo.busId,
+            make: "marwaed",
+            plate: "test",
+            size: 3
           }
         }
       })
@@ -595,8 +595,8 @@ describe("Busses", () => {
           }                  
         `,
         variables: {
-          "Ibus": {
-            "id": sharedInfo.busId
+          Ibus: {
+            id: sharedInfo.busId
           }
         }
       })
@@ -625,8 +625,8 @@ describe("Busses", () => {
           }                  
         `,
         variables: {
-          "Ibus": {
-            "id": sharedInfo.busId
+          Ibus: {
+            id: sharedInfo.busId
           }
         }
       })
@@ -662,7 +662,7 @@ describe("Busses", () => {
         done();
       });
   });
-})
+});
 
 describe("Parent", () => {
   it("Can create an parent", done => {
@@ -681,11 +681,11 @@ describe("Parent", () => {
           }
         `,
         variables: {
-          "Iparent": {
-            "name": "marwa",
-            "phone": "test",
-            "email": "FEMALE",
-            "gender": "MALE"
+          Iparent: {
+            name: "marwa",
+            phone: "test",
+            email: "FEMALE",
+            gender: "MALE"
           }
         }
       })
@@ -695,7 +695,7 @@ describe("Parent", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.parents.create.id).to.be.a.string;
 
-        sharedInfo.parentId = res.body.data.parents.create.id
+        sharedInfo.parentId = res.body.data.parents.create.id;
         done();
       });
   });
@@ -716,11 +716,11 @@ describe("Parent", () => {
           }
         `,
         variables: {
-          "Iparent": {
-            "name": "marwa 2",
-            "phone": "test",
-            "email": "FEMALE",
-            "gender": "MALE"
+          Iparent: {
+            name: "marwa 2",
+            phone: "test",
+            email: "FEMALE",
+            gender: "MALE"
           }
         }
       })
@@ -730,7 +730,7 @@ describe("Parent", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.parents.create.id).to.be.a.string;
 
-        sharedInfo.parent2Id = res.body.data.parents.create.id
+        sharedInfo.parent2Id = res.body.data.parents.create.id;
         done();
       });
   });
@@ -751,12 +751,12 @@ describe("Parent", () => {
         }
       `,
         variables: {
-          "parent": {
-            "id": sharedInfo.parentId,
-            "name": "marwaed",
-            "phone": "test",
-            "email": "email@email.com",
-            "gender": "MALE"
+          parent: {
+            id: sharedInfo.parentId,
+            name: "marwaed",
+            phone: "test",
+            email: "email@email.com",
+            gender: "MALE"
           }
         }
       })
@@ -785,8 +785,8 @@ describe("Parent", () => {
           }                  
         `,
         variables: {
-          "Iparent": {
-            "id": sharedInfo.parentId
+          Iparent: {
+            id: sharedInfo.parentId
           }
         }
       })
@@ -815,8 +815,8 @@ describe("Parent", () => {
           }                  
         `,
         variables: {
-          "Iparent": {
-            "id": sharedInfo.parentId
+          Iparent: {
+            id: sharedInfo.parentId
           }
         }
       })
@@ -852,8 +852,7 @@ describe("Parent", () => {
         done();
       });
   });
-})
-
+});
 
 describe("Students", () => {
   it("Can create an student", done => {
@@ -872,13 +871,13 @@ describe("Students", () => {
           }
         `,
         variables: {
-          "Istudent": {
-            "names": "marwa",
-            "route": sharedInfo.routeId,
-            "gender": "FEMALE",
+          Istudent: {
+            names: "marwa",
+            route: sharedInfo.routeId,
+            gender: "FEMALE",
             registration: "1234",
-            "parent": sharedInfo.parentId,
-            "parent2": sharedInfo.parent2Id
+            parent: sharedInfo.parentId,
+            parent2: sharedInfo.parent2Id
           }
         }
       })
@@ -888,7 +887,7 @@ describe("Students", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.students.create.id).to.be.a.string;
 
-        sharedInfo.studentId = res.body.data.students.create.id
+        sharedInfo.studentId = res.body.data.students.create.id;
         done();
       });
   });
@@ -909,12 +908,12 @@ describe("Students", () => {
         }                 
         `,
         variables: {
-          "student": {
-            "id": sharedInfo.studentId,
-            "names": "marwa",
-            "route": sharedInfo.routeId,
-            "gender": "MALE",
-            "parent": "test"
+          student: {
+            id: sharedInfo.studentId,
+            names: "marwa",
+            route: sharedInfo.routeId,
+            gender: "MALE",
+            parent: "test"
           }
         }
       })
@@ -943,8 +942,8 @@ describe("Students", () => {
           }                  
         `,
         variables: {
-          "Istudent": {
-            "id": sharedInfo.studentId
+          Istudent: {
+            id: sharedInfo.studentId
           }
         }
       })
@@ -973,8 +972,8 @@ describe("Students", () => {
           }                  
         `,
         variables: {
-          "Istudent": {
-            "id": sharedInfo.studentId
+          Istudent: {
+            id: sharedInfo.studentId
           }
         }
       })
@@ -1010,8 +1009,7 @@ describe("Students", () => {
         done();
       });
   });
-})
-
+});
 
 describe("Schedule", () => {
   it("Can create an schedule", done => {
@@ -1030,9 +1028,12 @@ describe("Schedule", () => {
           }            
         `,
         variables: {
-          "Ischedule": {
-            "name": "schedule 1",
-            time: new Date().toLocaleTimeString(),
+          Ischedule: {
+            name: "schedule 1",
+            time: new Date().toISOString(),
+            end_time: moment(new Date())
+              .add(30, "m")
+              .toISOString(),
             route: sharedInfo.routeId,
             days: "MONDAY,TEUSDAY",
             bus: sharedInfo.busId
@@ -1045,7 +1046,7 @@ describe("Schedule", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.schedules.create.id).to.be.a.string;
 
-        sharedInfo.scheduleId = res.body.data.schedules.create.id
+        sharedInfo.scheduleId = res.body.data.schedules.create.id;
         done();
       });
   });
@@ -1066,9 +1067,9 @@ describe("Schedule", () => {
           }            
         `,
         variables: {
-          "schedule": {
-            "id": sharedInfo.scheduleId,
-            "name": "Schedule 1 edited"
+          schedule: {
+            id: sharedInfo.scheduleId,
+            name: "Schedule 1 edited"
           }
         }
       })
@@ -1097,8 +1098,8 @@ describe("Schedule", () => {
           }                  
         `,
         variables: {
-          "Ischedule": {
-            "id": sharedInfo.scheduleId
+          Ischedule: {
+            id: sharedInfo.scheduleId
           }
         }
       })
@@ -1127,8 +1128,8 @@ describe("Schedule", () => {
           }                  
         `,
         variables: {
-          "Ischedule": {
-            "id": sharedInfo.scheduleId
+          Ischedule: {
+            id: sharedInfo.scheduleId
           }
         }
       })
@@ -1164,7 +1165,259 @@ describe("Schedule", () => {
         done();
       });
   });
-})
+});
+
+describe("Trips", () => {
+  it("Can create an trip", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        mutation ($Itrip: Itrip!) {
+          trips {
+            create(trip: $Itrip) {
+              id
+            }
+          }
+        }
+        `,
+        variables: {
+          Itrip: {
+            startedAt: new Date().toISOString(),
+            schedule: sharedInfo.scheduleId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.trips.create.id).to.be.a.string;
+
+        sharedInfo.tripId = res.body.data.trips.create.id;
+        done();
+      });
+  });
+
+  // dont add this id's to shared data
+  it("Can create a completed trip", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        mutation ($Itrip: Itrip!) {
+          trips {
+            create(trip: $Itrip) {
+              id
+            }
+          }
+        }
+        `,
+        variables: {
+          Itrip: {
+            startedAt: new Date().toISOString(),
+            completedAt: moment(new Date())
+              .add(40, "m")
+              .toISOString(),
+            schedule: sharedInfo.scheduleId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.trips.create.id).to.be.a.string;
+
+        done();
+      });
+  });
+
+  it("Can create a incomplete trip", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        mutation ($Itrip: Itrip!) {
+          trips {
+            create(trip: $Itrip) {
+              id
+            }
+          }
+        }
+        `,
+        variables: {
+          Itrip: {
+            startedAt: new Date().toISOString(),
+            schedule: sharedInfo.scheduleId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.trips.create.id).to.be.a.string;
+
+        done();
+      });
+  });
+
+  it("Can create a incomplete trip", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        mutation ($Itrip: Itrip!) {
+          trips {
+            create(trip: $Itrip) {
+              id
+            }
+          }
+        }
+        `,
+        variables: {
+          Itrip: {
+            isCancelled: true,
+            schedule: sharedInfo.scheduleId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.trips.create.id).to.be.a.string;
+
+        done();
+      });
+  });
+
+  it("Can update an trip", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($trip: Utrip!) {
+            trips {
+              update(trip: $trip) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          trip: {
+            id: sharedInfo.tripId,
+            startedAt: new Date().toISOString(),
+            completedAt: new Date().toISOString(),
+            schedule: sharedInfo.scheduleId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.trips.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an trip", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Itrip: Utrip!) {
+            trips {
+              archive(trip: $Itrip) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Itrip: {
+            id: sharedInfo.tripId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.trips.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an trip", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Itrip: Utrip!) {
+            trips {
+              restore(trip: $Itrip) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Itrip: {
+            id: sharedInfo.tripId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.trip.restore.id).to.be.string;
+        done();
+      });
+  });
+
+  it("Can fetch restored trip", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        {
+          trips{
+            id
+          }
+        }        
+        `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.trips[0].id).to.be.a.string;
+
+        done();
+      });
+  });
+});
 
 describe("Event", () => {
   it("Can create an event", done => {
@@ -1183,11 +1436,11 @@ describe("Event", () => {
           }            
         `,
         variables: {
-          "Ievent": {
-            "student": sharedInfo.studentId,
+          Ievent: {
+            student: sharedInfo.studentId,
             time: new Date().toLocaleTimeString(),
             type: "CHECKEDOFF",
-            trip: sharedInfo.scheduleId
+            trip: sharedInfo.tripId
           }
         }
       })
@@ -1197,7 +1450,7 @@ describe("Event", () => {
         expect(res.body.errors).to.not.exist;
         expect(res.body.data.events.create.id).to.be.a.string;
 
-        sharedInfo.eventId = res.body.data.events.create.id
+        sharedInfo.eventId = res.body.data.events.create.id;
         done();
       });
   });
@@ -1218,9 +1471,9 @@ describe("Event", () => {
           }            
         `,
         variables: {
-          "event": {
-            "id": sharedInfo.eventId,
-            time: new Date().toLocaleTimeString(),
+          event: {
+            id: sharedInfo.eventId,
+            time: new Date().toLocaleTimeString()
           }
         }
       })
@@ -1249,8 +1502,8 @@ describe("Event", () => {
           }                  
         `,
         variables: {
-          "Ievent": {
-            "id": sharedInfo.eventId
+          Ievent: {
+            id: sharedInfo.eventId
           }
         }
       })
@@ -1279,8 +1532,8 @@ describe("Event", () => {
           }                  
         `,
         variables: {
-          "Ievent": {
-            "id": sharedInfo.eventId
+          Ievent: {
+            id: sharedInfo.eventId
           }
         }
       })
@@ -1311,34 +1564,71 @@ describe("Event", () => {
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
-        expect(res.body.data.events[0].id).to.be.a.string;
+        // expect(res.body.data.events[0].id).to.be.a.string;
 
         done();
       });
   });
-})
+});
 
-describe("Schedule Events", () => {
-  it("Can create a schedule event", done => {
+describe("Complaint", () => {
+  it("Can create an complaint", done => {
     chai
       .request(app)
       .post("/graph")
       .set("content-type", "application/json")
       .send({
         query: `
-          mutation ($IscheduleEvent: IscheduleEvent!) {
-            scheduleEvents {
-              create(scheduleEvent: $IscheduleEvent) {
+          mutation ($Icomplaint: Icomplaint!) {
+            complaints {
+              create(complaint: $Icomplaint) {
+                id,
+                time,
+                parent{
+                  id
+                }
+              }
+            }
+          }            
+        `,
+        variables: {
+          Icomplaint: {
+            parent: sharedInfo.parentId,
+            time: new Date().toLocaleTimeString(),
+            content: "Complaining"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.complaints.create.id).to.be.a.string;
+
+        sharedInfo.complaintId = res.body.data.complaints.create.id;
+        done();
+      });
+  });
+
+  it("Can update an complaint", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($complaint: Ucomplaint!) {
+            complaints {
+              update(complaint: $complaint) {
                 id
               }
             }
           }            
         `,
         variables: {
-          "IscheduleEvent": {
-            driver: sharedInfo.driverId,
-            startedAt: new Date().toLocaleTimeString(),
-            trip: sharedInfo.scheduleId
+          complaint: {
+            id: sharedInfo.complaintId,
+            time: new Date().toLocaleTimeString()
           }
         }
       })
@@ -1346,62 +1636,29 @@ describe("Schedule Events", () => {
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
-        expect(res.body.data.scheduleEvents.create.id).to.be.a.string;
-
-        sharedInfo.scheduleEventId = res.body.data.scheduleEvents.create.id
+        expect(res.body.data.complaints.update.id).to.be.a.string;
         done();
       });
   });
 
-  it("Can update an schedule event", done => {
+  it("Can nuke an complaint", done => {
     chai
       .request(app)
       .post("/graph")
       .set("content-type", "application/json")
       .send({
         query: `
-          mutation ($scheduleEvent: UscheduleEvent!) {
-            scheduleEvents {
-              update(scheduleEvent: $scheduleEvent) {
-                id
-              }
-            }
-          }            
-        `,
-        variables: {
-          "scheduleEvent": {
-            "id": sharedInfo.scheduleEventId,
-            completedAt: new Date().toLocaleTimeString(),
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.scheduleEvents.update.id).to.be.a.string;
-        done();
-      });
-  });
-
-  it("Can nuke an scheduleEvent", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($IscheduleEvent: UscheduleEvent!) {
-            scheduleEvents {
-              archive(scheduleEvent: $IscheduleEvent) {
+          mutation ($Icomplaint: Ucomplaint!) {
+            complaints {
+              archive(complaint: $Icomplaint) {
                 id
               }
             }
           }                  
         `,
         variables: {
-          "IscheduleEvent": {
-            "id": sharedInfo.scheduleEventId
+          Icomplaint: {
+            id: sharedInfo.complaintId
           }
         }
       })
@@ -1409,29 +1666,29 @@ describe("Schedule Events", () => {
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
-        expect(res.body.data.scheduleEvents.archive.id).to.be.a.string;
+        expect(res.body.data.complaints.archive.id).to.be.a.string;
         done();
       });
   });
 
-  it("Can restore an scheduleEvent", done => {
+  it("Can restore an complaint", done => {
     chai
       .request(app)
       .post("/graph")
       .set("content-type", "application/json")
       .send({
         query: `
-          mutation ($IscheduleEvent: UscheduleEvent!) {
-            scheduleEvents {
-              restore(scheduleEvent: $IscheduleEvent) {
+          mutation ($Icomplaint: Ucomplaint!) {
+            complaints {
+              restore(complaint: $Icomplaint) {
                 id
               }
             }
           }                  
         `,
         variables: {
-          "IscheduleEvent": {
-            "id": sharedInfo.scheduleEventId
+          Icomplaint: {
+            id: sharedInfo.complaintId
           }
         }
       })
@@ -1439,12 +1696,12 @@ describe("Schedule Events", () => {
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
-        // expect(res.body.data.scheduleEvents.restore.id).to.be.string;
+        // expect(res.body.data.complaints.restore.id).to.be.string;
         done();
       });
   });
 
-  it("Can fetch restored scheduleEvent", done => {
+  it("Can fetch restored complaint", done => {
     chai
       .request(app)
       .post("/graph")
@@ -1452,7 +1709,7 @@ describe("Schedule Events", () => {
       .send({
         query: `
         {
-          scheduleEvents{
+          complaints{
             id
           }
         }        
@@ -1462,9 +1719,263 @@ describe("Schedule Events", () => {
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
-        expect(res.body.data.scheduleEvents[0].id).to.be.a.string;
+        // expect(res.body.data.complaints[0].id).to.be.a.string;
 
         done();
       });
   });
+<<<<<<< HEAD
 })
+
+describe("Schedule Events", () => {
+  it("Can create a schedule event", done => {
+=======
+});
+
+describe("Location Reporting", () => {
+  it("Can create an locReport", done => {
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+<<<<<<< HEAD
+          mutation ($IscheduleEvent: IscheduleEvent!) {
+            scheduleEvents {
+              create(scheduleEvent: $IscheduleEvent) {
+=======
+          mutation ($IlocReport: IlocReport!) {
+            locReports {
+              create(locreport: $IlocReport) {
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+<<<<<<< HEAD
+          "IscheduleEvent": {
+            driver: sharedInfo.driverId,
+            startedAt: new Date().toLocaleTimeString(),
+            trip: sharedInfo.scheduleId
+=======
+          IlocReport: {
+            trip: sharedInfo.tripId,
+            time: new Date().toLocaleTimeString(),
+            loc: {
+              lat: 1.234,
+              lng: -0.456
+            }
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+<<<<<<< HEAD
+        expect(res.body.data.scheduleEvents.create.id).to.be.a.string;
+
+        sharedInfo.scheduleEventId = res.body.data.scheduleEvents.create.id
+=======
+        expect(res.body.data.locReports.create.id).to.be.a.string;
+
+        sharedInfo.locReportId = res.body.data.locReports.create.id;
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+        done();
+      });
+  });
+
+<<<<<<< HEAD
+  it("Can update an schedule event", done => {
+=======
+  it("Can update an locReport", done => {
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+<<<<<<< HEAD
+          mutation ($scheduleEvent: UscheduleEvent!) {
+            scheduleEvents {
+              update(scheduleEvent: $scheduleEvent) {
+=======
+          mutation ($locReport: UlocReport!) {
+            locReports {
+              update(locreport: $locReport) {
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+<<<<<<< HEAD
+          "scheduleEvent": {
+            "id": sharedInfo.scheduleEventId,
+            completedAt: new Date().toLocaleTimeString(),
+=======
+          locReport: {
+            id: sharedInfo.locReportId,
+            time: new Date().toLocaleTimeString()
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+<<<<<<< HEAD
+        expect(res.body.data.scheduleEvents.update.id).to.be.a.string;
+=======
+        expect(res.body.data.locReports.update.id).to.be.a.string;
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+        done();
+      });
+  });
+
+<<<<<<< HEAD
+  it("Can nuke an scheduleEvent", done => {
+=======
+  it("Can nuke an locReport", done => {
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+<<<<<<< HEAD
+          mutation ($IscheduleEvent: UscheduleEvent!) {
+            scheduleEvents {
+              archive(scheduleEvent: $IscheduleEvent) {
+=======
+          mutation ($IlocReport: UlocReport!) {
+            locReports {
+              archive(locreport: $IlocReport) {
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+<<<<<<< HEAD
+          "IscheduleEvent": {
+            "id": sharedInfo.scheduleEventId
+=======
+          IlocReport: {
+            id: sharedInfo.locReportId
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+<<<<<<< HEAD
+        expect(res.body.data.scheduleEvents.archive.id).to.be.a.string;
+=======
+        expect(res.body.data.locReports.archive.id).to.be.a.string;
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+        done();
+      });
+  });
+
+<<<<<<< HEAD
+  it("Can restore an scheduleEvent", done => {
+=======
+  it("Can restore an locReport", done => {
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+<<<<<<< HEAD
+          mutation ($IscheduleEvent: UscheduleEvent!) {
+            scheduleEvents {
+              restore(scheduleEvent: $IscheduleEvent) {
+=======
+          mutation ($IlocReport: UlocReport!) {
+            locReports {
+              restore(locreport: $IlocReport) {
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+<<<<<<< HEAD
+          "IscheduleEvent": {
+            "id": sharedInfo.scheduleEventId
+=======
+          IlocReport: {
+            id: sharedInfo.locReportId
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+<<<<<<< HEAD
+        // expect(res.body.data.scheduleEvents.restore.id).to.be.string;
+=======
+        // expect(res.body.data.locReports.restore.id).to.be.string;
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+        done();
+      });
+  });
+
+<<<<<<< HEAD
+  it("Can fetch restored scheduleEvent", done => {
+=======
+  it("Can fetch restored locReport", done => {
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+    chai
+      .request(app)
+      .post("/graph")
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        {
+<<<<<<< HEAD
+          scheduleEvents{
+=======
+          locReports{
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+            id
+          }
+        }        
+        `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+<<<<<<< HEAD
+        expect(res.body.data.scheduleEvents[0].id).to.be.a.string;
+=======
+        // expect(res.body.data.locReports[0].id).to.be.a.string;
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c
+
+        done();
+      });
+  });
+<<<<<<< HEAD
+})
+=======
+});
+>>>>>>> 21230314cd942671e981618191cd3c61a68e5f2c

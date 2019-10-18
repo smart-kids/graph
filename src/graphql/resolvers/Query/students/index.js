@@ -46,6 +46,12 @@ const nested = {
         where: { id: root.parent2, isDeleted: false }
       });
       return entry;
+    },
+    async events(root, args, { db: { collections } }) {
+      const entry = await collections["event"].find({
+        where: { student: root.id, isDeleted: false }
+      });
+      return entry;
     }
   }
 }

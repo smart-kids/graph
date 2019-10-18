@@ -6,7 +6,9 @@ import students from "./students";
 import parents from "./parents";
 import schedules from "./schedules";
 import events from "./event";
-import scheduleEvents from './schedule-events'
+import trips from "./trip";
+import complaints from "./complaints"
+import locReports from "./location-reports"
 
 export default {
   admins,
@@ -17,7 +19,9 @@ export default {
   parents,
   schedules,
   events,
-  scheduleEvents,
+  trips,
+  complaints,
+  locReports,
   hello() {
     return "hello mutation";
   }

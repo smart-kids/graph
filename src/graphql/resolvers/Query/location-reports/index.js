@@ -28,21 +28,17 @@ const single = async (root, args, { db: { collections } }) => {
 };
 
 const nested = {
-  parent: {
-    async students(root, args, { db: { collections } }) {
-      const entry = await collections["student"].find({
-        where: { parent: root.parent, isDeleted: false }
-      });
-      return entry;
+  locReport: {
+    async loc(root, args, { db: { collections } }) {
+      return JSON.parse(root.loc);
     },
-    async complaints(root, args, { db: { collections } }) {
-      const entry = await collections["complaint"].find({
-        where: { parent: root.id, isDeleted: false }
+    async trip(root, args, { db: { collections } }) {
+      const entry = await collections["trip"].find({
+        where: { id: root.trip, isDeleted: false }
       });
       return entry;
     }
   }
 }
-
 
 export { list, single, listDeleted, nested };

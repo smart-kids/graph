@@ -28,25 +28,52 @@ const single = async (root, args, { db: { collections } }) => {
 };
 
 const nested = {
-  route: {
-    async path(
+  [name]: {
+    async bus(
       root,
       args,
       {
         db: { collections }
       }
     ) {
-      return root.path;
+      const entry = await collections["bus"].findOne({
+        where: { id: root.bus, isDeleted: false }
+      });
+      return entry;
     },
-    async students(
+    async driver(
       root,
       args,
       {
         db: { collections }
       }
     ) {
-      const entry = await collections["student"].find({
-        where: { route: root.id, isDeleted: false }
+      const entry = await collections["driver"].findOne({
+        where: { id: root.driver, isDeleted: false }
+      });
+      return entry;
+    },
+    async events(
+      root,
+      args,
+      {
+        db: { collections }
+      }
+    ) {
+      const entry = await collections["event"].find({
+        where: { trip: root.id, isDeleted: false }
+      });
+      return entry;
+    },
+    async locReports(
+      root,
+      args,
+      {
+        db: { collections }
+      }
+    ) {
+      const entry = await collections["locreport"].find({
+        where: { trip: root.id, isDeleted: false }
       });
       return entry;
     },
@@ -57,10 +84,9 @@ const nested = {
         db: { collections }
       }
     ) {
-      const entry = await collections["schedule"].find({
-        where: { route: root.id, isDeleted: false }
+      const entry = await collections["schedule"].findOne({
+        where: { id: root.schedule, isDeleted: false }
       });
-      console.log(entry)
       return entry;
     }
   }

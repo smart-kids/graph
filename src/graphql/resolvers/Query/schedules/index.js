@@ -36,6 +36,12 @@ const nested = {
       });
       return entry;
     },
+    async trips(root, args, { db: { collections } }) {
+      const entry = await collections["trip"].find({
+        where: { schedule: root.id, isDeleted: false }
+      });
+      return entry;
+    },
     async bus(root, args, { db: { collections } }) {
       const entry = await collections["bus"].findOne({
         where: { id: root.bus, isDeleted: false }
