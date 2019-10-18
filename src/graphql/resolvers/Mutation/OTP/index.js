@@ -1,14 +1,11 @@
 import { ObjectId } from "mongodb"
-import argon2 from "argon2"
 const { name } = require("./about.js")
 
 const { UserError } = require("graphql-errors");
 
 const create = async (data, { db: { collections } }) => {
   const id = new ObjectId().toHexString();
-
-  const password = await argon2.hash(data[name].password);
-  const entry = Object.assign(data[name], { id, password, isDeleted: false });
+  const entry = Object.assign(data[name], { id, isDeleted: false });
 
   try {
     await collections[name].create(entry);
@@ -25,11 +22,6 @@ const update = async (data, { db: { collections } }) => {
 
   try {
     delete entry.id;
-
-    if (entry.password) {
-      const hashedPassword = await argon2.hash(entry.password);
-      entry.password = hashedPassword
-    }
 
     await collections[name].update({ id }).set(entry);
 

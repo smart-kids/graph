@@ -5,21 +5,13 @@ const PNF = require('google-libphonenumber').PhoneNumberFormat;
 // Get an instance of `PhoneNumberUtil`.
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
 
-function makeid() {
-    var text = "";
-    var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
 
-    for (var i = 0; i < 4; i++)
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
 
-    return text;
-}
-
-const func = ({ data: { submited, project } }, reply) => {
-    const number = phoneUtil.parseAndKeepRawInput(submited.__agentPhoneNumber, 'KE');
+const func = ({ data: { phone, password } }, reply) => {
+    const number = phoneUtil.parseAndKeepRawInput(phone, 'KE');
     const coolNumber = phoneUtil.format(number, PNF.E164)
 
-    const Body = `test`
+    const Body = `${password} is your SmartKids login code. Don't reply to this message with your code.`
 
     const options = {
         method: 'POST',

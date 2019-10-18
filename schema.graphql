@@ -433,6 +433,7 @@ input Iparent {
   name: String
   phone: String
   email: String
+  password: String
   gender: gender
 }
 
@@ -440,6 +441,7 @@ input Uparent {
   id: String!
   name: String
   phone: String
+  password: String
   email: String
   gender: gender
 }

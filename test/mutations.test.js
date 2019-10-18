@@ -11,6 +11,7 @@ chai.should();
 var expect = chai.expect;
 
 const sharedInfo = {};
+let authorization = null
 
 rimraf(".tmp/localDiskDb/*", () => {
   console.log("  Cleared setup dir");
@@ -18,9 +19,9 @@ rimraf(".tmp/localDiskDb/*", () => {
 
 describe("Setup", () => {
   before(function (done) {
-    this.timeout(1000); // wait for db connections etc.
+    this.timeout(2000); // wait for db connections etc.
 
-    setTimeout(done, 500);
+    setTimeout(done, 2000);
   });
 
   describe("OPS", function () {
@@ -35,13 +36,47 @@ describe("Setup", () => {
           done();
         });
     });
+  });
+});
+
+describe("Super Auth", () => {
+  before(function (done) {
+    this.timeout(4000); // wait for db connections etc.
+
+    setTimeout(done, 4000);
+  });
+
+  describe("Auth", function () {
+    // Test to get all students record
+    it("super admin should return token based on env var", done => {
+      chai
+        .request(app)
+        .get("/auth/super")
+        .set("content-type", "application/json")
+        .send({
+          "user": "sAdmin",
+          "password": "12345"
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+
+          sharedInfo.auth = res.body
+          authorization = sharedInfo.auth.token
+
+          done();
+        });
+    });
 
     it("Graphql responds hello", done => {
       chai
         .request(app)
         .post("/graph")
+        .set("authorization", authorization)
         .set("content-type", "application/json")
-        .send({ query: "{hello}" })
+        .send({
+          query: `{
+            hello
+          }` })
         .end((err, res) => {
           res.should.have.status(200);
 
@@ -56,6 +91,7 @@ describe("Admins", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -69,7 +105,7 @@ describe("Admins", () => {
         `,
         variables: {
           Iadmin: {
-            username: "new admin",
+            username: "admin1",
             email: "test",
             password: "test"
           }
@@ -90,6 +126,7 @@ describe("Admins", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -121,6 +158,7 @@ describe("Admins", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -151,6 +189,7 @@ describe("Admins", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -181,6 +220,7 @@ describe("Admins", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -207,6 +247,7 @@ describe("Routes", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -240,6 +281,7 @@ describe("Routes", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -272,6 +314,7 @@ describe("Routes", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -302,6 +345,7 @@ describe("Routes", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -332,6 +376,7 @@ describe("Routes", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -358,6 +403,7 @@ describe("Drivers", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -371,10 +417,10 @@ describe("Drivers", () => {
       `,
         variables: {
           Idriver: {
-            username: "marwa",
-            email: "test",
-            phone: "test",
-            password: "12345"
+            username: "driver1",
+            email: "driver@gmail.com",
+            phone: "0711111111",
+            password: "4289Vtg"
           }
         }
       })
@@ -393,6 +439,7 @@ describe("Drivers", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -407,10 +454,7 @@ describe("Drivers", () => {
         variables: {
           driver: {
             id: sharedInfo.driverId,
-            username: "marwaed",
-            email: "test",
-            phone: "test",
-            password: "12345"
+            username: "driver2",
           }
         }
       })
@@ -427,6 +471,7 @@ describe("Drivers", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -457,6 +502,7 @@ describe("Drivers", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -487,6 +533,7 @@ describe("Drivers", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -508,11 +555,12 @@ describe("Drivers", () => {
   });
 });
 
-describe("Busses", () => {
+describe("Buses", () => {
   it("Can create an bus", done => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -548,6 +596,7 @@ describe("Busses", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -581,6 +630,7 @@ describe("Busses", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -611,6 +661,7 @@ describe("Busses", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -641,6 +692,7 @@ describe("Busses", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -667,6 +719,7 @@ describe("Parent", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -680,9 +733,10 @@ describe("Parent", () => {
         `,
         variables: {
           Iparent: {
-            name: "marwa",
-            phone: "test",
-            email: "FEMALE",
+            name: "parent1",
+            phone: "0722222222",
+            password: "rY8x5uW",
+            email: "parent1@gmail.com",
             gender: "MALE"
           }
         }
@@ -702,6 +756,7 @@ describe("Parent", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -715,9 +770,10 @@ describe("Parent", () => {
         `,
         variables: {
           Iparent: {
-            name: "marwa 2",
-            phone: "test",
-            email: "FEMALE",
+            name: "parent2",
+            phone: "0733333333",
+            password: "rY8x5uW",
+            email: "parent2@gmail.com",
             gender: "MALE"
           }
         }
@@ -737,6 +793,7 @@ describe("Parent", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -751,9 +808,8 @@ describe("Parent", () => {
         variables: {
           parent: {
             id: sharedInfo.parentId,
-            name: "marwaed",
-            phone: "test",
-            email: "email@email.com",
+            phone: "0722222223",
+            email: "parent1@gmail.com",
             gender: "MALE"
           }
         }
@@ -771,6 +827,7 @@ describe("Parent", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -801,6 +858,7 @@ describe("Parent", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -831,6 +889,7 @@ describe("Parent", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -857,6 +916,7 @@ describe("Students", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -870,7 +930,7 @@ describe("Students", () => {
         `,
         variables: {
           Istudent: {
-            names: "marwa",
+            names: "student1",
             route: sharedInfo.routeId,
             gender: "FEMALE",
             registration: "1234",
@@ -894,6 +954,7 @@ describe("Students", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -928,6 +989,7 @@ describe("Students", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -958,6 +1020,7 @@ describe("Students", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -988,6 +1051,7 @@ describe("Students", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1014,6 +1078,7 @@ describe("Schedule", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1053,6 +1118,7 @@ describe("Schedule", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1084,6 +1150,7 @@ describe("Schedule", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1114,6 +1181,7 @@ describe("Schedule", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1144,6 +1212,7 @@ describe("Schedule", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1170,6 +1239,7 @@ describe("Trips", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1204,6 +1274,7 @@ describe("Trips", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1239,6 +1310,7 @@ describe("Trips", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1271,6 +1343,7 @@ describe("Trips", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1303,6 +1376,7 @@ describe("Trips", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1336,6 +1410,7 @@ describe("Trips", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1366,6 +1441,7 @@ describe("Trips", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1396,6 +1472,7 @@ describe("Trips", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1422,6 +1499,7 @@ describe("Event", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1457,6 +1535,7 @@ describe("Event", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1488,6 +1567,7 @@ describe("Event", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1518,6 +1598,7 @@ describe("Event", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1548,6 +1629,7 @@ describe("Event", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1574,6 +1656,7 @@ describe("Complaint", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1612,6 +1695,7 @@ describe("Complaint", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1643,6 +1727,7 @@ describe("Complaint", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1673,6 +1758,7 @@ describe("Complaint", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1703,6 +1789,7 @@ describe("Complaint", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1729,6 +1816,7 @@ describe("Location Reporting", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1766,6 +1854,7 @@ describe("Location Reporting", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1797,6 +1886,7 @@ describe("Location Reporting", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1827,6 +1917,7 @@ describe("Location Reporting", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
@@ -1857,6 +1948,7 @@ describe("Location Reporting", () => {
     chai
       .request(app)
       .post("/graph")
+      .set("authorization", authorization)
       .set("content-type", "application/json")
       .send({
         query: `
