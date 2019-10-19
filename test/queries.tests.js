@@ -48,103 +48,143 @@ describe("Setup For Queries", () => {
     // });
   });
 
-  describe("Auth Tests", function () {
-    it("Parent Fetch Auth Code", done => {
-      chai
-        .request(app)
-        .get("/auth/login")
-        .set("content-type", "application/json")
-        .send({
-          "user": "0733333333",
-        })
-        .end((err, res) => {
-          res.should.have.status(200);
+  describe("Auth", function () {
+    describe("Parent", function () {
+      it("Fetch Auth Code", done => {
+        chai
+          .request(app)
+          .get("/auth/login")
+          .set("content-type", "application/json")
+          .send({
+            "user": "0733333333",
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
 
-          done();
-        });
-    });
-    // confirm code
-    it("Parent Confirm Auth Code", done => {
-      chai
-        .request(app)
-        .get("/auth/verify/sms")
-        .set("content-type", "application/json")
-        .send({
-          "user": "0733333333",
-          "password": "0000"
-        })
-        .end((err, res) => {
-          res.should.have.status(200);
+            done();
+          });
+      });
+      // confirm code
+      it("Confirm Auth Code", done => {
+        chai
+          .request(app)
+          .get("/auth/verify/sms")
+          .set("content-type", "application/json")
+          .send({
+            "user": "0733333333",
+            "password": "0000"
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
 
-          sharedInfo.auth = res.body
-          authorization = sharedInfo.auth.token
+            sharedInfo.auth = res.body
+            authorization = sharedInfo.auth.token
 
-          done();
-        });
-    });
+            done();
+          });
+      });
 
-    it("Test parent token using hello", done => {
-      chai
-        .request(app)
-        .post("/graph")
-        .set("authorization", authorization)
-        .set("content-type", "application/json")
-        .send({ query: "{hello}" })
-        .end((err, res) => {
-          res.should.have.status(200);
+      it("Token using hello", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("authorization", authorization)
+          .set("content-type", "application/json")
+          .send({ query: "{hello}" })
+          .end((err, res) => {
+            res.should.have.status(200);
 
-          done();
-        });
-    });
+            done();
+          });
+      });
+    })
+
 
     // login driver
-    it("Driver Fetch Auth Code", done => {
-      chai
-        .request(app)
-        .get("/auth/login")
-        .set("content-type", "application/json")
-        .send({
-          "user": "0711111111",
-        })
-        .end((err, res) => {
-          res.should.have.status(200);
+    describe("Driver", function () {
+      it("Fetch Auth Code", done => {
+        chai
+          .request(app)
+          .get("/auth/login")
+          .set("content-type", "application/json")
+          .send({
+            "user": "0711111111",
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
 
-          done();
-        });
-    });
-    // confirm code
-    it("Driver Confirm Auth Code", done => {
-      chai
-        .request(app)
-        .get("/auth/verify/sms")
-        .set("content-type", "application/json")
-        .send({
-          "user": "0711111111",
-          "password": "0000"
-        })
-        .end((err, res) => {
-          res.should.have.status(200);
+            done();
+          });
+      });
+      // confirm code
+      it("Confirm Auth Code", done => {
+        chai
+          .request(app)
+          .get("/auth/verify/sms")
+          .set("content-type", "application/json")
+          .send({
+            "user": "0711111111",
+            "password": "0000"
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
 
-          sharedInfo.auth = res.body
-          authorization = sharedInfo.auth.token
+            sharedInfo.auth = res.body
+            authorization = sharedInfo.auth.token
 
-          done();
-        });
-    });
+            done();
+          });
+      });
 
-    it("Test driver token using hello", done => {
-      chai
-        .request(app)
-        .post("/graph")
-        .set("authorization", authorization)
-        .set("content-type", "application/json")
-        .send({ query: "{hello}" })
-        .end((err, res) => {
-          res.should.have.status(200);
+      it("Test using hello", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("authorization", authorization)
+          .set("content-type", "application/json")
+          .send({ query: "{hello}" })
+          .end((err, res) => {
+            res.should.have.status(200);
 
-          done();
-        });
-    });
+            done();
+          });
+      });
+    })
+
+    describe("Admin", function () {
+      it("Fetch Auth Code", done => {
+        chai
+          .request(app)
+          .get("/auth/super")
+          .set("content-type", "application/json")
+          .send({
+            "user": "sAdmin",
+            "password": "12345",
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+
+            sharedInfo.auth = res.body
+            authorization = sharedInfo.auth.token
+
+            done();
+          });
+      });
+      // confirm code
+      it("Test using hello", done => {
+        chai
+          .request(app)
+          .post("/graph")
+          .set("authorization", authorization)
+          .set("content-type", "application/json")
+          .send({ query: "{hello}" })
+          .end((err, res) => {
+            res.should.have.status(200);
+
+            done();
+          });
+      });
+    })
   })
 
   describe("Graph", function () {
