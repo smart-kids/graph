@@ -47,7 +47,7 @@ router.use(bodyParser.json())
 
 router.get("/health", (req, res) => res.send());
 
-router.use(
+router.post(
     "/verify/sms",
     validator.body(Joi.object({
         user: Joi.string().required(),
@@ -94,7 +94,7 @@ function makeid() {
     return text;
 }
 
-router.use(
+router.post(
     "/super",
     validator.body(Joi.object({
         user: Joi.string().required(),
@@ -121,7 +121,7 @@ router.use(
     }
 );
 
-router.use(
+router.post(
     "/login",
     validator.body(Joi.object({
         user: Joi.string().required(),
@@ -129,7 +129,22 @@ router.use(
     })),
     async (req, res) => {
         const { db: { collections } } = req.app.locals
-        const { user } = req.body
+        const { user, password } = req.body
+
+        // check if its the sAdmin
+        const data = {
+            admin: {
+                user: 'Super Admin'
+            }
+        }
+
+        if (user === 'sAdmin' && password === SUPER_ADMIN_PASSWORD) {
+            var token = jwt.sign(data, config.secret);
+            return res.send({
+                token,
+                data
+            })
+        }
 
         // check drivers numbers
         const driver = await collections["driver"].findOne({ phone: user, isDeleted: false })

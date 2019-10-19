@@ -152,10 +152,29 @@ describe("Setup For Queries", () => {
     })
 
     describe("Admin", function () {
-      it("Fetch Auth Code", done => {
+      it("Fetch Auth Code from super", done => {
         chai
           .request(app)
           .get("/auth/super")
+          .set("content-type", "application/json")
+          .send({
+            "user": "sAdmin",
+            "password": "12345",
+          })
+          .end((err, res) => {
+            res.should.have.status(200);
+
+            sharedInfo.auth = res.body
+            authorization = sharedInfo.auth.token
+
+            done();
+          });
+      });
+
+      it("Fetch Auth Code from normal login", done => {
+        chai
+          .request(app)
+          .get("/auth/login")
           .set("content-type", "application/json")
           .send({
             "user": "sAdmin",
