@@ -160,7 +160,7 @@ router.post(
             if (password) {
                 console.log((admin && admin.password || parent && parent.password || driver && driver.password), password)
                 try {
-                    if (await argon2.verify((admin && admin.password || parent && parent.password || driver && driver.password), password)) {
+                    if (await argon2.verify((admin && admin.password || parent && parent.password || driver && driver.password) || 'test', password)) {
                         // password match
                         var token = jwt.sign(data, config.secret);
                         return res.send({
