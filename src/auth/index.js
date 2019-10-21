@@ -17,7 +17,7 @@ const config = {
     secret: "privateKEY"
 }
 
-const { NODE_ENV, SUPER_ADMIN_PASSWORD } = process.env;
+const { NODE_ENV = 'development', SUPER_ADMIN_PASSWORD = '00000' } = process.env;
 
 let checkToken = (req, res, next) => {
     let token = req.headers['x-access-token'] || req.headers['authorization']; // Express headers are auto converted to lowercase

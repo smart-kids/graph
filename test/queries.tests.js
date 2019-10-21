@@ -53,7 +53,7 @@ describe("Setup For Queries", () => {
       it("Fetch Auth Code", done => {
         chai
           .request(app)
-          .get("/auth/login")
+          .post("/auth/login")
           .set("content-type", "application/json")
           .send({
             "user": "0733333333",
@@ -68,7 +68,7 @@ describe("Setup For Queries", () => {
       it("Confirm Auth Code", done => {
         chai
           .request(app)
-          .get("/auth/verify/sms")
+          .post("/auth/verify/sms")
           .set("content-type", "application/json")
           .send({
             "user": "0733333333",
@@ -105,7 +105,7 @@ describe("Setup For Queries", () => {
       it("Fetch Auth Code", done => {
         chai
           .request(app)
-          .get("/auth/login")
+          .post("/auth/login")
           .set("content-type", "application/json")
           .send({
             "user": "0711111111",
@@ -120,7 +120,7 @@ describe("Setup For Queries", () => {
       it("Confirm Auth Code", done => {
         chai
           .request(app)
-          .get("/auth/verify/sms")
+          .post("/auth/verify/sms")
           .set("content-type", "application/json")
           .send({
             "user": "0711111111",
@@ -155,7 +155,7 @@ describe("Setup For Queries", () => {
       it("Fetch Auth Code from super", done => {
         chai
           .request(app)
-          .get("/auth/super")
+          .post("/auth/super")
           .set("content-type", "application/json")
           .send({
             "user": "sAdmin",
@@ -174,7 +174,7 @@ describe("Setup For Queries", () => {
       it("Fetch Auth Code from normal login", done => {
         chai
           .request(app)
-          .get("/auth/login")
+          .post("/auth/login")
           .set("content-type", "application/json")
           .send({
             "user": "sAdmin",

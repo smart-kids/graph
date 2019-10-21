@@ -19,9 +19,9 @@ rimraf(".tmp/localDiskDb/*", () => {
 
 describe("Setup", () => {
   before(function (done) {
-    this.timeout(2000); // wait for db connections etc.
+    this.timeout(4000); // wait for db connections etc.
 
-    setTimeout(done, 2000);
+    setTimeout(done, 4000);
   });
 
   describe("OPS", function () {
@@ -51,7 +51,7 @@ describe("Super Auth", () => {
     it("super admin should return token based on env var", done => {
       chai
         .request(app)
-        .get("/auth/super")
+        .post("/auth/super")
         .set("content-type", "application/json")
         .send({
           "user": "sAdmin",
