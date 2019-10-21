@@ -177,7 +177,7 @@ router.post(
                 const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
                 // send sms to phone
                 if (!['development', "test"].includes(NODE_ENV))
-                    sms({ data: { password, phone: (driver.phone || parent.phone) } })
+                    sms({ data: { password, phone: (driver.phone || parent.phone) } }, console.log)
 
                 await collections["otp"].create({
                     id: new ObjectId().toHexString(),
