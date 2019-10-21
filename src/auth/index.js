@@ -158,6 +158,7 @@ router.post(
 
         const returnAuth = async () => {
             if (password) {
+                console.log((admin && admin.password || parent && parent.password || driver && driver.password), password)
                 try {
                     if (await argon2.verify((admin && admin.password || parent && parent.password || driver && driver.password), password)) {
                         // password match
