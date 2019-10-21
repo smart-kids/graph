@@ -130,6 +130,8 @@ router.post(
         const { db: { collections } } = req.app.locals
         const { user, password } = req.body
 
+        let userType;
+
         // check if its the sAdmin
         const data = {
             admin: {
@@ -201,6 +203,7 @@ router.post(
                 await collections["otp"].create({
                     id: new ObjectId().toHexString(),
                     userId: user,
+                    userType,
                     user: JSON.stringify(driver || parent || admin),
                     password
                 })
@@ -213,14 +216,17 @@ router.post(
         }
 
         if (driver) {
+            userType = 'driver'
             return returnAuth(driver)
         }
 
         if (parent) {
+            userType = 'parent'
             return returnAuth(parent)
         }
 
         if (admin) {
+            userType = 'admin'
             return returnAuth(admin)
         }
 
