@@ -157,8 +157,8 @@ router.post(
         const admin = await collections["admin"].findOne({ username: user, isDeleted: false })
 
         const returnAuth = async () => {
-            if (password) {
-                console.log((admin && admin.password || parent && parent.password || driver && driver.password), password)
+            if (password && admin && admin.password || parent && parent.password || driver && driver.password) {
+                // console.log((admin && admin.password || parent && parent.password || driver && driver.password), password)
                 try {
                     if (await argon2.verify((admin && admin.password || parent && parent.password || driver && driver.password) || 'test', password)) {
                         // password match
