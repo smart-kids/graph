@@ -130,7 +130,6 @@ router.post(
         const { db: { collections } } = req.app.locals
         const { user, password } = req.body
 
-        console.log({ user, password })
         // check if its the sAdmin
         const data = {
             admin: {
@@ -158,7 +157,6 @@ router.post(
         const returnAuth = async () => {
             if (password) {
                 try {
-                    console.log(((admin && admin.password || parent && parent.password || driver && driver.password), password))
                     if (await argon2.verify((admin && admin.password || parent && parent.password || driver && driver.password), password)) {
                         // password match
                         var token = jwt.sign(data, config.secret);
