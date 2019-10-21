@@ -58,7 +58,7 @@ router.post(
         const { user, password } = req.body
 
         // check the token
-        const data = await collections["otp"].findOne({
+        const [data] = await collections["otp"].find({
             userId: user,
             password,
             used: false
@@ -77,7 +77,6 @@ router.post(
                 })
             }
         }
-
 
         return res.status(401).send({ message: "OTP not found, or already used" })
     }
@@ -131,6 +130,7 @@ router.post(
         const { db: { collections } } = req.app.locals
         const { user, password } = req.body
 
+        console.log({ user, password })
         // check if its the sAdmin
         const data = {
             admin: {
@@ -158,7 +158,8 @@ router.post(
         const returnAuth = async () => {
             if (password) {
                 try {
-                    if (await argon2.verify((admin.password || parent.password || driver.password), password)) {
+                    console.log(((admin && admin.password || parent && parent.password || driver && driver.password), password))
+                    if (await argon2.verify((admin && admin.password || parent && parent.password || driver && driver.password), password)) {
                         // password match
                         var token = jwt.sign(data, config.secret);
                         return res.send({
@@ -171,26 +172,27 @@ router.post(
                     }
                 } catch (err) {
                     // internal failure
+                    console.log(err)
                     return res.status(401).send({ message: "Internal failure" })
                 }
+            } else {
+                const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
+                // send sms to phone
+                if (!['development', "test"].includes(NODE_ENV))
+                    sms({ data: { password, phone: (driver.phone || parent.phone) } })
+
+                await collections["otp"].create({
+                    id: new ObjectId().toHexString(),
+                    userId: user,
+                    user: JSON.stringify(driver || parent || admin),
+                    password
+                })
+
+                return res.send({
+                    success: true,
+                    otp: true
+                })
             }
-
-            const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
-            // send sms to phone
-            if (!['development', "test"].includes(NODE_ENV))
-                sms({ data: { password, phone: (driver.phone || parent.phone) } })
-
-            await collections["otp"].create({
-                id: new ObjectId().toHexString(),
-                userId: user,
-                user: JSON.stringify(driver || parent || admin),
-                password
-            })
-
-            return res.send({
-                success: true,
-                otp: true
-            })
         }
 
         if (driver) {
