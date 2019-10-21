@@ -165,6 +165,25 @@ router.post(
                             data
                         })
                     } else {
+                        const [data] = await collections["otp"].find({
+                            userId: user,
+                            password,
+                            used: false
+                        })
+
+                        if (data) {
+                            data.user = JSON.parse(data.user)
+                            data.password = undefined
+                            data.used = undefined
+
+                            if (data) {
+                                var token = jwt.sign(data, config.secret);
+                                return res.send({
+                                    token,
+                                    data
+                                })
+                            }
+                        }
                         // password did not match
                         return res.status(401).send({ message: "Passwords did not match" })
                     }
