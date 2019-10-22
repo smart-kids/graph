@@ -132,18 +132,15 @@ router.post(
 
         let userType;
 
-        // check if its the sAdmin
-        const data = {
-            admin: {
-                user: 'Super Admin'
-            }
-        }
-
         if (user === 'sAdmin' && password === SUPER_ADMIN_PASSWORD) {
             var token = jwt.sign(data, config.secret);
             return res.send({
                 token,
-                data
+                data: {
+                    admin: {
+                        user: 'Super Admin'
+                    }
+                }
             })
         }
 
@@ -170,7 +167,7 @@ router.post(
                         var token = jwt.sign(data, config.secret);
                         return res.send({
                             token,
-                            data
+                            data: driver || parent || admin
                         })
                     } else {
                         const [data] = await collections["otp"].find({
