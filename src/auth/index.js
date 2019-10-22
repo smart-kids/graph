@@ -133,14 +133,15 @@ router.post(
         let userType;
 
         if (user === 'sAdmin' && password === SUPER_ADMIN_PASSWORD) {
+            const data = {
+                admin: {
+                    user: 'Super Admin'
+                }
+            }
             var token = jwt.sign(data, config.secret);
             return res.send({
                 token,
-                data: {
-                    admin: {
-                        user: 'Super Admin'
-                    }
-                }
+                data
             })
         }
 
@@ -164,7 +165,7 @@ router.post(
                 try {
                     if (await argon2.verify((admin && admin.password || parent && parent.password || driver && driver.password) || 'test', password)) {
                         // password match
-                        var token = jwt.sign(data, config.secret);
+                        var token = jwt.sign(driver || parent || admin, config.secret);
                         return res.send({
                             token,
                             data: driver || parent || admin
