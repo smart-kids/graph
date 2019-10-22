@@ -18,7 +18,12 @@ const listDeleted = async (root, args, { db: { collections } }) => {
   return entries;
 };
 
-const single = async (root, args, { db: { collections }, auth }) => auth.user
+const single = async (root, args, { db: { collections }, auth }) => {
+  if (auth.userType == 'parent')
+    return auth.user
+
+  return null;
+}
 
 const nested = {
   parent: {
