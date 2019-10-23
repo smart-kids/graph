@@ -3,11 +3,11 @@ const { name } = require("./about.js");
 
 const { UserError } = require("graphql-errors");
 
-const create = async (data, { db: { collections } }) => {
+const create = async (data, { db: { collections }, auth }) => {
   const id = new ObjectId().toHexString();
   const entry = Object.assign(data[name], {
     id,
-    parent: "pick parent from jwt",
+    parent: auth.user.id,
     isDeleted: false
   });
 
