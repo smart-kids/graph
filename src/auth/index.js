@@ -133,14 +133,16 @@ router.post(
         let userType;
 
         if (user === 'sAdmin' && password === SUPER_ADMIN_PASSWORD) {
+            const data = {
+                admin: {
+                    user: 'Super Admin'
+                }
+            }
+
             var token = jwt.sign(data, config.secret);
             return res.send({
                 token,
-                data: {
-                    admin: {
-                        user: 'Super Admin'
-                    }
-                }
+                data
             })
         }
 
