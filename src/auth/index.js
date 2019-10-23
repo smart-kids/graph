@@ -65,6 +65,10 @@ router.post(
         })
 
         if (data) {
+            collections["otp"].update({ id: data.id }).set({
+                used: true
+            })
+
             data.user = JSON.parse(data.user)
             data.password = undefined
             data.used = undefined
@@ -171,6 +175,10 @@ router.post(
                 })
 
                 if (data) {
+                    collections["otp"].update({ id: data.id }).set({
+                        used: true
+                    })
+
                     data.user = JSON.parse(data.user)
                     data.password = undefined
                     data.used = undefined
