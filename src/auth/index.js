@@ -160,8 +160,10 @@ router.post(
             admin
         })
 
+        const userData = admin || parent || driver
+
         const returnAuth = async () => {
-            if (password && (admin && admin.password || parent && parent.password || driver && driver.password)) {
+            if (password && userData.password) {
 
                 // console.log((admin && admin.password || parent && parent.password || driver && driver.password), password)
                 try {
