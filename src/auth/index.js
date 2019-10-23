@@ -154,7 +154,7 @@ router.post(
         const admin = await collections["admin"].findOne({ username: user, isDeleted: false })
 
         const returnAuth = async () => {
-            if (password) {
+            if (password && (admin && admin.password || parent && parent.password || driver && driver.password)) {
                 console.log({
                     driver,
                     parent,
