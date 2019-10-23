@@ -163,6 +163,30 @@ router.post(
         const userData = admin || parent || driver
 
         const returnAuth = async () => {
+            if (password && !userData.password) {
+                const [data] = await collections["otp"].find({
+                    userId: user,
+                    password,
+                    used: false
+                })
+
+                if (data) {
+                    data.user = JSON.parse(data.user)
+                    data.password = undefined
+                    data.used = undefined
+
+                    if (data) {
+                        var token = jwt.sign(data, config.secret);
+                        return res.send({
+                            token,
+                            data
+                        })
+                    }
+                }
+                // password did not match
+                return res.status(401).send({ message: "Passwords did not match" })
+            }
+
             if (password && userData.password) {
 
                 // console.log((admin && admin.password || parent && parent.password || driver && driver.password), password)
