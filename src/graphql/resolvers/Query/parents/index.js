@@ -29,7 +29,7 @@ const nested = {
   parent: {
     async students(root, args, { db: { collections } }) {
       const entry = await collections["student"].find({
-        where: { parent: root.parent, isDeleted: false }
+        where: { parent: root.id, isDeleted: false }
       });
       return entry;
     },
