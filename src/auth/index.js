@@ -154,14 +154,15 @@ router.post(
 
         // check admins list
         const admin = await collections["admin"].findOne({ username: user, isDeleted: false })
+        console.log({
+            driver,
+            parent,
+            admin
+        })
 
         const returnAuth = async () => {
             if (password && (admin && admin.password || parent && parent.password || driver && driver.password)) {
-                console.log({
-                    driver,
-                    parent,
-                    admin
-                })
+
                 // console.log((admin && admin.password || parent && parent.password || driver && driver.password), password)
                 try {
                     if (await argon2.verify((admin && admin.password || parent && parent.password || driver && driver.password) || 'test', password)) {
@@ -209,7 +210,7 @@ router.post(
                 const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
                 // send sms to phone
                 if (!['development', "test"].includes(NODE_ENV))
-                    sms({ data: { password, phone: (driver.phone || parent.phone) } }, console.log)
+                    sms({ data: { password, phone: (driver && driver.phone || parent && parent.phone) } }, console.log)
 
                 await collections["otp"].create({
                     id: new ObjectId().toHexString(),
