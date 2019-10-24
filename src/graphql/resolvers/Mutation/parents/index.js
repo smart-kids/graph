@@ -7,7 +7,7 @@ const { UserError } = require("graphql-errors");
 const create = async (data, { db: { collections } }) => {
   const id = new ObjectId().toHexString();
 
-  const password = await argon2.hash(data[name].password);
+  const password = await argon2.hash(data[name].password || '');
   const entry = Object.assign(data[name], { id, password, isDeleted: false });
 
   try {
