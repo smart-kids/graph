@@ -12,12 +12,11 @@ const create = async (data, { db: { collections }, auth }) => {
     where: { id: data[name].schedule, isDeleted: false }
   });
 
-  const bus = await collections["bus"].findOne({
-    where: { id: schedule.bus, isDeleted: false }
-  });
+  if (schedule)
+    entry.bus = schedule.bus;
 
-  entry.bus = schedule.bus;
-  entry.driver = auth.user.id;
+  if (auth.user)
+    entry.driver = auth.user.id;
 
   try {
     await collections[name].create(entry);

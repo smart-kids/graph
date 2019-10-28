@@ -60,7 +60,6 @@ const nested = {
       const entry = await collections["schedule"].find({
         where: { route: root.id, isDeleted: false }
       });
-      console.log(entry)
       return entry;
     }
   }
