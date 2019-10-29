@@ -11,8 +11,8 @@ export default Waterline.Collection.extend({
     names: { type: "string", required: true },
     route: { type: "string", required: true },
     gender: { type: "string", required: true },
-    parent: { type: "string", required: true },
-    parent2: { type: "string", required: true },
+    parent: { type: "string", required: false },
+    parent2: { type: "string", required: false },
     registration: { type: "string", required: true },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
