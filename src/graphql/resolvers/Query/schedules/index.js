@@ -48,6 +48,12 @@ const nested = {
       });
       return entry;
     },
+    async driver(root, args, { db: { collections } }) {
+      const entry = await collections["driver"].findOne({
+        where: { id: root.driver, isDeleted: false }
+      });
+      return entry;
+    },
     async days(root, args, { db: { collections } }) {
       if (root.days)
         return root.days.split(",");

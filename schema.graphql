@@ -373,7 +373,7 @@ type routeMutations {
 # schedule things
 enum day {
   MONDAY
-  TEUSDAY
+  TUESDAY
   WEDNESDAY
   THURSDAY
   FRIDAY
@@ -390,6 +390,7 @@ type schedule {
   route: route
   bus: bus
   trips:[trip]
+  driver: driver
 }
 
 input Ischedule {
@@ -399,6 +400,7 @@ input Ischedule {
   route: String
   days: String
   bus: String
+  driver: String
 }
 
 input Uschedule {
@@ -409,6 +411,7 @@ input Uschedule {
   days: String
   route: String
   bus: String
+  driver: String
 }
 
 type scheduleMutations {
