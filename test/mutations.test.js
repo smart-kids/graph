@@ -734,6 +734,7 @@ describe("Parent", () => {
         variables: {
           Iparent: {
             name: "parent1",
+            national_id:"35718850",
             phone: "0722222222",
             password: "rY8x5uW",
             email: "parent1@gmail.com",
@@ -771,6 +772,7 @@ describe("Parent", () => {
         variables: {
           Iparent: {
             name: "parent2",
+            national_id:"35718851",
             phone: "0733333333",
             password: "rY8x5uW",
             email: "parent2@gmail.com",
@@ -809,6 +811,7 @@ describe("Parent", () => {
           parent: {
             id: sharedInfo.parentId,
             phone: "0722222223",
+            national_id:"35718857",
             email: "parent1@gmail.com",
             gender: "MALE"
           }

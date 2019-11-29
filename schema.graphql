@@ -424,6 +424,7 @@ type scheduleMutations {
 # parent things
 type parent {
   id: String
+  national_id: String
   name: String
   phone: String
   email: String
@@ -434,6 +435,7 @@ type parent {
 
 input Iparent {
   name: String
+  national_id: String
   phone: String
   email: String
   password: String
@@ -442,6 +444,7 @@ input Iparent {
 
 input Uparent {
   id: String!
+  national_id: String
   name: String
   phone: String
   password: String
