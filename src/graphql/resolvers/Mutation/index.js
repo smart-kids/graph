@@ -9,6 +9,7 @@ import events from "./event";
 import trips from "./trip";
 import complaints from "./complaints"
 import locReports from "./location-reports"
+import classes from "./classes"
 
 export default {
   admins,
@@ -22,6 +23,7 @@ export default {
   trips,
   complaints,
   locReports,
+  classes,
   hello() {
     return "hello mutation";
   }

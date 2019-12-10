@@ -14,6 +14,7 @@ export default Waterline.Collection.extend({
     parent: { type: "string", required: false },
     parent2: { type: "string", required: false },
     registration: { type: "string", required: true },
+    class: { type: "string", required: true },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });

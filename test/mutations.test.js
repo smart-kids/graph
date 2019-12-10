@@ -242,6 +242,160 @@ describe("Admins", () => {
   });
 });
 
+describe("Classes", () => {
+  it("Can create a class", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($class: IClass!) {
+            classes {
+              create(class: $class) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          class: {
+            name: "Class Name"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.classes.create.id).to.be.a.string;
+
+        sharedInfo.class = res.body.data.classes.create.id;
+        done();
+      });
+  });
+
+  it("Can update a class", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($class: UClass!) {
+            classes {
+              update(class: $class) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          class: {
+            id: sharedInfo.class,
+            name: "New Class"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.classes.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke a class", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($class: UClass!) {
+            classes {
+              archive(class: $class) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          class: {
+            id: sharedInfo.class
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.classes.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore a class", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($class: UClass!) {
+            classes {
+              restore(class: $class) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          class: {
+            id: sharedInfo.class
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.locReports.restore.id).to.be.string;
+        done();
+      });
+  });
+
+  it("Can fetch restored class", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        {
+          classes{
+            id
+          }
+        }        
+        `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.locReports[0].id).to.be.a.string;
+
+        done();
+      });
+  });
+});
+
 describe("Routes", () => {
   it("Can create an route", done => {
     chai
@@ -938,7 +1092,8 @@ describe("Students", () => {
             gender: "FEMALE",
             registration: "1234",
             parent: sharedInfo.parentId,
-            parent2: sharedInfo.parent2Id
+            parent2: sharedInfo.parent2Id,
+            class: sharedInfo.class
           }
         }
       })

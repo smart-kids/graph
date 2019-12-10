@@ -33,6 +33,9 @@ type Query {
 
   locReports: [locReport]
   locReport: locReport
+
+  classes: [class]
+  class: class
 }
 
 type Mutation {
@@ -49,6 +52,7 @@ type Mutation {
   events: eventMutations
   complaints: complaintMutations
   locReports: locReportMutations
+  classes: classMutations
 }
 
 # admin things
@@ -311,6 +315,7 @@ type student {
   registration: String
   parent: parent
   parent2: parent,
+  class: class,
   events:[event]
 }
 
@@ -321,6 +326,7 @@ input Istudent {
   registration: String
   parent: String
   parent2: String
+  class: String
 }
 
 input Ustudent {
@@ -331,6 +337,7 @@ input Ustudent {
   gender: gender
   parent: String
   parent2: String
+  class: String
 }
 
 type studentMutations {
@@ -368,6 +375,28 @@ type routeMutations {
   update(route: Uroute!): route
   archive(route: Uroute!): route
   restore(route: Uroute!): route
+}
+
+# class things
+type class {
+  id: String
+  name: String
+}
+
+input IClass {
+  name: String
+}
+
+input UClass {
+  id: String!
+  name: String
+}
+
+type classMutations {
+  create(class: IClass!): class
+  update(class: UClass!): class
+  archive(class: UClass!): class
+  restore(class: UClass!): class
 }
 
 # schedule things

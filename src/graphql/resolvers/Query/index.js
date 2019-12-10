@@ -30,6 +30,11 @@ import {
   nested as NlocReport
 } from "./location-reports";
 
+import {
+  list as classes,
+  single as classSingle
+} from "./classes"
+
 const nested = {};
 
 Object.assign(
@@ -78,6 +83,9 @@ const Query = {
 
   events,
   event,
+
+  classes,
+  class: classSingle,
 
   hello: () => "hey"
 };
