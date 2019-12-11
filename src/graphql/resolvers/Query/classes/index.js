@@ -41,4 +41,4 @@ const nested = {
   }
 }
 
-export { list, single, listDeleted };
+export { list, single, listDeleted, nested };

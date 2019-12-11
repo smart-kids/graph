@@ -32,7 +32,8 @@ import {
 
 import {
   list as classes,
-  single as classSingle
+  single as classSingle,
+  nested as Nclass
 } from "./classes"
 
 const nested = {};
@@ -47,7 +48,8 @@ Object.assign(
   Ntrip,
   Ncomplaint,
   NlocReport,
-  Nevent
+  Nevent,
+  Nclass
 );
 
 const Query = {
