@@ -380,7 +380,8 @@ type routeMutations {
 # class things
 type class {
   id: String
-  name: String
+  name: String,
+  students: [student]
 }
 
 input IClass {
