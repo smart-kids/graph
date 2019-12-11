@@ -36,6 +36,11 @@ import {
   nested as Nclass
 } from "./classes"
 
+import {
+  list as schools,
+  single as school
+} from "./school"
+
 const nested = {};
 
 Object.assign(
@@ -88,6 +93,9 @@ const Query = {
 
   classes,
   class: classSingle,
+
+  schools,
+  school,
 
   hello: () => "hey"
 };

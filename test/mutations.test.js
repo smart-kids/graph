@@ -242,6 +242,160 @@ describe("Admins", () => {
   });
 });
 
+describe("Schools", () => {
+  it("Can create a school", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($school: ISchool!) {
+            schools {
+              create(school: $school) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          school: {
+            name: "School Name"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.schools.create.id).to.be.a.string;
+
+        sharedInfo.school = res.body.data.schools.create.id;
+        done();
+      });
+  });
+
+  it("Can update a school", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($school: USchool!) {
+            schools {
+              update(school: $school) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          school: {
+            id: sharedInfo.school,
+            name: "New School"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.schools.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke a school", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($school: USchool!) {
+            schools {
+              archive(school: $school) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          school: {
+            id: sharedInfo.school
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.schools.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore a school", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($school: USchool!) {
+            schools {
+              restore(school: $school) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          school: {
+            id: sharedInfo.school
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.locReports.restore.id).to.be.string;
+        done();
+      });
+  });
+
+  it("Can fetch restored school", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        {
+          schools{
+            id
+          }
+        }        
+        `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.locReports[0].id).to.be.a.string;
+
+        done();
+      });
+  });
+});
+
 describe("Classes", () => {
   it("Can create a class", done => {
     chai

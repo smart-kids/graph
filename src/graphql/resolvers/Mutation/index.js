@@ -10,6 +10,7 @@ import trips from "./trip";
 import complaints from "./complaints"
 import locReports from "./location-reports"
 import classes from "./classes"
+import schools from "./school"
 
 export default {
   admins,
@@ -24,6 +25,7 @@ export default {
   complaints,
   locReports,
   classes,
+  schools,
   hello() {
     return "hello mutation";
   }

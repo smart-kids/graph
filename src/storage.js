@@ -15,6 +15,7 @@ import trip from "./graphql/resolvers/Mutation/trip/model";
 import complaint from "./graphql/resolvers/Mutation/complaints/model"
 import locReport from "./graphql/resolvers/Mutation/location-reports/model"
 import classModel from "./graphql/resolvers/Mutation/classes/model"
+import school from "./graphql/resolvers/Mutation/school/model"
 import OTP from "./graphql/resolvers/Mutation/OTP/model"
 
 const { NODE_ENV, DB_URL = 'db url here' } = process.env;
@@ -33,6 +34,7 @@ waterline.registerModel(trip);
 waterline.registerModel(complaint);
 waterline.registerModel(locReport)
 waterline.registerModel(classModel)
+waterline.registerModel(school)
 waterline.registerModel(OTP)
 
 var config = {
