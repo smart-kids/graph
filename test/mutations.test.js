@@ -728,6 +728,11 @@ describe("Drivers", () => {
             username: "driver1",
             email: "driver@gmail.com",
             phone: "0711111111",
+            photo: "03/03/2022",
+            license_expiry: "35718850",
+            licence_number: "IcanDrive099",
+            experience: "4",
+            home: "Juja, Kiambu, Kenya",
             password: "4289Vtg"
           }
         }
