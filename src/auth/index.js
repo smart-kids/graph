@@ -199,13 +199,14 @@ router.post(
 
                 // console.log((admin && admin.password || parent && parent.password || driver && driver.password), password)
                 try {
-                    if (await argon2.verify((admin && admin.password || parent && parent.password || driver && driver.password) || 'test', password)) {
+                    if (await argon2.verify(userData.password || 'test', password)) {
                         // password match
-                        let data = Object.assign({}, {
-                            user: driver || parent || admin,
+                        let data = {
+                            user: userData,
                             userType,
                             userId: user
-                        })
+                        }
+                        
                         var token = jwt.sign(data, config.secret);
 
                         return res.send({
