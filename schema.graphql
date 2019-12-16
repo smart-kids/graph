@@ -422,16 +422,25 @@ type classMutations {
 # school things
 type school {
   id: String
-  name: String,
+  name: String
+  phone: String
+  email: String
+  address: String
 }
 
 input ISchool {
   name: String
+  phone: String
+  email: String
+  address: String
 }
 
 input USchool {
   id: String!
   name: String
+  phone: String
+  email: String
+  address: String
 }
 
 type schoolMutations {

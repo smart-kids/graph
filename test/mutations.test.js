@@ -261,7 +261,10 @@ describe("Schools", () => {
         `,
         variables: {
           school: {
-            name: "School Name"
+            name: "School Name",
+            phone: "0711111111",
+            email: "mail@domain.com",
+            address: "PO Box 1234-00000 Someplace somewhere",
           }
         }
       })
