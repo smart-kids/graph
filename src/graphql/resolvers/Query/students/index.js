@@ -57,7 +57,7 @@ const nested = {
       const entry = await collections["class"].find({
         where: { id: root.class, isDeleted: false }
       });
-      return entry;
+      return entry[0];
     }
   }
 }
