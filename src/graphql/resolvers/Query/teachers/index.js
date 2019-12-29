@@ -18,36 +18,25 @@ const listDeleted = async (root, args, { db: { collections } }) => {
   return entries;
 };
 
-const single = async (root, args, { db: { collections } }) => {
+const single = async (root, args, { db: { collections }, auth }) => {
   const { id } = args[name];
 
   const entry = await collections[name].findOne({
     where: { id, isDeleted: false }
   });
   return entry;
-};
+}
 
 const nested = {
-  class:{
-    students: async (root, args, { db: { collections }}) => {
-      const entries = await collections["student"].find({ 
-        where: { 
-          class : root.id, isDeleted: false 
-        }
-      })
-
-      return entries
+  teacher: {
+    async classes(root, args, { db: { collections } }) {
+      const entry = await collections["class"].find({
+        where: { teacher: root.id, isDeleted: false }
+      });
+      return entry;
     },
-    teacher: async (root, args, { db: { collections }}) => {
-      const entry = await collections["student"].findOne({ 
-        where: { 
-          id : root.teacher, isDeleted: false 
-        }
-      })
-
-      return entry
-    }
   }
 }
+
 
 export { list, single, listDeleted, nested };

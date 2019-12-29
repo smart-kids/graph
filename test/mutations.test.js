@@ -382,7 +382,7 @@ describe("Schools", () => {
       .send({
         query: `
         {
-          schools{
+          school{
             id
           }
         }        
@@ -393,6 +393,167 @@ describe("Schools", () => {
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
         // expect(res.body.data.locReports[0].id).to.be.a.string;
+
+        done();
+      });
+  });
+});
+
+describe("Teacher", () => {
+  it("Can create an teacher", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iteacher: Iteacher!) {
+            teachers {
+              create(teacher: $Iteacher) {
+                id
+              }
+            }
+          }
+        `,
+        variables: {
+          Iteacher: {
+            name: "teacher1",
+            national_id:"35718850",
+            phone: "0722222222",
+            email: "teacher1@gmail.com",
+            gender: "MALE"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.teachers.create.id).to.be.a.string;
+
+        sharedInfo.teacherId = res.body.data.teachers.create.id;
+        done();
+      });
+  });
+
+  it("Can update an teacher", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        mutation ($teacher: Uteacher!) {
+          teachers {
+            update(teacher: $teacher) {
+              id
+            }
+          }
+        }
+      `,
+        variables: {
+          teacher: {
+            id: sharedInfo.teacherId,
+            phone: "0722222223",
+            national_id:"35718857",
+            email: "teacher1@gmail.com",
+            gender: "MALE"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.teachers.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an teacher", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iteacher: Uteacher!) {
+            teachers {
+              archive(teacher: $Iteacher) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Iteacher: {
+            id: sharedInfo.teacherId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.teachers.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an teacher", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iteacher: Uteacher!) {
+            teachers {
+              restore(teacher: $Iteacher) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Iteacher: {
+            id: sharedInfo.teacherId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.teachers.restore.id).to.be.string;
+        done();
+      });
+  });
+
+  it("Can fetch restored teacher", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        {
+          teachers{
+            id
+          }
+        }        
+        `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.teachers[0].id).to.be.a.string;
 
         done();
       });
@@ -418,7 +579,8 @@ describe("Classes", () => {
         `,
         variables: {
           class: {
-            name: "Class Name"
+            name: "Class Name",
+            teacher: sharedInfo.teacherId
           }
         }
       })

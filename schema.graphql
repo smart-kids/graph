@@ -37,7 +37,9 @@ type Query {
   classes: [class]
   class: class
 
-  schools: [school],
+  teachers: [teacher]
+  teacher: teacher
+
   school: school
 }
 
@@ -57,6 +59,7 @@ type Mutation {
   locReports: locReportMutations
   classes: classMutations
   schools: schoolMutations
+  teachers: teacherMutations
 }
 
 # admin things
@@ -400,16 +403,19 @@ type routeMutations {
 type class {
   id: String
   name: String,
+  teacher: teacher
   students: [student]
 }
 
 input IClass {
   name: String
+  teacher: String
 }
 
 input UClass {
   id: String!
   name: String
+  teacher: String
 }
 
 type classMutations {
@@ -537,4 +543,39 @@ type parentMutations {
   update(parent: Uparent!): parent
   archive(parent: Uparent!): parent
   restore(parent: Uparent!): parent
+}
+
+# teacher things
+type teacher {
+  id: String
+  national_id: String
+  name: String
+  phone: String
+  email: String
+  gender: gender
+  classes: [class]
+}
+
+input Iteacher {
+  name: String
+  national_id: String
+  phone: String
+  email: String
+  gender: gender
+}
+
+input Uteacher {
+  id: String!
+  national_id: String
+  name: String
+  phone: String
+  email: String
+  gender: gender
+}
+
+type teacherMutations {
+  create(teacher: Iteacher!): teacher
+  update(teacher: Uteacher!): teacher
+  archive(teacher: Uteacher!): teacher
+  restore(teacher: Uteacher!): teacher
 }

@@ -37,7 +37,12 @@ import {
 } from "./classes"
 
 import {
-  list as schools,
+  list as teachers,
+  single as teacher,
+  nested as Nteacher
+} from "./classes"
+
+import {
   single as school
 } from "./school"
 
@@ -54,7 +59,8 @@ Object.assign(
   Ncomplaint,
   NlocReport,
   Nevent,
-  Nclass
+  Nclass,
+  Nteacher
 );
 
 const Query = {
@@ -94,7 +100,9 @@ const Query = {
   classes,
   class: classSingle,
 
-  schools,
+  teachers,
+  teacher,
+
   school,
 
   hello: () => "hey"

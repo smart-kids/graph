@@ -11,6 +11,7 @@ import complaints from "./complaints"
 import locReports from "./location-reports"
 import classes from "./classes"
 import schools from "./school"
+import teachers from "./teachers"
 
 export default {
   admins,
@@ -26,6 +27,7 @@ export default {
   locReports,
   classes,
   schools,
+  teachers,
   hello() {
     return "hello mutation";
   }
