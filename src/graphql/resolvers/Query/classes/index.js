@@ -39,7 +39,7 @@ const nested = {
       return entries
     },
     teacher: async (root, args, { db: { collections }}) => {
-      const entry = await collections["student"].findOne({ 
+      const entry = await collections["teacher"].findOne({ 
         where: { 
           id : root.teacher, isDeleted: false 
         }
