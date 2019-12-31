@@ -382,6 +382,7 @@ type route {
 input Iroute {
   name: String
   description: String
+  students: [String]
   path: [Iloc]
 }
 
@@ -389,6 +390,7 @@ input Uroute {
   id: String!
   name: String
   description: String
+  students: [String]
   path: [Iloc]
 }
 

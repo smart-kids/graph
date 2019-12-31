@@ -6,9 +6,27 @@ const { UserError } = require("graphql-errors");
 const create = async (data, { db: { collections } }) => {
   const id = new ObjectId().toHexString();
   const entry = Object.assign(data[name], { id, isDeleted: false });
+  const { students } = data[name]
+  entry.students = undefined
 
   try {
     await collections[name].create(entry);
+
+    if(students){
+      students.foreach(async id => {
+        try{
+          const student = await collections["student"].findOne({
+            where: {
+              id, isDeleted: false
+            }
+          })
+        
+          await collections["student"].update({ id: student.id }).set({ route: entry.id })
+        } catch(e){
+          throw new UserError(e.details)
+        }
+      })
+    }
 
     return entry;
   } catch (err) {
