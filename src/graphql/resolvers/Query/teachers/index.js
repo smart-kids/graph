@@ -28,7 +28,7 @@ const single = async (root, args, { db: { collections }, auth }) => {
 }
 
 const nested = {
-  teacher: {
+  [name]: {
     async classes(root, args, { db: { collections } }) {
       const entry = await collections["class"].find({
         where: { teacher: root.id, isDeleted: false }

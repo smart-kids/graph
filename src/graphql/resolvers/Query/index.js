@@ -40,7 +40,7 @@ import {
   list as teachers,
   single as teacher,
   nested as Nteacher
-} from "./classes"
+} from "./teachers"
 
 import {
   single as school
