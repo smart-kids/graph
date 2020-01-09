@@ -245,7 +245,7 @@ router.post(
                 const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
                 // send sms to phone
                 if (!['development', "test"].includes(NODE_ENV))
-                    sms({ data: { password, phone: (driver && driver.phone || parent && parent.phone) } }, console.log)
+                    sms({ data: { message: `${password} is your SmartKids login code. Don't reply to this message with your code.`, phone: (driver && driver.phone || parent && parent.phone) } }, console.log)
 
                 await collections["otp"].create({
                     id: new ObjectId().toHexString(),

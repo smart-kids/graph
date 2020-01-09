@@ -12,6 +12,7 @@ import locReports from "./location-reports"
 import classes from "./classes"
 import schools from "./school"
 import teachers from "./teachers"
+import sms from "./sms"
 
 export default {
   admins,
@@ -28,6 +29,7 @@ export default {
   classes,
   schools,
   teachers,
+  sms,
   hello() {
     return "hello mutation";
   }

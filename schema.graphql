@@ -60,6 +60,7 @@ type Mutation {
   classes: classMutations
   schools: schoolMutations
   teachers: teacherMutations
+  sms: smsMutations
 }
 
 # admin things
@@ -580,4 +581,13 @@ type teacherMutations {
   update(teacher: Uteacher!): teacher
   archive(teacher: Uteacher!): teacher
   restore(teacher: Uteacher!): teacher
+}
+
+input Isms {
+  message: String!
+  parents: [String!]!
+}
+
+type smsMutations {
+  send(sms: Isms!): String
 }

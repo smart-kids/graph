@@ -5,13 +5,11 @@ const PNF = require('google-libphonenumber').PhoneNumberFormat;
 // Get an instance of `PhoneNumberUtil`.
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
 
-
-
-const func = ({ data: { phone, password } }, reply) => {
+const func = ({ data: { phone, message } }, reply) => {
     const number = phoneUtil.parseAndKeepRawInput(phone, 'KE');
     const coolNumber = phoneUtil.format(number, PNF.E164)
 
-    const Body = `${password} is your SmartKids login code. Don't reply to this message with your code.`
+    const Body = `${message}`
 
     const options = {
         method: 'POST',
@@ -45,5 +43,7 @@ const func = ({ data: { phone, password } }, reply) => {
 
 // console.log(makeid())
 // func({ data: { password: makeid(), phone: "+254711657108" } }, console.log)
+
+// sms({ data: { phone: "+254719420491", message:"Hello" }}, console.log)
 
 module.exports = func

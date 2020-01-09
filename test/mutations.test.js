@@ -1213,7 +1213,7 @@ describe("Parent", () => {
           Iparent: {
             name: "parent1",
             national_id:"35718850",
-            phone: "0722222222",
+            phone: "0719420491",
             password: "rY8x5uW",
             email: "parent1@gmail.com",
             gender: "MALE"
@@ -1251,7 +1251,7 @@ describe("Parent", () => {
           Iparent: {
             name: "parent2",
             national_id:"35718851",
-            phone: "0733333333",
+            phone: "0774751895",
             password: "rY8x5uW",
             email: "parent2@gmail.com",
             gender: "MALE"
@@ -1288,7 +1288,6 @@ describe("Parent", () => {
         variables: {
           parent: {
             id: sharedInfo.parentId,
-            phone: "0722222223",
             national_id:"35718857",
             email: "parent1@gmail.com",
             gender: "MALE"
@@ -2440,6 +2439,39 @@ describe("Location Reporting", () => {
           }
         }        
         `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.locReports[0].id).to.be.a.string;
+
+        done();
+      });
+  });
+});
+
+describe("SMS Communication", () => {
+  it("Can send sms", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        mutation($sms: Isms!){
+          sms{
+            send(sms: $sms)
+          }
+        }
+        `,
+        variables: {
+          sms: {
+            message: "Message",
+            parents:[sharedInfo.parentId, sharedInfo.parent2Id]
+          }
+        }
       })
       .end((err, res) => {
         res.should.have.status(200);

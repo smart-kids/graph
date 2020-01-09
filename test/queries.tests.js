@@ -56,7 +56,7 @@ describe("Setup For Queries", () => {
           .post("/auth/login")
           .set("content-type", "application/json")
           .send({
-            "user": "0733333333",
+            "user": "0719420491",
           })
           .end((err, res) => {
             res.should.have.status(200);
@@ -71,7 +71,7 @@ describe("Setup For Queries", () => {
           .post("/auth/verify/sms")
           .set("content-type", "application/json")
           .send({
-            "user": "0733333333",
+            "user": "0719420491",
             "password": "0000"
           })
           .end((err, res) => {
