@@ -160,15 +160,7 @@ router.post(
 
         // check admins list
         const admin = await collections["admin"].findOne({ username: user, isDeleted: false })
-        console.log({
-            driver,
-            parent,
-            admin
-        })
-
-        const userData = admin || parent || driver
-
-        const returnAuth = async () => {
+        const returnAuth = async (userData) => {
             if (password && !userData.password) {
                 const [data] = await collections["otp"].find({
                     userId: user,
