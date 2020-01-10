@@ -62,11 +62,33 @@ router.use(
         // check admins list
         const admin = await collections["admin"].findOne({ username: user, isDeleted: false })
 
-        if (!driver || !parent || !admin) {
+        if (!driver) {
             const data = {
-                admin,
-                parent,
                 driver
+            }
+
+            var token = jwt.sign(data, config.secret);
+            return res.send({
+                token,
+                data
+            })
+        }
+
+        if (!parent) {
+            const data = {
+                parent
+            }
+
+            var token = jwt.sign(data, config.secret);
+            return res.send({
+                token,
+                data
+            })
+        }
+
+        if (!admin) {
+            const data = {
+                admin
             }
 
             var token = jwt.sign(data, config.secret);
