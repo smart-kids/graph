@@ -134,6 +134,8 @@ router.post(
         const { db: { collections } } = req.app.locals
         const { user, password } = req.body
 
+        console.log("Attemting to authenticate", user)
+
         let userType;
 
         if (user === 'sAdmin' && password === SUPER_ADMIN_PASSWORD) {
@@ -206,7 +208,7 @@ router.post(
                             userType,
                             userId: user
                         }
-                        
+
                         var token = jwt.sign(data, config.secret);
 
                         return res.send({
