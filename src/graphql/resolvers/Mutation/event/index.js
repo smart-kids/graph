@@ -1,14 +1,32 @@
 import { ObjectId } from "mongodb"
+import sms from "../../../../utils/sms"
 const { name } = require("./about.js")
+
+const messageMap = {
+  "CHECKEDON": "Your student has been picked up",
+  "CHECKEDOFF": "Your student has been dropped off",
+}
 
 const { UserError } = require("graphql-errors");
 
 const create = async (data, { db: { collections } }) => {
   const id = new ObjectId().toHexString();
   const entry = Object.assign(data[name], { id, isDeleted: false });
+  
+  const student = await collections["student"].findOne({
+    where: { id: entry.student, isDeleted: false }
+  });
+
+  const parent = await collections["parent"].findOne({
+    where: { id: student.parent, isDeleted: false }
+  });
+
+  console.log({ student, parent })
 
   try {
     await collections[name].create(entry);
+
+    sms({ data: { phone: parent.phone, message: messageMap[entry.type] }}, console.log)
 
     return entry;
   } catch (err) {
