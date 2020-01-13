@@ -15,13 +15,13 @@ const create = async (data, { db: { collections } }) => {
     if(students){
       students.foreach(async id => {
         try{
-          const student = await collections["student"].findOne({
-            where: {
-              id, isDeleted: false
-            }
-          })
+          // const student = await collections["student"].findOne({
+          //   where: {
+          //     id, isDeleted: false
+          //   }
+          // })
         
-          await collections["student"].update({ id: student.id }).set({ route: entry.id })
+          await collections["student"].update({ id }).set({ route: entry.id })
         } catch(e){
           throw new UserError(e.details)
         }
