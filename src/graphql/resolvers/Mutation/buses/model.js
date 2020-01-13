@@ -11,7 +11,7 @@ export default Waterline.Collection.extend({
     make: { type: "string", required: true },
     plate: { type: "string", required: true },
     size: { type: "string", required: true },
-    driver: { type: "string", required: true },
+    driver: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });
