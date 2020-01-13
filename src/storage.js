@@ -21,6 +21,14 @@ import OTP from "./graphql/resolvers/Mutation/OTP/model"
 
 const { NODE_ENV, DB_URL = 'db url here' } = process.env;
 
+console.log({
+    NODE_ENV,
+    DB_URL,
+    storage: !['development', "test"].includes(NODE_ENV)
+        ? "mongo"
+        : "disk"
+})
+
 var waterline = new Waterline();
 
 waterline.registerModel(admins);

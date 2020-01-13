@@ -9,13 +9,13 @@ export default Waterline.Collection.extend({
   attributes: {
     id: { type: "string", required: true },
     username: { type: "string", required: true },
-    email: { type: "string", required: true },
+    email: { type: "string", required: false },
     phone: { type: "string", required: true },
-    photo: { type: "string", required: true },
-    license_expiry: { type: "string", required: true },
-    licence_number: { type: "string", required: true },
-    home: { type: "string", required: true },
-    experience: { type: "string", required: true },
+    photo: { type: "string", required: false },
+    license_expiry: { type: "string", required: false },
+    licence_number: { type: "string", required: false },
+    home: { type: "string", required: false },
+    experience: { type: "string", required: false },
     password: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
