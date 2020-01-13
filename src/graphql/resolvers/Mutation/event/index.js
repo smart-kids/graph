@@ -21,8 +21,6 @@ const create = async (data, { db: { collections } }) => {
     where: { id: student.parent, isDeleted: false }
   });
 
-  console.log({ student, parent })
-
   try {
     await collections[name].create(entry);
 
