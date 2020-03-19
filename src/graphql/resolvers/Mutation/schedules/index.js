@@ -1,11 +1,14 @@
-import { ObjectId } from "mongodb"
-const { name } = require("./about.js")
+import { ObjectId } from "mongodb";
+const { name } = require("./about.js");
 
 const { UserError } = require("graphql-errors");
 
 const create = async (data, { db: { collections } }) => {
   const id = new ObjectId().toHexString();
   const entry = Object.assign(data[name], { id, isDeleted: false });
+
+  // stringify actions - contains a hbs templates for emails and sms
+  entry.actions = JSON.stringify(entry.actions);
 
   try {
     await collections[name].create(entry);
@@ -19,6 +22,9 @@ const create = async (data, { db: { collections } }) => {
 const update = async (data, { db: { collections } }) => {
   const { id } = data[name];
   const entry = data[name];
+
+  // stringify actions - contains a hbs templates for sms and email
+  entry.actions = JSON.stringify(entry.actions);
 
   try {
     delete entry.id;

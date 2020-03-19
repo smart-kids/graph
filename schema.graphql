@@ -28,7 +28,7 @@ type Query {
   events: [event]
   event: event
 
-  complaints:[complaint]
+  complaints: [complaint]
   complaint: complaint
 
   locReports: [locReport]
@@ -176,21 +176,20 @@ enum eventType {
   CHECKEDON
 }
 
-
 # event things
 type event {
   id: String
   student: student
   time: String
   type: eventType
-  trip:trip
+  trip: trip
 }
 
 input Ievent {
   student: String
   time: String
   type: String
-  trip:String
+  trip: String
 }
 
 input Uevent {
@@ -198,7 +197,7 @@ input Uevent {
   student: String
   time: String
   type: String
-  trip:String
+  trip: String
 }
 
 type eventMutations {
@@ -295,10 +294,10 @@ type trip {
   startedAt: String
   completedAt: String
   isCancelled: Boolean
-  bus:bus,
-  driver:driver,
+  bus: bus
+  driver: driver
   schedule: schedule
-  events:[event]
+  events: [event]
   locReports: [locReport]
 }
 
@@ -337,9 +336,9 @@ type student {
   gender: gender
   registration: String
   parent: parent
-  parent2: parent,
-  class: class,
-  events:[event]
+  parent2: parent
+  class: class
+  events: [event]
 }
 
 input Istudent {
@@ -376,7 +375,7 @@ type route {
   name: String
   description: String
   path: [loc]
-  schedule:schedule,
+  schedule: schedule
   students: [student]
 }
 
@@ -405,7 +404,7 @@ type routeMutations {
 # class things
 type class {
   id: String
-  name: String,
+  name: String
   teacher: teacher
   students: [student]
 }
@@ -470,6 +469,24 @@ enum day {
   SUNDAY
 }
 
+type smsActions {
+  tick: String
+  cancellation: String
+}
+
+input IsmsActions {
+  tick: String
+  cancellation: String
+}
+
+type action {
+  sms: smsActions
+}
+
+input Iaction {
+  sms: IsmsActions
+}
+
 type schedule {
   id: String
   name: String
@@ -478,8 +495,9 @@ type schedule {
   days: [day]
   route: route
   bus: bus
-  trips:[trip]
+  trips: [trip]
   driver: driver
+  actions: action
 }
 
 input Ischedule {
@@ -490,6 +508,7 @@ input Ischedule {
   days: String
   bus: String
   driver: String
+  actions: Iaction
 }
 
 input Uschedule {
@@ -501,6 +520,7 @@ input Uschedule {
   route: String
   bus: String
   driver: String
+  actions: Iaction
 }
 
 type scheduleMutations {

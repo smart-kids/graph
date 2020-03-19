@@ -13,6 +13,7 @@ export default Waterline.Collection.extend({
     end_time: { type: "string", required: true },
     days: { type: "string", required: true },
     route: { type: "string", required: false },
+    actions: { type: "string", required: false },
     bus: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false }
   }

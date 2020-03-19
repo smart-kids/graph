@@ -1,4 +1,4 @@
-const { name } = require("./about.js")
+const { name } = require("./about.js");
 
 const list = async (root, args, { db: { collections } }) => {
   const entries = await collections[name].find({
@@ -24,12 +24,15 @@ const single = async (root, args, { db: { collections } }) => {
   const entry = await collections[name].findOne({
     where: { id, isDeleted: false }
   });
+
   return entry;
 };
 
-
 const nested = {
   schedule: {
+    async actions(root, args, { db: { collections } }) {
+      return root.actions ? JSON.parse(root.actions) : {};
+    },
     async route(root, args, { db: { collections } }) {
       const entry = await collections["route"].findOne({
         where: { id: root.route, isDeleted: false }
@@ -55,10 +58,9 @@ const nested = {
       return entry;
     },
     async days(root, args, { db: { collections } }) {
-      if (root.days)
-        return root.days.split(",");
-    },
+      if (root.days) return root.days.split(",");
+    }
   }
-}
+};
 
 export { list, single, listDeleted, nested };
