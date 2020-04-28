@@ -10,33 +10,64 @@ import cors from "cors"
 
 import game_socket from "./game-events/route_files.js"
 
-const server = require('http').Server(app);
-const io = require('socket.io')(server)
-
 const { NODE_ENV, PORT = 3000 } = process.env;
 
-var app = express()
+// ------------------------------------------
+var app = require('express')(),
+    server = require("http").createServer(app),
+    io = require("socket.io")(server),
+    session = require("express-session")({
+        secret: "my-secret",
+        resave: true,
+        saveUninitialized: true
+    }),
+    sharedsession = require("express-socket.io-session");
 
-if (NODE_ENV !== "test") app.use(morgan("tiny"), cors());
+const attatchRouter = async (app) => {
+    // app.use("/health", (req, res) => res.json({ status: "ok" }))
 
-const attatchRouter = async () => {
+    // Attach session
+    app.use(session);
+
+    // Share session with io sockets
+
+    io.use(sharedsession(session));
+
+    io.on("connection", function (socket) {
+        // Accept a login event with user's data
+        socket.on("login", function (userdata) {
+            console.log(socket.id, " login")
+            socket.handshake.session.userdata = userdata;
+            socket.handshake.session.save();
+        });
+        socket.on("logout", function (userdata) {
+            console.log(socket.id, " logout")
+            if (socket.handshake.session.userdata) {
+                delete socket.handshake.session.userdata;
+                socket.handshake.session.save();
+            }
+        });
+    });
+
+    if (NODE_ENV !== "test") app.use(morgan("tiny"), cors());
+
     const db = await storage
 
     Object.assign(app.locals, { db })
 
-    app.use("/game-events",game_socket)
+    // app.use("/game-events", game_socket)
     app.use("/auth", router)
-    app.use("/health", (req, res)=> res.send("OK"))
+    app.use("/health", (req, res) => res.json({ status: "ok" }))
     app.use("/", dataGraphRouter)
 
-    app.use("*", (req, res)=> res.send(`
-        that url doesnt have a home here, are you lost? 
+    // app.use("*", (req, res) => res.send(`
+    //     that url doesnt have a home here, are you lost? 
 
-        <a url="/">go home </a>
-    `))
+    //     <a url="/">go home </a>
+    // `))
 }
 
-attatchRouter()
+attatchRouter(app)
 
 if (NODE_ENV !== "test")
     server.listen(PORT, () =>
