@@ -1,6 +1,6 @@
 import express from "express"
 
-import graphRouter from "./index"
+import dataGraphRouter from "./index"
 import { router } from "./auth"
 import storage from "./storage"
 
@@ -19,7 +19,14 @@ const attatchRouter = async () => {
 
     Object.assign(app.locals, { db })
     app.use("/auth", router)
-    app.use("/", graphRouter)
+    app.use("/health", (req, res)=> res.send("OK"))
+    app.use("/", dataGraphRouter)
+
+    app.use("*", (req, res)=> res.send(`
+        that url doesnt have a home here, are you lost? 
+
+        <a url="/">go home </a>
+    `))
 }
 
 attatchRouter()
