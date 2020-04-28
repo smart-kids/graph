@@ -8,7 +8,11 @@ import morgan from "morgan";
 
 import cors from "cors"
 
-import game_socket from "./game-events/route_files.js"
+const StreamTcp = require('./sockets/stream-tcp')
+
+// import game_socket from "./sockets/route_files.js"
+
+const tcpSplit = new StreamTcp()
 
 const { NODE_ENV, PORT = 3000 } = process.env;
 
@@ -33,21 +37,7 @@ const attatchRouter = async (app) => {
 
     io.use(sharedsession(session));
 
-    io.on("connection", function (socket) {
-        // Accept a login event with user's data
-        socket.on("login", function (userdata) {
-            console.log(socket.id, " login")
-            socket.handshake.session.userdata = userdata;
-            socket.handshake.session.save();
-        });
-        socket.on("logout", function (userdata) {
-            console.log(socket.id, " logout")
-            if (socket.handshake.session.userdata) {
-                delete socket.handshake.session.userdata;
-                socket.handshake.session.save();
-            }
-        });
-    });
+    io.on("connection", require("./sockets/socket-pass"));
 
     if (NODE_ENV !== "test") app.use(morgan("tiny"), cors());
 
