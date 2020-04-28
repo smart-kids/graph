@@ -8,6 +8,11 @@ import morgan from "morgan";
 
 import cors from "cors"
 
+import game_socket from "./game-events/route_files.js"
+
+const server = require('http').Server(app);
+const io = require('socket.io')(server)
+
 const { NODE_ENV, PORT = 3000 } = process.env;
 
 var app = express()
@@ -18,6 +23,8 @@ const attatchRouter = async () => {
     const db = await storage
 
     Object.assign(app.locals, { db })
+
+    app.use("/game-events",game_socket)
     app.use("/auth", router)
     app.use("/health", (req, res)=> res.send("OK"))
     app.use("/", dataGraphRouter)
@@ -32,8 +39,10 @@ const attatchRouter = async () => {
 attatchRouter()
 
 if (NODE_ENV !== "test")
-    app.listen(PORT, () =>
+    server.listen(PORT, () =>
         console.log(`School project running on port ${PORT}! on ${NODE_ENV} mode.`)
     );
+
+app.locals.io = io
 
 export default app;

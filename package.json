@@ -40,6 +40,7 @@
     "sails-disk": "^1.1.2",
     "sails-mongo": "https://github.com/luislobo/sails-mongo#upgrade-mongodb-drivers",
     "sails-postgresql": "^1.0.2",
+    "socket.io": "^2.3.0",
     "source-map-support": "^0.5.13",
     "uuidv4": "^4.0.0",
     "waterline": "^0.13.6"
