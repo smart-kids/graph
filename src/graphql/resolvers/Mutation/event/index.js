@@ -9,15 +9,15 @@ const messageMap = {
   
   Please use the Bethlehem app to raise any issues, view live data of the bus location as well as raise any issues to our support staff.
   
-  Bethlehem schools appreciates your commitment to time and safety.`,
+  we appreciate your commitment to time and safety.`,
 
   CHECKEDOFF: `Our bus has confirmed that our bus was unnable to pick your child at his/her ussual pick up point, please reach out to the school for explanation/corrections. 
 
-  Bethlehem schools appreciates your commitment to time and safety.`,
+  we appreciate appreciates your commitment to time and safety.`,
 
   TRIPSTARTED: `The school bus has left school and is on route to pick up your child, please ensure that he/she is ready to be picked up and his/her usual destination. 
 
-  Bethlehem schools appreciates your commitment to keep time.`
+  we appreciate appreciates your commitment to keep time.`
 };
 
 const { UserError } = require("graphql-errors");
@@ -25,6 +25,8 @@ const { UserError } = require("graphql-errors");
 const create = async (data, { db: { collections } }) => {
   const id = new ObjectId().toHexString();
   const entry = Object.assign(data[name], { id, isDeleted: false });
+
+  console.log({ entry })
 
   const student = await collections["student"].findOne({
     where: { id: entry.student, isDeleted: false }
@@ -45,13 +47,13 @@ const create = async (data, { db: { collections } }) => {
   const actions = JSON.parse(schedule.actions);
 
   try {
-    if (event.type === "CHECKEDON")
+    if (entry.type === "CHECKEDON")
       sms(
         { data: { phone: parent.phone, message: actions.sms.tick } },
         console.log
       );
 
-    if (event.type === "CHECKEDOFF")
+    if (entry.type === "CHECKEDOFF")
       sms(
         { data: { phone: parent.phone, message: actions.sms.cancellation } },
         console.log
