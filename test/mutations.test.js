@@ -55,7 +55,7 @@ describe("Super Auth", () => {
         .set("content-type", "application/json")
         .send({
           "user": "sAdmin",
-          "password": "12345"
+          "password": "00000"
         })
         .end((err, res) => {
           res.should.have.status(200);
@@ -83,162 +83,6 @@ describe("Super Auth", () => {
           done();
         });
     });
-  });
-});
-
-describe("Admins", () => {
-  it("Can create an admin", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("authorization", authorization)
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($Iadmin: Iadmin!) {
-            admins {
-              create(admin: $Iadmin) {
-                id
-              }
-            }
-          }            
-        `,
-        variables: {
-          Iadmin: {
-            username: "admin1",
-            email: "test",
-            password: "test"
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.admins.create.id).to.be.a.string;
-
-        sharedInfo.adminId = res.body.data.admins.create.id;
-        done();
-      });
-  });
-
-  it("Can update an admin", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("authorization", authorization)
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($admin: Uadmin!) {
-            admins {
-              update(admin: $admin) {
-                id
-              }
-            }
-          }            
-        `,
-        variables: {
-          admin: {
-            id: sharedInfo.adminId,
-            username: "updated admin"
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.admins.update.id).to.be.a.string;
-        done();
-      });
-  });
-
-  it("Can nuke an admin", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("authorization", authorization)
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($Iadmin: Uadmin!) {
-            admins {
-              archive(admin: $Iadmin) {
-                id
-              }
-            }
-          }                  
-        `,
-        variables: {
-          Iadmin: {
-            id: sharedInfo.adminId
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.admins.archive.id).to.be.a.string;
-        done();
-      });
-  });
-
-  it("Can restore an admin", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("authorization", authorization)
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($Iadmin: Uadmin!) {
-            admins {
-              restore(admin: $Iadmin) {
-                id
-              }
-            }
-          }                  
-        `,
-        variables: {
-          Iadmin: {
-            id: sharedInfo.adminId
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        // expect(res.body.data.admins.restore.id).to.be.string;
-        done();
-      });
-  });
-
-  it("Can fetch restored admin", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("authorization", authorization)
-      .set("content-type", "application/json")
-      .send({
-        query: `
-        {
-          admins{
-            id
-          }
-        }        
-        `
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.admins[0].id).to.be.a.string;
-
-        done();
-      });
   });
 });
 
@@ -399,6 +243,163 @@ describe("Schools", () => {
   });
 });
 
+describe("Admins", () => {
+  it("Can create an admin", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iadmin: Iadmin!) {
+            admins {
+              create(admin: $Iadmin) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Iadmin: {
+            username: "admin1",
+            email: "test",
+            password: "test",
+            school: sharedInfo.school,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.admins.create.id).to.be.a.string;
+
+        sharedInfo.adminId = res.body.data.admins.create.id;
+        done();
+      });
+  });
+
+  it("Can update an admin", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($admin: Uadmin!) {
+            admins {
+              update(admin: $admin) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          admin: {
+            id: sharedInfo.adminId,
+            username: "updated admin"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.admins.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an admin", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iadmin: Uadmin!) {
+            admins {
+              archive(admin: $Iadmin) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Iadmin: {
+            id: sharedInfo.adminId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.admins.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an admin", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iadmin: Uadmin!) {
+            admins {
+              restore(admin: $Iadmin) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Iadmin: {
+            id: sharedInfo.adminId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+
+  it("Can fetch restored admin", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+        {
+          admins{
+            id
+          }
+        }        
+        `
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.admins[0].id).to.be.a.string;
+
+        done();
+      });
+  });
+});
+
 describe("Teacher", () => {
   it("Can create an teacher", done => {
     chai
@@ -419,7 +420,8 @@ describe("Teacher", () => {
         variables: {
           Iteacher: {
             name: "teacher1",
-            national_id:"35718850",
+            national_id: "35718850",
+            school: sharedInfo.school,
             phone: "0722222222",
             email: "teacher1@gmail.com",
             gender: "MALE"
@@ -457,7 +459,7 @@ describe("Teacher", () => {
           teacher: {
             id: sharedInfo.teacherId,
             phone: "0722222223",
-            national_id:"35718857",
+            national_id: "35718857",
             email: "teacher1@gmail.com",
             gender: "MALE"
           }
@@ -580,7 +582,8 @@ describe("Classes", () => {
         variables: {
           class: {
             name: "Class Name",
-            teacher: sharedInfo.teacherId
+            teacher: sharedInfo.teacherId,
+            school: sharedInfo.school,
           }
         }
       })
@@ -735,7 +738,8 @@ describe("Routes", () => {
         variables: {
           Iroute: {
             name: "marwa",
-            description: "marwa"
+            description: "marwa",
+            school: sharedInfo.school,
           }
         }
       })
@@ -893,6 +897,7 @@ describe("Drivers", () => {
             username: "driver1",
             email: "driver@gmail.com",
             phone: "0711111111",
+            school: sharedInfo.school,
             photo: "03/03/2022",
             license_expiry: "35718850",
             licence_number: "IcanDrive099",
@@ -1055,6 +1060,7 @@ describe("Buses", () => {
             make: "marwa",
             plate: "test",
             size: 2,
+            school: sharedInfo.school,
             driver: sharedInfo.driverId
           }
         }
@@ -1212,9 +1218,10 @@ describe("Parent", () => {
         variables: {
           Iparent: {
             name: "parent1",
-            national_id:"35718850",
+            national_id: "35718850",
             phone: "0719420491",
             password: "rY8x5uW",
+            school: sharedInfo.school,
             email: "parent1@gmail.com",
             gender: "MALE"
           }
@@ -1250,9 +1257,10 @@ describe("Parent", () => {
         variables: {
           Iparent: {
             name: "parent2",
-            national_id:"35718851",
+            national_id: "35718851",
             phone: "0774751895",
             password: "rY8x5uW",
+            school: sharedInfo.school,
             email: "parent2@gmail.com",
             gender: "MALE"
           }
@@ -1288,7 +1296,7 @@ describe("Parent", () => {
         variables: {
           parent: {
             id: sharedInfo.parentId,
-            national_id:"35718857",
+            national_id: "35718857",
             email: "parent1@gmail.com",
             gender: "MALE"
           }
@@ -1414,6 +1422,7 @@ describe("Students", () => {
             route: sharedInfo.routeId,
             gender: "FEMALE",
             registration: "1234",
+            school: sharedInfo.school,
             parent: sharedInfo.parentId,
             parent2: sharedInfo.parent2Id,
             class: sharedInfo.class
@@ -1578,8 +1587,9 @@ describe("Schedule", () => {
             end_time: moment(new Date())
               .add(30, "m")
               .toISOString(),
+            school: sharedInfo.school,
             route: sharedInfo.routeId,
-            days: "MONDAY,TEUSDAY",
+            days: "MONDAY,TUESDAY",
             bus: sharedInfo.busId
           }
         }
@@ -1735,7 +1745,9 @@ describe("Trips", () => {
         variables: {
           Itrip: {
             startedAt: new Date().toISOString(),
-            schedule: sharedInfo.scheduleId
+            schedule: sharedInfo.scheduleId,
+            driver: sharedInfo.driverId,
+            school: sharedInfo.school,
           }
         }
       })
@@ -1773,6 +1785,8 @@ describe("Trips", () => {
             completedAt: moment(new Date())
               .add(40, "m")
               .toISOString(),
+            driver: sharedInfo.driverId,
+            school: sharedInfo.school,
             schedule: sharedInfo.scheduleId
           }
         }
@@ -1806,7 +1820,9 @@ describe("Trips", () => {
         variables: {
           Itrip: {
             startedAt: new Date().toISOString(),
-            schedule: sharedInfo.scheduleId
+            schedule: sharedInfo.scheduleId,
+            driver: sharedInfo.driverId,
+            school: sharedInfo.school,
           }
         }
       })
@@ -1839,6 +1855,8 @@ describe("Trips", () => {
         variables: {
           Itrip: {
             isCancelled: true,
+            school: sharedInfo.school,
+            driver: sharedInfo.driverId,
             schedule: sharedInfo.scheduleId
           }
         }
@@ -1997,6 +2015,7 @@ describe("Event", () => {
             student: sharedInfo.studentId,
             time: new Date().toLocaleTimeString(),
             type: "CHECKEDOFF",
+            school: sharedInfo.school,
             trip: sharedInfo.tripId
           }
         }
@@ -2155,8 +2174,9 @@ describe("Complaint", () => {
         `,
         variables: {
           Icomplaint: {
-            parent: sharedInfo.parentId,
+            parent: sharedInfo.parent2Id,
             time: new Date().toLocaleTimeString(),
+            school: sharedInfo.school,
             content: "Complaining"
           }
         }
@@ -2469,7 +2489,8 @@ describe("SMS Communication", () => {
         variables: {
           sms: {
             message: "Message",
-            parents:[sharedInfo.parentId, sharedInfo.parent2Id]
+            school: sharedInfo.school,
+            parents: [sharedInfo.parentId, sharedInfo.parent2Id]
           }
         }
       })

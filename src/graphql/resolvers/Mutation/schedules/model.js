@@ -9,6 +9,7 @@ export default Waterline.Collection.extend({
   attributes: {
     id: { type: "string", required: true },
     name: { type: "string", required: true },
+    school: { type: "string", required: false },
     time: { type: "string", required: true },
     end_time: { type: "string", required: true },
     days: { type: "string", required: true },

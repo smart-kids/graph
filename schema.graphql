@@ -40,7 +40,12 @@ type Query {
   teachers: [teacher]
   teacher: teacher
 
+
+  payment: payment
+  payments: [payment]
+
   school: school
+  schools: [school]
 }
 
 type Mutation {
@@ -63,22 +68,65 @@ type Mutation {
   sms: smsMutations
 }
 
-# admin things
+# payment things
+type payment {
+  id: String
+  school: String
+  ammount: String
+  type: String
+  ref: String
+  time: String
+}
+
+input Ipayment {
+  school: String
+  ammount: String
+  type: String
+  ref: String
+  time: String
+}
+
+input Upayment {
+  id: String!
+  school: String
+  ammount: String
+  type: String
+  ref: String
+  time: String
+}
+
+type paymentMutations {
+  create(payment: Ipayment!): payment
+  update(payment: Upayment!): payment
+  archive(payment: Upayment!): payment
+  restore(payment: Upayment!): payment
+}
+
+# admins things
 type admin {
   id: String
+  name: String
   username: String
   email: String
   password: String
+  
+  phone: String
+  schools: [school]
 }
 
 input Iadmin {
+  name: String
+  phone: String
   username: String!
+  school: String!
   email: String!
   password: String!
 }
 
 input Uadmin {
   id: String!
+  name: String
+  phone: String
   username: String
   email: String
   password: String
@@ -114,6 +162,7 @@ input Idriver {
   license_expiry: String
   licence_number: String
   home: String
+  school: String!
   experience: String
   password: String
   bus: String
@@ -153,6 +202,7 @@ input Ibus {
   make: String
   plate: String
   size: Float
+  school: String!
   driver: String
 }
 
@@ -188,6 +238,7 @@ type event {
 input Ievent {
   student: String
   time: String
+  school: String!
   type: String
   trip: String
 }
@@ -217,6 +268,7 @@ type complaint {
 
 input Icomplaint {
   parent: String
+  school: String!
   content: String
   time: String
 }
@@ -305,6 +357,8 @@ input Itrip {
   startedAt: String
   completedAt: String
   isCancelled: Boolean
+  school: String!
+  driver: String!
   schedule: String
 }
 
@@ -347,6 +401,7 @@ input Istudent {
   gender: gender
   registration: String
   parent: String
+  school: String!
   parent2: String
   class: String
 }
@@ -382,6 +437,7 @@ type route {
 input Iroute {
   name: String
   description: String
+  school: String!
   students: [String]
   path: [Iloc]
 }
@@ -405,6 +461,7 @@ type routeMutations {
 type class {
   id: String
   name: String
+  school: String!
   teacher: teacher
   students: [student]
 }
@@ -412,6 +469,7 @@ type class {
 input IClass {
   name: String
   teacher: String
+  school: String!
 }
 
 input UClass {
@@ -434,6 +492,21 @@ type school {
   phone: String
   email: String
   address: String
+
+  # relations for saas
+  admins: [admin]
+  students: [student]
+  parents: [parent]
+  drivers: [driver]
+  buses: [bus]
+  trips: [trip]
+  routes: [route]
+  schedules: [schedule]
+  events: [event]
+  complaints: [complaint]
+  locReports: [locReport]
+  classes: [class]
+  teachers: [teacher]
 }
 
 input ISchool {
@@ -504,6 +577,7 @@ input Ischedule {
   name: String
   time: String
   end_time: String
+  school: String!
   route: String
   days: String
   bus: String
@@ -547,6 +621,7 @@ input Iparent {
   national_id: String
   phone: String
   email: String
+  school: String!
   password: String
   gender: gender
 }
@@ -584,6 +659,7 @@ input Iteacher {
   national_id: String
   phone: String
   email: String
+  school: String!
   gender: gender
 }
 
@@ -605,6 +681,7 @@ type teacherMutations {
 
 input Isms {
   message: String!
+  school: String!
   parents: [String!]!
 }
 

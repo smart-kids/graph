@@ -8,6 +8,7 @@ export default Waterline.Collection.extend({
 
   attributes: {
     id: { type: "string", required: true },
+    school: { type: "string", required: false },
     make: { type: "string", required: true },
     plate: { type: "string", required: true },
     size: { type: "string", required: true },

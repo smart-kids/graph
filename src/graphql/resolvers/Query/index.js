@@ -43,13 +43,16 @@ import {
 } from "./teachers"
 
 import {
-  single as school
+  single as school,
+  list as schools,
+  nested as Nschool
 } from "./school"
 
 const nested = {};
 
 Object.assign(
   nested,
+  Nschool,
   Nstudent,
   Nschedule,
   Nroutes,
@@ -64,6 +67,9 @@ Object.assign(
 );
 
 const Query = {
+  schools,
+  school,
+
   admins,
   admin,
 

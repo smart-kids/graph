@@ -28,10 +28,14 @@ const single = async (root, args, { db: { collections }, auth }) => {
 const nested = {
   parent: {
     async students(root, args, { db: { collections } }) {
-      const entry = await collections["student"].find({
+      const parent1 = await collections["student"].find({
         where: { parent: root.id, isDeleted: false }
       });
-      return entry;
+
+      const parent2 = await collections["student"].find({
+        where: { parent2: root.id, isDeleted: false }
+      });
+      return [...parent1, ...parent2];
     },
     async complaints(root, args, { db: { collections } }) {
       const entry = await collections["complaint"].find({

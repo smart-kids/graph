@@ -26,14 +26,12 @@ const create = async (data, { db: { collections } }) => {
   const id = new ObjectId().toHexString();
   const entry = Object.assign(data[name], { id, isDeleted: false });
 
-  console.log({ entry })
-
   const student = await collections["student"].findOne({
     where: { id: entry.student, isDeleted: false }
   });
 
   const parent = await collections["parent"].findOne({
-    where: { id: student.parent, isDeleted: false }
+    where: { id: student.parent2, isDeleted: false }
   });
 
   const trip = await collections["trip"].findOne({
@@ -44,18 +42,18 @@ const create = async (data, { db: { collections } }) => {
     where: { id: trip.schedule, isDeleted: false }
   });
 
-  const actions = JSON.parse(schedule.actions);
+  const actions = schedule.actions ? JSON.parse(schedule.actions) : null;
 
   try {
     if (entry.type === "CHECKEDON")
       sms(
-        { data: { phone: parent.phone, message: actions.sms.tick } },
+        { data: { phone: parent.phone, message: messageMap[entry.type] } },
         console.log
       );
 
     if (entry.type === "CHECKEDOFF")
       sms(
-        { data: { phone: parent.phone, message: actions.sms.cancellation } },
+        { data: { phone: parent.phone, message: messageMap[entry.type] } },
         console.log
       );
   } catch (err) {

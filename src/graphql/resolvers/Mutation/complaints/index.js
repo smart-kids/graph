@@ -7,7 +7,7 @@ const create = async (data, { db: { collections }, auth }) => {
   const id = new ObjectId().toHexString();
   const entry = Object.assign(data[name], {
     id,
-    parent: auth.user ? auth.user.id : "",
+    parent: auth.user ? auth.user.id : data[name].parent,
     isDeleted: false
   });
 
