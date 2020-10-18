@@ -461,7 +461,7 @@ type routeMutations {
 type class {
   id: String
   name: String
-  school: String!
+  school: school
   teacher: teacher
   students: [student]
 }

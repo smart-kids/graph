@@ -43,6 +43,18 @@ const nested = {
       });
       return entries;
     },
+    async teachers(root, args, { db: { collections } }) {
+      const entries = await collections["teacher"].find({
+        where: { school: root.id, isDeleted: false }
+      });
+      return entries;
+    },
+    async classes(root, args, { db: { collections } }) {
+      const entries = await collections["class"].find({
+        where: { school: root.id, isDeleted: false }
+      });
+      return entries;
+    },
     async complaints(root, args, { db: { collections } }) {
       const entries = await collections["complaint"].find({
         where: { school: root.id, isDeleted: false }

@@ -226,33 +226,53 @@ describe("Setup For Queries", () => {
         .set("authorization", authorization)
         .set("content-type", "application/json")
         .send({
-          query: `{
-            school {
-              id
-              name
+          query: `
+          {
+            schools {
+              id,
+              name,
+              complaints {
+                id
+                time
+                content
+                parent {
+                  id
+                  name
+                }
+              }
               students {
                 id
                 names
+                gender
+                registration
+                class {
+                  name
+                  teacher {
+                    name
+                  }
+                }
                 route {
+                  id
                   name
                 }
                 parent {
+                  id
+                  national_id
                   name
                 }
                 parent2 {
+                  id
+                  national_id
                   name
                 }
               }
               buses {
+                id
                 plate
                 make
                 size
-              }
-              complaints {
-                id
-                time
-                parent {
-                  id
+                driver {
+                  username
                 }
               }
               drivers {
@@ -260,23 +280,37 @@ describe("Setup For Queries", () => {
                 username
                 email
                 phone
+                license_expiry
+                licence_number
+                home
                 bus {
                   id
                   plate
                   make
                   size
+                  driver {
+                    username
+                  }
                 }
               }
               parents {
                 id
+                national_id
                 name
                 complaints {
                   id
                   content
                 }
+                gender
+                email
+                phone
                 students {
-                  id
                   names
+                  id
+                  gender
+                  route {
+                    name
+                  }
                   events {
                     type
                     trip {
@@ -302,6 +336,32 @@ describe("Setup For Queries", () => {
                   }
                 }
               }
+              teachers {
+                id
+                national_id
+                name
+                gender
+                phone
+                email
+                classes {
+                  name
+                }
+              }
+              classes {
+                id
+                name
+                students {
+                  names
+                  gender
+                  route {
+                    name
+                  }
+                }
+                teacher {
+                  id
+                  name
+                }
+              }
               routes {
                 id
                 name
@@ -311,35 +371,10 @@ describe("Setup For Queries", () => {
                   lng
                 }
               }
-              trips {
-                startedAt
-                completedAt
-                bus {
-                  id
-                  make
-                }
-                driver {
-                  id
-                }
-                locReports {
-                  id
-                  time
-                  loc {
-                    lat
-                    lng
-                  }
-                }
-                events {
-                  time
-                  type
-                  student {
-                    id
-                  }
-                }
-              }
               schedules {
                 id
                 time
+                end_time
                 name
                 days
                 route {
@@ -349,8 +384,6 @@ describe("Setup For Queries", () => {
                 bus {
                   id
                   make
-                  size
-                  plate
                 }
                 trips {
                   startedAt
@@ -379,17 +412,79 @@ describe("Setup For Queries", () => {
                   }
                 }
               }
+              complaints {
+                id
+                time
+                parent {
+                  id
+                }
+              }
+              trips {
+                id
+                driver {
+                  id
+                  username
+                }
+                schedule {
+                  name
+                  id
+                  time
+                  end_time
+                  route {
+                    id
+                    name
+                    students {
+                      id
+                    }
+                  }
+                }
+                events {
+                  time
+                  type
+                  student {
+                    id
+                  }
+                }
+                startedAt
+                isCancelled
+                completedAt
+                bus {
+                  id
+                  make
+                  plate
+                }
+                driver {
+                  id
+                  username
+                }
+                locReports {
+                  id
+                  time
+                  loc {
+                    lat
+                    lng
+                  }
+                }
+                events {
+                  time
+                  type
+                  student {
+                    id
+                    names
+                  }
+                }
+              }
             }
-          }
+          }          
           `
         })
         .end((err, res) => {
           res.should.have.status(200);
 
-          res.body.error ? console.log(res.body.errors) : null
+          res.body.errors ? console.log(res.body.errors) : null
           expect(res.body.errors).to.not.exist;
 
-          const school = res.body.data.school
+          const school = res.body.data.schools[0]
 
           const student = school.students[0];
           const bus = school.buses[0];
@@ -397,6 +492,8 @@ describe("Setup For Queries", () => {
           const parent = school.parents[1];
           const route = school.routes[0];
           const driver = school.drivers[0];
+          const teacher = school.teachers[0];
+          const class1 = school.classes[0];
           const schedule = school.schedules[0];
           const complaint = school.complaints[0];
 
@@ -465,6 +562,18 @@ describe("Setup For Queries", () => {
           expect(schedule.trips[0].locReports[0].loc).to.exist;
           expect(schedule.trips[0].locReports[0].loc.lat).to.be.a.string;
           expect(schedule.trips[0].locReports[0].loc.lng).to.be.a.string;
+
+          // teachers
+          expect(teacher.id).to.be.a.string;
+          expect(teacher.national_id).to.be.a.string;
+          expect(teacher.name).to.be.a.string;
+          expect(teacher.phone).to.be.a.string;
+          expect(teacher.email).to.be.a.string;
+          expect(teacher.gender).to.be.a.string;
+
+          // classes
+          expect(class1.id).to.be.a.string;
+          expect(class1.name).to.be.a.string;
 
           done();
         });
