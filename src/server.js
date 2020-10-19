@@ -52,6 +52,8 @@ const attatchRouter = async (app) => {
 
     Object.assign(app.locals, { db })
 
+    app.use(["/", "/graph"], dataGraphRouter)
+
     // app.use("/game-events", game_socket)
     app.use("/auth", router)
     app.use("/health", (req, res) => res.json({ status: "ok" }))
@@ -92,7 +94,7 @@ const attatchRouter = async (app) => {
         }));
 
 
-    app.use("/graph", dataGraphRouter)
+    
 }
 
 attatchRouter(app)
