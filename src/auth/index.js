@@ -159,7 +159,9 @@ router.post(
         const parent = await collections["parent"].findOne({ phone: user, isDeleted: false })
 
         // check admins list
-        const admin = await collections["admin"].findOne({ username: user, isDeleted: false })
+        const adminEmail = await collections["admin"].findOne({ username: user, isDeleted: false })
+        const adminPhone = await collections["admin"].findOne({ phone: user, isDeleted: false })
+
         const returnAuth = async (userData) => {
             if (password && !userData.password) {
                 const [data] = await collections["otp"].find({
@@ -245,7 +247,7 @@ router.post(
                     id: new ObjectId().toHexString(),
                     userId: user,
                     userType,
-                    user: JSON.stringify(driver || parent || admin),
+                    user: JSON.stringify(driver || parent || adminEmail || adminPhone),
                     password
                 })
 
@@ -266,9 +268,9 @@ router.post(
             return returnAuth(parent)
         }
 
-        if (admin) {
+        if (adminPhone||adminEmail) {
             userType = 'admin'
-            return returnAuth(admin)
+            return returnAuth(adminPhone||adminEmail)
         }
 
         return res.status(401).send({ message: "User not found, Please contact an administrator" })
