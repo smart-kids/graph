@@ -9,9 +9,9 @@ import morgan from "morgan";
 import cors from "cors"
 
 const {
-    FACEBOOK_APP_ID,
-    FACEBOOK_APP_SECRET,
-    FACEBOOK_CALLBACK,
+    FACEBOOK_APP_ID = "",
+    FACEBOOK_APP_SECRET = "",
+    FACEBOOK_CALLBACK = "",
 } = process.env
 
 const StreamTcp = require('./sockets/stream-tcp')
@@ -66,20 +66,24 @@ const attatchRouter = async (app) => {
     // `))
 
 
-    // OAUTH STUFF
-    passport.use(new FacebookStrategy({
-        clientID: FACEBOOK_APP_ID,
-        clientSecret: FACEBOOK_APP_SECRET,
-        callbackURL: FACEBOOK_CALLBACK
-    },
-        function (accessToken, refreshToken, profile, done) {
-            console.log({ accessToken, refreshToken, profile })
-            // User.findOrCreate(..., function (err, user) {
-            //     if (err) { return done(err); }
-            //     done(null, user);
-            // });
-        }
-    ));
+    try {
+        // OAUTH STUFF
+        passport.use(new FacebookStrategy({
+            clientID: FACEBOOK_APP_ID,
+            clientSecret: FACEBOOK_APP_SECRET,
+            callbackURL: FACEBOOK_CALLBACK
+        },
+            function (accessToken, refreshToken, profile, done) {
+                console.log({ accessToken, refreshToken, profile })
+                // User.findOrCreate(..., function (err, user) {
+                //     if (err) { return done(err); }
+                //     done(null, user);
+                // });
+            }
+        ));
+    } catch (err) {
+        console.warn(err)
+    }
 
     app.get('/auth/facebook', passport.authenticate('facebook'));
 
@@ -94,7 +98,7 @@ const attatchRouter = async (app) => {
         }));
 
 
-    
+
 }
 
 attatchRouter(app)
