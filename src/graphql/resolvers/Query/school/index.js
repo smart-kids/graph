@@ -4,10 +4,11 @@ const { name } = require("./about.js")
 
 const list = async (root, args, { db: { collections } }) => {
   const entries = await collections[name].find({
-    where: {
-      isDeleted: false
-    }
+    // where: {
+    //   isDeleted: false
+    // }
   });
+  console.log(entries)
   return entries;
 };
 
