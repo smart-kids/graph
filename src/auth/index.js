@@ -124,6 +124,58 @@ router.post(
     }
 );
 
+
+router.post(
+    "/register",
+    validator.body(Joi.object({
+        name: Joi.string().required(),
+        phone: Joi.string(),
+        email: Joi.string(),
+        address: Joi.string()
+    })),
+    async (req, res) => {
+        // create a school object
+        const { db: { collections } } = req.app.locals
+        const { name, phone, email, address } = req.body
+
+        const schoolId = new ObjectId().toHexString();
+        await collections["school"].create({
+            id: schoolId,
+            name,
+            phone,
+            email,
+            address
+        })
+
+        // create a use who is the admin with the phone number
+        const adminId = new ObjectId().toHexString();
+        await collections["admin"].create({
+            id: adminId,
+            username: email,
+            email,
+            phone,
+            school: schoolId
+        })
+
+        // send an sms with welcome and link to download the app
+        sms({ data: { message: `Thank you for registering ${name} to shule plus. Please login to our app to start enjoying your first free month`, phone } }, console.log)
+
+        const data = {
+            admin: {
+                school: schoolId,
+                user: email
+            }
+        }
+
+        var token = jwt.sign(data, config.secret);
+        return res.send({
+            token,
+            data
+        })
+        //TODO send an email with the welcome page, app and admin login
+
+    })
+
 router.post(
     "/login",
     validator.body(Joi.object({
@@ -268,9 +320,9 @@ router.post(
             return returnAuth(parent)
         }
 
-        if (adminPhone||adminEmail) {
+        if (adminPhone || adminEmail) {
             userType = 'admin'
-            return returnAuth(adminPhone||adminEmail)
+            return returnAuth(adminPhone || adminEmail)
         }
 
         return res.status(401).send({ message: "User not found, Please contact an administrator" })

@@ -2,11 +2,13 @@ import schedules from "../../Mutation/schedules/index.js";
 
 const { name } = require("./about.js")
 
-const list = async (root, args, { db: { collections } }) => {
+const list = async (root, args, { auth, db: { collections } }) => {
+  console.log({ auth })
   const entries = await collections[name].find({
-    // where: {
-    //   isDeleted: false
-    // }
+    where: {
+      id: auth.admin.school,
+      isDeleted: false
+    }
   });
   console.log(entries)
   return entries;
