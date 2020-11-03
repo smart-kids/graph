@@ -74,6 +74,7 @@ type user {
   id: String
   name: String
   email: String
+  phone: String
   address: String
 }
 
