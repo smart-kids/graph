@@ -124,6 +124,58 @@ router.post(
     }
 );
 
+
+router.post(
+    "/register",
+    validator.body(Joi.object({
+        name: Joi.string().required(),
+        phone: Joi.string(),
+        email: Joi.string(),
+        address: Joi.string()
+    })),
+    async (req, res) => {
+        // create a school object
+        const { db: { collections } } = req.app.locals
+        const { name, phone, email, address } = req.body
+
+        const schoolId = new ObjectId().toHexString();
+        await collections["school"].create({
+            id: schoolId,
+            name,
+            phone,
+            email,
+            address
+        })
+
+        // create a use who is the admin with the phone number
+        const adminId = new ObjectId().toHexString();
+        await collections["admin"].create({
+            id: adminId,
+            username: email,
+            email,
+            phone,
+            school: schoolId
+        })
+
+        // send an sms with welcome and link to download the app
+        sms({ data: { message: `Thank you for registering ${name} to shule plus. Please login to our app to start enjoying your first free month`, phone } }, console.log)
+
+        const data = {
+            admin: {
+                school: schoolId,
+                user: email
+            }
+        }
+
+        var token = jwt.sign(data, config.secret);
+        return res.send({
+            token,
+            data
+        })
+        //TODO send an email with the welcome page, app and admin login
+
+    })
+
 router.post(
     "/login",
     validator.body(Joi.object({
@@ -159,7 +211,9 @@ router.post(
         const parent = await collections["parent"].findOne({ phone: user, isDeleted: false })
 
         // check admins list
-        const admin = await collections["admin"].findOne({ username: user, isDeleted: false })
+        const adminEmail = await collections["admin"].findOne({ username: user, isDeleted: false })
+        const adminPhone = await collections["admin"].findOne({ phone: user, isDeleted: false })
+
         const returnAuth = async (userData) => {
             if (password && !userData.password) {
                 const [data] = await collections["otp"].find({
@@ -239,13 +293,13 @@ router.post(
                 const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
                 // send sms to phone
                 if (!['development', "test"].includes(NODE_ENV))
-                    sms({ data: { message: `${password} is your SmartKids login code. Don't reply to this message with your code.`, phone: (driver && driver.phone || parent && parent.phone) } }, console.log)
+                    sms({ data: { message: `${password} is your ShulePlus login code. Don't reply to this message with your code.`, phone: (driver && driver.phone || parent && parent.phone) } }, console.log)
 
                 await collections["otp"].create({
                     id: new ObjectId().toHexString(),
                     userId: user,
                     userType,
-                    user: JSON.stringify(driver || parent || admin),
+                    user: JSON.stringify(driver || parent || adminEmail || adminPhone),
                     password
                 })
 
@@ -266,9 +320,9 @@ router.post(
             return returnAuth(parent)
         }
 
-        if (admin) {
+        if (adminPhone || adminEmail) {
             userType = 'admin'
-            return returnAuth(admin)
+            return returnAuth(adminPhone || adminEmail)
         }
 
         return res.status(401).send({ message: "User not found, Please contact an administrator" })

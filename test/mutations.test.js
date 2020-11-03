@@ -264,6 +264,7 @@ describe("Admins", () => {
           Iadmin: {
             username: "admin1",
             email: "test",
+            phone: "0711657108",
             password: "test",
             school: sharedInfo.school,
           }

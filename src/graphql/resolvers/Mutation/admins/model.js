@@ -10,7 +10,9 @@ export default Waterline.Collection.extend({
     id: { type: "string", required: true },
     username: { type: "string", required: true },
     email: { type: "string", required: true },
-    password: { type: "string", required: true },
+    phone: { type: "string", required: true },
+    password: { type: "string" },
+    school: { type: "string" },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });
