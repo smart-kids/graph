@@ -73,10 +73,8 @@ type Mutation {
 type user {
   id: String
   name: String
-  ammount: String
-  type: String
-  ref: String
-  time: String
+  email: String
+  address: String
 }
 
 # payment things
