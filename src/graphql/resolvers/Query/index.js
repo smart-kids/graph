@@ -8,6 +8,9 @@ import {
   nested as Nstudent
 } from "./students";
 import {
+  single as user,
+} from "./user";
+import {
   list as schedules,
   single as schedule,
   nested as Nschedule
@@ -67,6 +70,8 @@ Object.assign(
 );
 
 const Query = {
+  user,
+  
   schools,
   school,
 

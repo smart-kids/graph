@@ -1,5 +1,6 @@
 type Query {
   hello: String
+  user: user
 
   admins: [admin]
   admin: admin
@@ -66,6 +67,16 @@ type Mutation {
   schools: schoolMutations
   teachers: teacherMutations
   sms: smsMutations
+}
+
+# user things
+type user {
+  id: String
+  name: String
+  ammount: String
+  type: String
+  ref: String
+  time: String
 }
 
 # payment things
