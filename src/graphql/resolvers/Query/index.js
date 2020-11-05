@@ -7,26 +7,38 @@ import {
   single as student,
   nested as Nstudent
 } from "./students";
+
 import {
   single as user,
 } from "./user";
+
 import {
   list as schedules,
   single as schedule,
   nested as Nschedule
 } from "./schedules";
+
 import {
   list as parents,
   single as parent,
   nested as Nparents
 } from "./parents";
+
 import { list as events, single as event, nested as Nevent } from "./events";
 import { list as trips, single as trip, nested as Ntrip } from "./trips";
+
 import {
   list as complaints,
   single as complaint,
   nested as Ncomplaint
 } from "./complaints";
+
+import {
+  list as charges,
+  single as charge,
+  nested as Ncharges
+} from "./charges";
+
 import {
   list as locReports,
   single as locReport,
@@ -56,6 +68,7 @@ const nested = {};
 Object.assign(
   nested,
   Nschool,
+  Ncharges,
   Nstudent,
   Nschedule,
   Nroutes,
@@ -77,6 +90,9 @@ const Query = {
 
   admins,
   admin,
+
+  charges,
+  charge,
 
   routes,
   route,

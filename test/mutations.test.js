@@ -1726,6 +1726,9 @@ describe("Schedule", () => {
   });
 });
 
+
+
+
 describe("Trips", () => {
   it("Can create an trip", done => {
     chai
@@ -2505,3 +2508,170 @@ describe("SMS Communication", () => {
       });
   });
 });
+
+
+describe("Payment", () => {
+  it("Can create an payment", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ipayment: Ipayment!) {
+            payments {
+              create(payment: $Ipayment) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Ipayment: {
+            school: sharedInfo.school,
+            ammount: "1000",
+            type: "MPESA",
+            phone: "0711657108",
+            ref: "MKGFDYGVJH",
+            time: new Date()
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.payments.create.id).to.be.a.string;
+
+        sharedInfo.paymentId = res.body.data.payments.create.id;
+        done();
+      });
+  });
+
+  // it("Can nuke an payment", done => {
+  //   chai
+  //     .request(app)
+  //     .post("/graph")
+  //     .set("authorization", authorization)
+  //     .set("content-type", "application/json")
+  //     .send({
+  //       query: `
+  //         mutation ($Ipayment: Upayment!) {
+  //           payments {
+  //             archive(payment: $Ipayment) {
+  //               id
+  //             }
+  //           }
+  //         }                  
+  //       `,
+  //       variables: {
+  //         Ipayment: {
+  //           id: sharedInfo.paymentId
+  //         }
+  //       }
+  //     })
+  //     .end((err, res) => {
+  //       res.should.have.status(200);
+  //       expect(res.body).to.not.be.null;
+  //       expect(res.body.errors).to.not.exist;
+  //       expect(res.body.data.payments.archive.id).to.be.a.string;
+  //       done();
+  //     });
+  // });
+
+  // it("Can restore an payment", done => {
+  //   chai
+  //     .request(app)
+  //     .post("/graph")
+  //     .set("authorization", authorization)
+  //     .set("content-type", "application/json")
+  //     .send({
+  //       query: `
+  //         mutation ($Ipayment: Upayment!) {
+  //           payments {
+  //             restore(payment: $Ipayment) {
+  //               id
+  //             }
+  //           }
+  //         }                  
+  //       `,
+  //       variables: {
+  //         Ipayment: {
+  //           id: sharedInfo.paymentId
+  //         }
+  //       }
+  //     })
+  //     .end((err, res) => {
+  //       res.should.have.status(200);
+  //       expect(res.body).to.not.be.null;
+  //       expect(res.body.errors).to.not.exist;
+  //       // expect(res.body.data.payments.restore.id).to.be.string;
+  //       done();
+  //     });
+  // });
+
+  // it("Can fetch restored payment", done => {
+  //   chai
+  //     .request(app)
+  //     .post("/graph")
+  //     .set("authorization", authorization)
+  //     .set("content-type", "application/json")
+  //     .send({
+  //       query: `
+  //       {
+  //         payments {
+  //           id
+  //         }
+  //       }        
+  //       `
+  //     })
+  //     .end((err, res) => {
+  //       res.should.have.status(200);
+  //       expect(res.body).to.not.be.null;
+  //       expect(res.body.errors).to.not.exist;
+  //       expect(res.body.data.payments[0].id).to.be.a.string;
+
+  //       done();
+  //     });
+  // });
+});
+
+
+describe("Charges", () => {
+  it("Can create an charge", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Icharge: Icharge!) {
+            charges {
+              create(charge: $Icharge) {
+                id
+              }
+            }
+          }
+        `,
+        variables: {
+          Icharge: {
+            school: sharedInfo.school,
+            ammount: "100",
+            reason: "Sending message 'This is a message This is a message This is a message This is a message This is a message'",
+            time: new Date()
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.charges.create.id).to.be.a.string;
+
+        sharedInfo.paymentId = res.body.data.charges.create.id;
+        done();
+      });
+  });
+})

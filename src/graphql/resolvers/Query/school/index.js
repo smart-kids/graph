@@ -1,16 +1,17 @@
+import payments from "../../Mutation/payments/index.js";
 import schedules from "../../Mutation/schedules/index.js";
 
 const { name } = require("./about.js")
 
 const list = async (root, args, { auth, db: { collections } }) => {
-  console.log({ auth })
+
   const entries = await collections[name].find({
     where: {
       id: auth.admin.school,
       isDeleted: false
     }
   });
-  console.log(entries)
+
   return entries;
 };
 
@@ -42,6 +43,18 @@ const nested = {
     },
     async buses(root, args, { db: { collections } }) {
       const entries = await collections["bus"].find({
+        where: { school: root.id, isDeleted: false }
+      });
+      return entries;
+    },
+    async charges(root, args, { db: { collections } }) {
+      const entries = await collections["charge"].find({
+        where: { school: root.id, isDeleted: false }
+      });
+      return entries;
+    },
+    async payments(root, args, { db: { collections } }) {
+      const entries = await collections["payment"].find({
         where: { school: root.id, isDeleted: false }
       });
       return entries;

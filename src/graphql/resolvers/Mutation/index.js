@@ -12,10 +12,14 @@ import locReports from "./location-reports"
 import classes from "./classes"
 import schools from "./school"
 import teachers from "./teachers"
+import payments from "./payments"
+import charges from "./charges"
 import sms from "./sms"
 
 export default {
   admins,
+  charges,
+  payments,
   routes,
   drivers,
   buses,

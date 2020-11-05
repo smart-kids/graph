@@ -18,6 +18,8 @@ import classModel from "./graphql/resolvers/Mutation/classes/model"
 import school from "./graphql/resolvers/Mutation/school/model"
 import teacher from "./graphql/resolvers/Mutation/teachers/model"
 import OTP from "./graphql/resolvers/Mutation/OTP/model"
+import payments from "./graphql/resolvers/Mutation/payments/model"
+import charges from "./graphql/resolvers/Mutation/charges/model"
 
 const { NODE_ENV, DB_URL = 'db url here' } = process.env;
 
@@ -45,6 +47,8 @@ waterline.registerModel(locReport)
 waterline.registerModel(classModel)
 waterline.registerModel(school)
 waterline.registerModel(teacher)
+waterline.registerModel(payments)
+waterline.registerModel(charges)
 waterline.registerModel(OTP)
 
 var config = {
@@ -69,6 +73,7 @@ export default new Promise((resolve, reject) => {
             console.log(err)
             reject(err)
         }
+
         resolve(db)
     });
 })

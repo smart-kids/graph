@@ -47,6 +47,9 @@ type Query {
 
   school: school
   schools: [school]
+
+  charge: charge
+  charges: [charge]
 }
 
 type Mutation {
@@ -60,8 +63,10 @@ type Mutation {
   trips: tripMutations
   routes: routeMutations
   schedules: scheduleMutations
+  payments: paymentMutations
   events: eventMutations
   complaints: complaintMutations
+  charges: chargeMutations
   locReports: locReportMutations
   classes: classMutations
   schools: schoolMutations
@@ -84,12 +89,15 @@ type payment {
   school: String
   ammount: String
   type: String
+  phone: String
+  acc: String
   ref: String
   time: String
 }
 
 input Ipayment {
   school: String
+  phone: String
   ammount: String
   type: String
   ref: String
@@ -98,6 +106,7 @@ input Ipayment {
 
 input Upayment {
   id: String!
+  phone: String
   school: String
   ammount: String
   type: String
@@ -110,6 +119,37 @@ type paymentMutations {
   update(payment: Upayment!): payment
   archive(payment: Upayment!): payment
   restore(payment: Upayment!): payment
+}
+
+# charges things
+type charge {
+  id: String
+  school: String
+  ammount: String
+  reason: String
+  time: String
+}
+
+input Icharge {
+  school: String
+  ammount: String
+  reason: String
+  time: String
+}
+
+input Ucharge {
+  id: String!
+  school: String
+  ammount: String
+  reason: String
+  time: String
+}
+
+type chargeMutations {
+  create(charge: Icharge!): charge
+  update(charge: Ucharge!): charge
+  archive(charge: Ucharge!): charge
+  restore(charge: Ucharge!): charge
 }
 
 # admins things
@@ -517,6 +557,8 @@ type school {
   locReports: [locReport]
   classes: [class]
   teachers: [teacher]
+  payments:[payment]
+  charges:[charge]
 }
 
 input ISchool {
