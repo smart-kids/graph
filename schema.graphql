@@ -535,6 +535,10 @@ type classMutations {
   restore(class: UClass!): class
 }
 
+type financial {
+  balance: Float
+}
+
 # school things
 type school {
   id: String
@@ -542,6 +546,7 @@ type school {
   phone: String
   email: String
   address: String
+  financial: financial
 
   # relations for saas
   admins: [admin]

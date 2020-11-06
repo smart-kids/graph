@@ -1,5 +1,6 @@
 import payments from "../../Mutation/payments/index.js";
 import schedules from "../../Mutation/schedules/index.js";
+import { sum, subtract } from "mathjs"
 
 const { name } = require("./about.js")
 
@@ -35,6 +36,24 @@ const single = async (root, args, { db: { collections } }) => {
 
 const nested = {
   school: {
+    async financial(root, args, { db: { collections } }) {
+      const payments = await collections["payment"].find({
+        where: { school: root.id, isDeleted: false }
+      });
+
+      const charges = await collections["charge"].find({
+        where: { school: root.id, isDeleted: false }
+      });
+
+      const paymentsSum = sum(payments.map(p => p.ammount))
+      const chargesSum = sum(charges.map(p => p.ammount))
+
+      const balance = subtract(paymentsSum, chargesSum)
+
+      return {
+        balance
+      }
+    },
     async students(root, args, { db: { collections } }) {
       const entries = await collections["student"].find({
         where: { school: root.id, isDeleted: false }

@@ -61,6 +61,21 @@ const restore = async (data, { db: { collections } }) => {
   }
 };
 
+
+const pay = async (data, { db: { collections } }) => {
+  const { id } = data[name];
+
+  try {
+    await collections[name].findOne({ id, isDeleted: false })
+
+    return {
+      id
+    };
+  } catch (err) {
+    throw new UserError(err.details);
+  }
+};
+
 export default () => {
   return {
     create,
