@@ -95,6 +95,27 @@ type payment {
   time: String
 }
 
+input mpesaStartTxInput {
+  id: String
+  phone: String
+  ammount: Float
+}
+
+type mpesaStartTxVerification {
+  CheckoutRequestID: String
+  MerchantRequestID: String
+}
+
+input mpesaStartTxVerificationInput {
+  CheckoutRequestID: String
+  MerchantRequestID: String
+}
+
+type mpesaStartTxResult {
+  success: Boolean
+  message: String
+}
+
 input Ipayment {
   school: String
   phone: String
@@ -115,8 +136,9 @@ input Upayment {
 }
 
 type paymentMutations {
+  init(payment: mpesaStartTxInput!): mpesaStartTxVerification
+  confirm(payment: mpesaStartTxVerificationInput!): mpesaStartTxResult
   create(payment: Ipayment!): payment
-  update(payment: Upayment!): payment
   archive(payment: Upayment!): payment
   restore(payment: Upayment!): payment
 }
