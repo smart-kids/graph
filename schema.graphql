@@ -98,7 +98,7 @@ type payment {
 input mpesaStartTxInput {
   id: String
   phone: String
-  ammount: Float
+  ammount: String
 }
 
 type mpesaStartTxVerification {

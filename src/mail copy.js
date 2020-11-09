@@ -2,7 +2,9 @@
 var express = require("express"),
     router = express.Router(),
     smtpTransport = require('nodemailer-smtp-transport');//setup nodemailer
+
 const nodemailer = require('nodemailer');
+
 let transporter = nodemailer.createTransport(smtpTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
@@ -16,7 +18,7 @@ const mailOptions = {
     from: "gitomehbranson@gmail.com",
     to: "sirbranson67@gmail.com",                  
     subject: "subject",       
-    html: "message"          
+    html: "message"   
 }; 
 
 transporter.sendMail(mailOptions, function (error, info) {
