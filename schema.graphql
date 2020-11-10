@@ -108,7 +108,8 @@ type mpesaStartTxVerification {
 
 input mpesaStartTxVerificationInput {
   CheckoutRequestID: String
-  MerchantRequestID: String
+  MerchantRequestID: String,
+  school:String
 }
 
 type mpesaStartTxResult {
