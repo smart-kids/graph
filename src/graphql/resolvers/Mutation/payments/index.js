@@ -43,44 +43,34 @@ const confirm = async (data, { db: { collections } }) => {
 
     const { success, data: { ResultDesc: message } = {} } = res
 
-    // make an entry into the payments collection
-    console.log(res)
     const meta = JSON.parse(res.data.meta).Item
 
-    meta.map(({Name,Value})=>{
-
+    const datamap = {}
+    meta.map(({ Name, Value }) => {
+      datamap[Name.toLowerCase()] = Value
     })
-    // const id = new ObjectId().toHexString();
-    // const entry = Object.assign(data[name], { id, isDeleted: false });
 
-  
-    // school: ,
-    // ammount: ,
-    // type: ,
-    // acc: ,
-    // ref: ,
-    // time: ,
+    const id = new ObjectId().toHexString();
 
-    // {
-    //   success: true,
-    //   data: {
-    //     _id: '5fa97fbecfe35300170e112d',
-    //     id: '5fa97fbe6ebd7a00172ee817',
-    //     MerchantRequestID: '9258-60408806-1',
-    //     CheckoutRequestID: 'ws_CO_09112020204213757172',
-    //     ResultCode: '0',
-    //     ResultDesc: 'The service request is processed successfully.',
-    //     meta: '{"Item":[{"Name":"Amount","Value":2},{"Name":"MpesaReceiptNumber","Value":"OK94CNHIXQ"},{"Name":"TransactionDate","Value":20201109204258},{"Name":"PhoneNumber","Value":254711657108}]}'
-    //   }
-    // }
+    const finalData = {
+      school,
+      ammount: datamap.amount,
+      phone: datamap.phonenumber,
+      type: "Mpesa",
+      ref: datamap.mpesareceiptnumber,
+      time: new Date()
+    }
+
+    const entry = Object.assign(finalData, { id, isDeleted: false });
+
+    await collections[name].create(entry);
 
     return {
       success,
       message
-    }
-
+    };
   } catch (err) {
-    console.log(err.error)
+    console.log("error", err)
 
     const { success, data: { ResultDesc: message } = {} } = err.error
     return {
