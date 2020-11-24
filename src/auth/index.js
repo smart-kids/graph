@@ -297,7 +297,7 @@ router.post(
                 // send sms to phone
                 if (!['development', "test"].includes(NODE_ENV))
                     sms({
-                        school: schoolId,
+                        // school: schoolId,
                         data: { message: `${password} is your ShulePlus login code. Don't reply to this message with your code.`, phone: (driver && driver.phone || parent && parent.phone) }
                     }, console.log)
 
