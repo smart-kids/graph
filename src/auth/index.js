@@ -158,7 +158,10 @@ router.post(
         })
 
         // send an sms with welcome and link to download the app
-        sms({ data: { message: `Thank you for registering ${name} to shule plus. Please login to our app to start enjoying your first free month`, phone } }, console.log)
+        sms({
+            school: schoolId,
+            data: { message: `Thank you for registering ${name} to shule plus. Please login to our app to start enjoying your first free month`, phone }
+        }, console.log)
 
         const data = {
             admin: {
@@ -205,14 +208,14 @@ router.post(
         }
 
         // check drivers numbers
-        const driver = await collections["driver"].findOne({ phone: user, isDeleted: false })
+        const [driver] = await collections["driver"].find({ phone: user, isDeleted: false })
 
         // check parents list
-        const parent = await collections["parent"].findOne({ phone: user, isDeleted: false })
+        const [parent] = await collections["parent"].find({ phone: user, isDeleted: false })
 
         // check admins list
-        const adminEmail = await collections["admin"].findOne({ username: user, isDeleted: false })
-        const adminPhone = await collections["admin"].findOne({ phone: user, isDeleted: false })
+        const [adminEmail] = await collections["admin"].find({ username: user, isDeleted: false })
+        const [adminPhone] = await collections["admin"].find({ phone: user, isDeleted: false })
 
         const returnAuth = async (userData) => {
             if (password && !userData.password) {
@@ -293,7 +296,10 @@ router.post(
                 const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
                 // send sms to phone
                 if (!['development', "test"].includes(NODE_ENV))
-                    sms({ data: { message: `${password} is your ShulePlus login code. Don't reply to this message with your code.`, phone: (driver && driver.phone || parent && parent.phone) } }, console.log)
+                    sms({
+                        school: schoolId,
+                        data: { message: `${password} is your ShulePlus login code. Don't reply to this message with your code.`, phone: (driver && driver.phone || parent && parent.phone) }
+                    }, console.log)
 
                 await collections["otp"].create({
                     id: new ObjectId().toHexString(),
