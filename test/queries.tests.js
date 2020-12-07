@@ -231,6 +231,14 @@ describe("Setup For Queries", () => {
             schools {
               id,
               name,
+              grades {
+                id
+                name
+                subjects {
+                  id
+                  name
+                }
+              }
               complaints {
                 id
                 time

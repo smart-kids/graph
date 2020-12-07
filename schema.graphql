@@ -595,6 +595,7 @@ type school {
   teachers: [teacher]
   payments:[payment]
   charges:[charge]
+  grades:[grade]
 }
 
 input ISchool {
@@ -782,6 +783,7 @@ type grade {
   id: String
   name: String
   school: school
+  subjects: [subject]
 }
 
 input Igrade {
