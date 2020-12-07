@@ -2675,3 +2675,264 @@ describe("Charges", () => {
       });
   });
 })
+
+describe("Grades", () => {
+  it("Can create a grade", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Igrade: Igrade!) {
+            grades {
+              create(grade: $Igrade) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Igrade: {
+            name: "3",
+            school: sharedInfo.school,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.grades.create.id).to.be.a.string;
+
+        sharedInfo.gradeId = res.body.data.grades.create.id;
+        done();
+      });
+  });
+
+  it("Can update a grade", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Igrade: Ugrade!) {
+            grades {
+              update(grade: $Igrade) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Igrade: {
+            id: sharedInfo.gradeId,
+            name: "2"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.grades.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke a grade", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Igrade: Ugrade!) {
+            grades {
+              archive(grade: $Igrade) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Igrade: {
+            id: sharedInfo.gradeId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.grades.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore a grade", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Igrade: Ugrade!) {
+            grades {
+              restore(grade: $Igrade) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Igrade: {
+            id: sharedInfo.gradeId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});
+
+
+describe("Subjects", () => {
+  it("Can create an subject", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubject: Isubject!) {
+            subjects {
+              create(subject: $Isubject) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Isubject: {
+            name: "Science",
+            grade: sharedInfo.gradeId,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.subjects.create.id).to.be.a.string;
+
+        sharedInfo.subjectId = res.body.data.subjects.create.id;
+        done();
+      });
+  });
+
+  it("Can update an subject", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubject: Usubject!) {
+            subjects {
+              update(subject: $Isubject) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Isubject: {
+            id: sharedInfo.subjectId,
+            name: "Social Studies"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.subjects.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an subject", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubject: Usubject!) {
+            subjects {
+              archive(subject: $Isubject) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Isubject: {
+            id: sharedInfo.subjectId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.subjects.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an subject", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubject: Usubject!) {
+            subjects {
+              restore(subject: $Isubject) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Isubject: {
+            id: sharedInfo.subjectId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});

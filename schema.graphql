@@ -50,6 +50,12 @@ type Query {
 
   charge: charge
   charges: [charge]
+
+  grade: grade
+  grades: [grade]
+
+  subject: subject
+  subjects: [subject]
 }
 
 type Mutation {
@@ -72,6 +78,8 @@ type Mutation {
   schools: schoolMutations
   teachers: teacherMutations
   sms: smsMutations
+  grades: gradeMutations
+  subjects: subjectMutations
 }
 
 # user things
@@ -767,4 +775,54 @@ input Isms {
 
 type smsMutations {
   send(sms: Isms!): String
+}
+
+# grade things
+type grade {
+  id: String
+  name: String
+  school: school
+}
+
+input Igrade {
+  name: String!
+  school: String!
+}
+
+input Ugrade {
+  id: String!
+  name: String
+  school: String
+}
+
+type gradeMutations {
+  create(grade: Igrade!): grade
+  update(grade: Ugrade!): grade
+  archive(grade: Ugrade!): grade
+  restore(grade: Ugrade!): grade
+}
+
+# subject things
+type subject {
+  id: String
+  name: String
+  grade: grade
+}
+
+input Isubject {
+  name: String!
+  grade: String!
+}
+
+input Usubject {
+  id: String!
+  name: String
+  grade: String
+}
+
+type subjectMutations {
+  create(subject: Isubject!): subject
+  update(subject: Usubject!): subject
+  archive(subject: Usubject!): subject
+  restore(subject: Usubject!): subject
 }
