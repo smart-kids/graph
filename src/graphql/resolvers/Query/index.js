@@ -63,6 +63,24 @@ import {
   nested as Nschool
 } from "./school"
 
+import {
+  list as grades,
+  single as grade,
+  nested as Ngrade
+} from "./grades";
+
+import {
+  list as subjects,
+  single as subject,
+  nested as Nsubject
+} from "./subjects";
+
+import {
+  list as topics,
+  single as topic,
+  nested as Ntopic
+} from "./topics";
+
 const nested = {};
 
 Object.assign(
@@ -79,7 +97,10 @@ Object.assign(
   NlocReport,
   Nevent,
   Nclass,
-  Nteacher
+  Nteacher,
+  Ngrade,
+  Nsubject,
+  Ntopic,
 );
 
 const Query = {
@@ -131,6 +152,15 @@ const Query = {
   teacher,
 
   school,
+
+  grade,
+  grades,
+
+  subject,
+  subjects,
+
+  topic,
+  topics,
 
   hello: () => "hey"
 };

@@ -22,6 +22,7 @@ import payments from "./graphql/resolvers/Mutation/payments/model"
 import charges from "./graphql/resolvers/Mutation/charges/model"
 import grades from "./graphql/resolvers/Mutation/grades/model"
 import subjects from "./graphql/resolvers/Mutation/subjects/model"
+import topics from "./graphql/resolvers/Mutation/topics/model"
 
 const { NODE_ENV, DB_URL = 'db url here' } = process.env;
 
@@ -53,6 +54,7 @@ waterline.registerModel(payments)
 waterline.registerModel(charges)
 waterline.registerModel(grades)
 waterline.registerModel(subjects)
+waterline.registerModel(topics)
 waterline.registerModel(OTP)
 
 var config = {

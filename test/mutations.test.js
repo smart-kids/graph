@@ -2936,3 +2936,133 @@ describe("Subjects", () => {
       });
   });
 });
+
+describe("Topics", () => {
+  it("Can create an topic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Itopic: Itopic!) {
+            topics {
+              create(topic: $Itopic) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Itopic: {
+            name: "Introduction",
+            subject: sharedInfo.subjectId,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.topics.create.id).to.be.a.string;
+
+        sharedInfo.topicId = res.body.data.topics.create.id;
+        done();
+      });
+  });
+
+  it("Can update an topic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Itopic: Utopic!) {
+            topics {
+              update(topic: $Itopic) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Itopic: {
+            id: sharedInfo.topicId,
+            name: "Energy"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.topics.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an topic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Itopic: Utopic!) {
+            topics {
+              archive(topic: $Itopic) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Itopic: {
+            id: sharedInfo.topicId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.topics.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an topic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Itopic: Utopic!) {
+            topics {
+              restore(topic: $Itopic) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Itopic: {
+            id: sharedInfo.topicId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});

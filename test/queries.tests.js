@@ -237,6 +237,10 @@ describe("Setup For Queries", () => {
                 subjects {
                   id
                   name
+                  topics {
+                    id
+                    name
+                  }
                 }
               }
               complaints {
@@ -483,7 +487,7 @@ describe("Setup For Queries", () => {
                 }
               }
             }
-          }          
+          }        
           `
         })
         .end((err, res) => {
@@ -504,6 +508,9 @@ describe("Setup For Queries", () => {
           const class1 = school.classes[0];
           const schedule = school.schedules[0];
           const complaint = school.complaints[0];
+          const grade = school.grades[0];
+          const subject = school.grades[0].subjects[0];
+          const topic = school.grades[0].subjects[0].topics[0];
 
           // students
           expect(student.id).to.be.a.string;
@@ -533,7 +540,6 @@ describe("Setup For Queries", () => {
           expect(parent.complaints).to.be.instanceof(Array);
           expect(parent.complaints[0].id).to.be.a.string;
 
-          // routes
           expect(route.id).to.be.a.string;
           expect(route.name).to.be.a.string;
           expect(route.description).to.be.a.string;
@@ -582,6 +588,18 @@ describe("Setup For Queries", () => {
           // classes
           expect(class1.id).to.be.a.string;
           expect(class1.name).to.be.a.string;
+
+          // grades
+          expect(grade.id).to.be.a.string;
+          expect(school.grades).to.be.instanceof(Array);
+
+          // subjects
+          expect(subject.id).to.be.a.string;
+          expect(grade.subjects).to.be.instanceof(Array);
+
+          // topics
+          expect(topic.id).to.be.a.string;
+          expect(subject.topics).to.be.instanceof(Array);
 
           done();
         });

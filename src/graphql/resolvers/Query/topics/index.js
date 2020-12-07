@@ -28,25 +28,13 @@ const single = async (root, args, { db: { collections } }) => {
 };
 
 const nested = {
-  grade:{
-    subjects: async (root, args, { db: { collections }}) => {
-      const entries = await collections["subject"].find({ 
-        where: { 
-          grade : root.id, isDeleted: false 
-        }
-      })
-
-      return entries
+  topic: {
+    async subject(root, args, { db: { collections } }) {
+      const entry = await collections["subject"].findOne({
+        where: { id: root.subject, isDeleted: false }
+      });
+      return entry;
     },
-    school: async (root, args, { db: { collections }}) => {
-      const entry = await collections["school"].findOne({ 
-        where: { 
-          id : root.school, isDeleted: false 
-        }
-      })
-
-      return entry
-    }
   }
 }
 
