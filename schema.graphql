@@ -68,6 +68,9 @@ type Query {
 
   answer: answer
   answers: [answer]
+
+  option: option
+  options: [option]
 }
 
 type Mutation {
@@ -96,6 +99,7 @@ type Mutation {
   subtopics: subtopicMutations
   questions: questionMutations
   answers: answerMutations
+  options: optionMutations
 }
 
 # user things
@@ -911,6 +915,7 @@ type question {
   type: answerType
   subtopic: subtopic
   answers: [answer]
+  options: [option]
 }
 
 input Iquestion {
@@ -956,4 +961,29 @@ type answerMutations {
   update(answer: Uanswer!): answer
   archive(answer: Uanswer!): answer
   restore(answer: Uanswer!): answer
+}
+
+# option things
+type option {
+  id: String
+  value: String
+  question: question
+}
+
+input Ioption {
+  value: String!
+  question: String!
+}
+
+input Uoption {
+  id: String!
+  value: String
+  question: String
+}
+
+type optionMutations {
+  create(option: Ioption!): option
+  update(option: Uoption!): option
+  archive(option: Uoption!): option
+  restore(option: Uoption!): option
 }

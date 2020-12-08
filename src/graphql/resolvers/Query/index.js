@@ -99,6 +99,12 @@ import {
   nested as Nanswer
 } from "./answers";
 
+import {
+  list as options,
+  single as option,
+  nested as Noption
+} from "./answers";
+
 const nested = {};
 
 Object.assign(
@@ -122,6 +128,7 @@ Object.assign(
   Nsubtopic,
   Nquestion,
   Nanswer,
+  Noption,
 );
 
 const Query = {
@@ -191,6 +198,9 @@ const Query = {
 
   answer,
   answers,
+
+  option,
+  options,
 
   hello: () => "hey"
 };

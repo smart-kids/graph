@@ -26,6 +26,7 @@ import topics from "./graphql/resolvers/Mutation/topics/model"
 import subtopics from "./graphql/resolvers/Mutation/subtopics/model"
 import questions from "./graphql/resolvers/Mutation/questions/model"
 import answers from "./graphql/resolvers/Mutation/answers/model"
+import options from "./graphql/resolvers/Mutation/options/model"
 
 const { NODE_ENV, DB_URL = 'db url here' } = process.env;
 
@@ -61,6 +62,7 @@ waterline.registerModel(topics)
 waterline.registerModel(subtopics)
 waterline.registerModel(questions)
 waterline.registerModel(answers)
+waterline.registerModel(options)
 waterline.registerModel(OTP)
 
 var config = {

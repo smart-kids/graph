@@ -3459,3 +3459,133 @@ describe("Answers", () => {
       });
   });
 });
+
+describe("Options", () => {
+  it("Can create an option", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ioption: Ioption!) {
+            options {
+              create(option: $Ioption) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Ioption: {
+            value: 'cat.jpg',
+            question: sharedInfo.questionId,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.options.create.id).to.be.a.string;
+
+        sharedInfo.optionId = res.body.data.options.create.id;
+        done();
+      });
+  });
+
+  it("Can update an option", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ioption: Uoption!) {
+            options {
+              update(option: $Ioption) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Ioption: {
+            id: sharedInfo.optionId,
+            value: 'dog.jpg'
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.options.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an option", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ioption: Uoption!) {
+            options {
+              archive(option: $Ioption) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Ioption: {
+            id: sharedInfo.optionId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.options.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an option", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ioption: Uoption!) {
+            options {
+              restore(option: $Ioption) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Ioption: {
+            id: sharedInfo.optionId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});

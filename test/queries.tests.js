@@ -251,6 +251,10 @@ describe("Setup For Queries", () => {
                           id
                           value
                         }
+                        options {
+                          id
+                          value
+                        }
                       }
                     }
                   }
@@ -527,6 +531,7 @@ describe("Setup For Queries", () => {
           const subtopic = topic.subtopics[0];
           const question = subtopic.questions[0];
           const answer = question.answers[0];
+          const option = question.options[0];
 
           // students
           expect(student.id).to.be.a.string;
@@ -632,6 +637,11 @@ describe("Setup For Queries", () => {
           expect(answer.id).to.be.a.string;
           expect(answer.value).to.be.a.string;
           expect(question.answers).to.be.instanceof(Array);
+
+          // options
+          expect(option.id).to.be.a.string;
+          expect(option.value).to.be.a.string;
+          expect(question.options).to.be.instanceof(Array);
 
           done();
         });
