@@ -20,6 +20,7 @@ import subjects from "./subjects"
 import topics from "./topics"
 import subtopics from "./subtopics"
 import questions from "./questions"
+import answers from "./answers"
 
 export default {
   admins,
@@ -44,6 +45,7 @@ export default {
   topics,
   subtopics,
   questions,
+  answers,
   hello() {
     return "hello mutation";
   }

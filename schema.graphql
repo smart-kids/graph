@@ -65,6 +65,9 @@ type Query {
 
   question: question
   questions: [question]
+
+  answer: answer
+  answers: [answer]
 }
 
 type Mutation {
@@ -92,6 +95,7 @@ type Mutation {
   topics: topicMutations
   subtopics: subtopicMutations
   questions: questionMutations
+  answers: answerMutations
 }
 
 # user things
@@ -906,6 +910,7 @@ type question {
   name: String
   type: answerType
   subtopic: subtopic
+  answers: [answer]
 }
 
 input Iquestion {
@@ -926,4 +931,29 @@ type questionMutations {
   update(question: Uquestion!): question
   archive(question: Uquestion!): question
   restore(question: Uquestion!): question
+}
+
+# answer things
+type answer {
+  id: String
+  value: String
+  question: question
+}
+
+input Ianswer {
+  value: String!
+  question: String!
+}
+
+input Uanswer {
+  id: String!
+  value: String
+  question: String
+}
+
+type answerMutations {
+  create(answer: Ianswer!): answer
+  update(answer: Uanswer!): answer
+  archive(answer: Uanswer!): answer
+  restore(answer: Uanswer!): answer
 }

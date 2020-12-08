@@ -3329,3 +3329,133 @@ describe("Questions", () => {
       });
   });
 });
+
+describe("Answers", () => {
+  it("Can create an answer", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ianswer: Ianswer!) {
+            answers {
+              create(answer: $Ianswer) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Ianswer: {
+            value: 'A',
+            question: sharedInfo.questionId,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.answers.create.id).to.be.a.string;
+
+        sharedInfo.answerId = res.body.data.answers.create.id;
+        done();
+      });
+  });
+
+  it("Can update an answer", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ianswer: Uanswer!) {
+            answers {
+              update(answer: $Ianswer) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Ianswer: {
+            id: sharedInfo.answerId,
+            value: 'C'
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.answers.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an answer", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ianswer: Uanswer!) {
+            answers {
+              archive(answer: $Ianswer) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Ianswer: {
+            id: sharedInfo.answerId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.answers.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an answer", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ianswer: Uanswer!) {
+            answers {
+              restore(answer: $Ianswer) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Ianswer: {
+            id: sharedInfo.answerId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});
