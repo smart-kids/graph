@@ -50,6 +50,27 @@ type Query {
 
   charge: charge
   charges: [charge]
+
+  grade: grade
+  grades: [grade]
+
+  subject: subject
+  subjects: [subject]
+
+  topic: topic
+  topics: [topic]
+
+  subtopic: subtopic
+  subtopics: [subtopic]
+
+  question: question
+  questions: [question]
+
+  answer: answer
+  answers: [answer]
+
+  option: option
+  options: [option]
 }
 
 type Mutation {
@@ -72,6 +93,13 @@ type Mutation {
   schools: schoolMutations
   teachers: teacherMutations
   sms: smsMutations
+  grades: gradeMutations
+  subjects: subjectMutations
+  topics: topicMutations
+  subtopics: subtopicMutations
+  questions: questionMutations
+  answers: answerMutations
+  options: optionMutations
 }
 
 # user things
@@ -587,6 +615,7 @@ type school {
   teachers: [teacher]
   payments:[payment]
   charges:[charge]
+  grades:[grade]
 }
 
 input ISchool {
@@ -767,4 +796,194 @@ input Isms {
 
 type smsMutations {
   send(sms: Isms!): String
+}
+
+# grade things
+type grade {
+  id: String
+  name: String
+  school: school
+  subjects: [subject]
+}
+
+input Igrade {
+  name: String!
+  school: String!
+}
+
+input Ugrade {
+  id: String!
+  name: String
+  school: String
+}
+
+type gradeMutations {
+  create(grade: Igrade!): grade
+  update(grade: Ugrade!): grade
+  archive(grade: Ugrade!): grade
+  restore(grade: Ugrade!): grade
+}
+
+# subject things
+type subject {
+  id: String
+  name: String
+  grade: grade
+  topics: [topic]
+}
+
+input Isubject {
+  name: String!
+  grade: String!
+}
+
+input Usubject {
+  id: String!
+  name: String
+  grade: String
+}
+
+type subjectMutations {
+  create(subject: Isubject!): subject
+  update(subject: Usubject!): subject
+  archive(subject: Usubject!): subject
+  restore(subject: Usubject!): subject
+}
+
+
+# topic things
+type topic {
+  id: String
+  name: String
+  subject: subject
+  subtopics: [subtopic]
+}
+
+input Itopic {
+  name: String!
+  subject: String!
+}
+
+input Utopic {
+  id: String!
+  name: String
+  subject: String
+}
+
+type topicMutations {
+  create(topic: Itopic!): topic
+  update(topic: Utopic!): topic
+  archive(topic: Utopic!): topic
+  restore(topic: Utopic!): topic
+}
+
+# subtopic things
+type subtopic {
+  id: String
+  name: String
+  topic: topic
+  questions: [question]
+}
+
+input Isubtopic {
+  name: String!
+  topic: String!
+}
+
+input Usubtopic {
+  id: String!
+  name: String
+  topic: String
+}
+
+type subtopicMutations {
+  create(subtopic: Isubtopic!): subtopic
+  update(subtopic: Usubtopic!): subtopic
+  archive(subtopic: Usubtopic!): subtopic
+  restore(subtopic: Usubtopic!): subtopic
+}
+
+enum answerType {
+  SINGLECHOICE
+  MULTICHOICE
+}
+
+# question things
+type question {
+  id: String
+  name: String
+  type: answerType
+  subtopic: subtopic
+  answers: [answer]
+  options: [option]
+}
+
+input Iquestion {
+  name: String!
+  type: String!
+  subtopic: String!
+}
+
+input Uquestion {
+  id: String!
+  name: String
+  type: answerType
+  subtopic: String
+}
+
+type questionMutations {
+  create(question: Iquestion!): question
+  update(question: Uquestion!): question
+  archive(question: Uquestion!): question
+  restore(question: Uquestion!): question
+}
+
+# answer things
+type answer {
+  id: String
+  value: String
+  question: question
+}
+
+input Ianswer {
+  value: String!
+  question: String!
+}
+
+input Uanswer {
+  id: String!
+  value: String
+  question: String
+}
+
+type answerMutations {
+  create(answer: Ianswer!): answer
+  update(answer: Uanswer!): answer
+  archive(answer: Uanswer!): answer
+  restore(answer: Uanswer!): answer
+}
+
+# option things
+type option {
+  id: String
+  value: String
+  question: question
+}
+
+input Ioption {
+  value: String!
+  question: String!
+}
+
+input Uoption {
+  id: String!
+  value: String
+  question: String
+}
+
+type optionMutations {
+  create(option: Ioption!): option
+  update(option: Uoption!): option
+  archive(option: Uoption!): option
+  restore(option: Uoption!): option
 }

@@ -125,6 +125,12 @@ const nested = {
         where: { school: root.id, isDeleted: false }
       });
       return entries;
+    },
+    async grades(root, args, { db: { collections } }) {
+      const entries = await collections["grade"].find({
+        where: { school: root.id, isDeleted: false }
+      });
+      return entries;
     }
   }
 };

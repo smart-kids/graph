@@ -15,6 +15,13 @@ import teachers from "./teachers"
 import payments from "./payments"
 import charges from "./charges"
 import sms from "./sms"
+import grades from "./grades"
+import subjects from "./subjects"
+import topics from "./topics"
+import subtopics from "./subtopics"
+import questions from "./questions"
+import answers from "./answers"
+import options from "./options"
 
 export default {
   admins,
@@ -34,6 +41,13 @@ export default {
   schools,
   teachers,
   sms,
+  grades,
+  subjects,
+  topics,
+  subtopics,
+  questions,
+  answers,
+  options,
   hello() {
     return "hello mutation";
   }

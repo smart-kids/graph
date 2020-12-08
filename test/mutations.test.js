@@ -2675,3 +2675,917 @@ describe("Charges", () => {
       });
   });
 })
+
+describe("Grades", () => {
+  it("Can create a grade", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Igrade: Igrade!) {
+            grades {
+              create(grade: $Igrade) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Igrade: {
+            name: "3",
+            school: sharedInfo.school,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.grades.create.id).to.be.a.string;
+
+        sharedInfo.gradeId = res.body.data.grades.create.id;
+        done();
+      });
+  });
+
+  it("Can update a grade", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Igrade: Ugrade!) {
+            grades {
+              update(grade: $Igrade) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Igrade: {
+            id: sharedInfo.gradeId,
+            name: "2"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.grades.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke a grade", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Igrade: Ugrade!) {
+            grades {
+              archive(grade: $Igrade) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Igrade: {
+            id: sharedInfo.gradeId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.grades.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore a grade", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Igrade: Ugrade!) {
+            grades {
+              restore(grade: $Igrade) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Igrade: {
+            id: sharedInfo.gradeId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});
+
+
+describe("Subjects", () => {
+  it("Can create a subject", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubject: Isubject!) {
+            subjects {
+              create(subject: $Isubject) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Isubject: {
+            name: "Science",
+            grade: sharedInfo.gradeId,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.subjects.create.id).to.be.a.string;
+
+        sharedInfo.subjectId = res.body.data.subjects.create.id;
+        done();
+      });
+  });
+
+  it("Can update a subject", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubject: Usubject!) {
+            subjects {
+              update(subject: $Isubject) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Isubject: {
+            id: sharedInfo.subjectId,
+            name: "Social Studies"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.subjects.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke a subject", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubject: Usubject!) {
+            subjects {
+              archive(subject: $Isubject) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Isubject: {
+            id: sharedInfo.subjectId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.subjects.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore a subject", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubject: Usubject!) {
+            subjects {
+              restore(subject: $Isubject) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Isubject: {
+            id: sharedInfo.subjectId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});
+
+describe("Topics", () => {
+  it("Can create a topic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Itopic: Itopic!) {
+            topics {
+              create(topic: $Itopic) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Itopic: {
+            name: "Introduction",
+            subject: sharedInfo.subjectId,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.topics.create.id).to.be.a.string;
+
+        sharedInfo.topicId = res.body.data.topics.create.id;
+        done();
+      });
+  });
+
+  it("Can update a topic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Itopic: Utopic!) {
+            topics {
+              update(topic: $Itopic) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Itopic: {
+            id: sharedInfo.topicId,
+            name: "Energy"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.topics.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke a topic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Itopic: Utopic!) {
+            topics {
+              archive(topic: $Itopic) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Itopic: {
+            id: sharedInfo.topicId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.topics.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore a topic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Itopic: Utopic!) {
+            topics {
+              restore(topic: $Itopic) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Itopic: {
+            id: sharedInfo.topicId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});
+
+describe("Subtopics", () => {
+  it("Can create a subtopic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubtopic: Isubtopic!) {
+            subtopics {
+              create(subtopic: $Isubtopic) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Isubtopic: {
+            name: "Basics",
+            topic: sharedInfo.topicId,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.subtopics.create.id).to.be.a.string;
+
+        sharedInfo.subtopicId = res.body.data.subtopics.create.id;
+        done();
+      });
+  });
+
+  it("Can update a subtopic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubtopic: Usubtopic!) {
+            subtopics {
+              update(subtopic: $Isubtopic) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Isubtopic: {
+            id: sharedInfo.subtopicId,
+            name: "Summary"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.subtopics.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke a subtopic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubtopic: Usubtopic!) {
+            subtopics {
+              archive(subtopic: $Isubtopic) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Isubtopic: {
+            id: sharedInfo.subtopicId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.subtopics.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an subtopic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubtopic: Usubtopic!) {
+            subtopics {
+              restore(subtopic: $Isubtopic) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Isubtopic: {
+            id: sharedInfo.subtopicId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});
+
+describe("Questions", () => {
+  it("Can create a question", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iquestion: Iquestion!) {
+            questions {
+              create(question: $Iquestion) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Iquestion: {
+            subtopic: sharedInfo.subtopicId,
+            type: "SINGLECHOICE",
+            name: "Which image shows a cat?",
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.questions.create.id).to.be.a.string;
+
+        sharedInfo.questionId = res.body.data.questions.create.id;
+        done();
+      });
+  });
+
+  it("Can update a question", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iquestion: Uquestion!) {
+            questions {
+              update(question: $Iquestion) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Iquestion: {
+            id: sharedInfo.questionId,
+            subtopic: sharedInfo.subtopicId,
+            type: "MULTICHOICE",
+            name: "Which images show cats?",
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.questions.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke a question", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iquestion: Uquestion!) {
+            questions {
+              archive(question: $Iquestion) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Iquestion: {
+            id: sharedInfo.questionId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.questions.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an question", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iquestion: Uquestion!) {
+            questions {
+              restore(question: $Iquestion) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Iquestion: {
+            id: sharedInfo.questionId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});
+
+describe("Answers", () => {
+  it("Can create an answer", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ianswer: Ianswer!) {
+            answers {
+              create(answer: $Ianswer) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Ianswer: {
+            value: 'A',
+            question: sharedInfo.questionId,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.answers.create.id).to.be.a.string;
+
+        sharedInfo.answerId = res.body.data.answers.create.id;
+        done();
+      });
+  });
+
+  it("Can update an answer", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ianswer: Uanswer!) {
+            answers {
+              update(answer: $Ianswer) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Ianswer: {
+            id: sharedInfo.answerId,
+            value: 'C'
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.answers.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an answer", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ianswer: Uanswer!) {
+            answers {
+              archive(answer: $Ianswer) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Ianswer: {
+            id: sharedInfo.answerId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.answers.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an answer", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ianswer: Uanswer!) {
+            answers {
+              restore(answer: $Ianswer) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Ianswer: {
+            id: sharedInfo.answerId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});
+
+describe("Options", () => {
+  it("Can create an option", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ioption: Ioption!) {
+            options {
+              create(option: $Ioption) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Ioption: {
+            value: 'cat.jpg',
+            question: sharedInfo.questionId,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.options.create.id).to.be.a.string;
+
+        sharedInfo.optionId = res.body.data.options.create.id;
+        done();
+      });
+  });
+
+  it("Can update an option", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ioption: Uoption!) {
+            options {
+              update(option: $Ioption) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Ioption: {
+            id: sharedInfo.optionId,
+            value: 'dog.jpg'
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.options.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an option", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ioption: Uoption!) {
+            options {
+              archive(option: $Ioption) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Ioption: {
+            id: sharedInfo.optionId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.options.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an option", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Ioption: Uoption!) {
+            options {
+              restore(option: $Ioption) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Ioption: {
+            id: sharedInfo.optionId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});

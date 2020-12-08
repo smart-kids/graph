@@ -231,6 +231,35 @@ describe("Setup For Queries", () => {
             schools {
               id,
               name,
+              grades {
+                id
+                name
+                subjects {
+                  id
+                  name
+                  topics {
+                    id
+                    name
+                    subtopics {
+                      id
+                      name
+                      questions {
+                        id
+                        name
+                        type
+                        answers {
+                          id
+                          value
+                        }
+                        options {
+                          id
+                          value
+                        }
+                      }
+                    }
+                  }
+                }
+              }
               complaints {
                 id
                 time
@@ -475,7 +504,7 @@ describe("Setup For Queries", () => {
                 }
               }
             }
-          }          
+          }        
           `
         })
         .end((err, res) => {
@@ -496,6 +525,13 @@ describe("Setup For Queries", () => {
           const class1 = school.classes[0];
           const schedule = school.schedules[0];
           const complaint = school.complaints[0];
+          const grade = school.grades[0];
+          const subject = grade.subjects[0];
+          const topic = subject.topics[0];
+          const subtopic = topic.subtopics[0];
+          const question = subtopic.questions[0];
+          const answer = question.answers[0];
+          const option = question.options[0];
 
           // students
           expect(student.id).to.be.a.string;
@@ -525,7 +561,6 @@ describe("Setup For Queries", () => {
           expect(parent.complaints).to.be.instanceof(Array);
           expect(parent.complaints[0].id).to.be.a.string;
 
-          // routes
           expect(route.id).to.be.a.string;
           expect(route.name).to.be.a.string;
           expect(route.description).to.be.a.string;
@@ -574,6 +609,39 @@ describe("Setup For Queries", () => {
           // classes
           expect(class1.id).to.be.a.string;
           expect(class1.name).to.be.a.string;
+
+          // grades
+          expect(grade.id).to.be.a.string;
+          expect(school.grades).to.be.instanceof(Array);
+
+          // subjects
+          expect(subject.id).to.be.a.string;
+          expect(grade.subjects).to.be.instanceof(Array);
+
+          // topics
+          expect(topic.id).to.be.a.string;
+          expect(subject.topics).to.be.instanceof(Array);
+
+          // subtopics
+          expect(subtopic.id).to.be.a.string;
+          expect(topic.subtopics).to.be.instanceof(Array);
+
+          // questions
+          expect(question.id).to.be.a.string;
+          expect(question.name).to.be.a.string;
+          expect(question.answer).to.be.a.string;
+          expect(question.type).to.be.a.string;
+          expect(subtopic.questions).to.be.instanceof(Array);
+
+          // answers
+          expect(answer.id).to.be.a.string;
+          expect(answer.value).to.be.a.string;
+          expect(question.answers).to.be.instanceof(Array);
+
+          // options
+          expect(option.id).to.be.a.string;
+          expect(option.value).to.be.a.string;
+          expect(question.options).to.be.instanceof(Array);
 
           done();
         });
