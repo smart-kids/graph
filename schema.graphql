@@ -62,6 +62,9 @@ type Query {
 
   subtopic: subtopic
   subtopics: [subtopic]
+
+  question: question
+  questions: [question]
 }
 
 type Mutation {
@@ -88,6 +91,7 @@ type Mutation {
   subjects: subjectMutations
   topics: topicMutations
   subtopics: subtopicMutations
+  questions: questionMutations
 }
 
 # user things
@@ -870,6 +874,7 @@ type subtopic {
   id: String
   name: String
   topic: topic
+  questions: [question]
 }
 
 input Isubtopic {
@@ -888,4 +893,37 @@ type subtopicMutations {
   update(subtopic: Usubtopic!): subtopic
   archive(subtopic: Usubtopic!): subtopic
   restore(subtopic: Usubtopic!): subtopic
+}
+
+enum answerType {
+  SINGLECHOICE
+  MULTICHOICE
+}
+
+# question things
+type question {
+  id: String
+  name: String
+  type: answerType
+  subtopic: subtopic
+}
+
+input Iquestion {
+  name: String!
+  type: String!
+  subtopic: String!
+}
+
+input Uquestion {
+  id: String!
+  name: String
+  type: answerType
+  subtopic: String
+}
+
+type questionMutations {
+  create(question: Iquestion!): question
+  update(question: Uquestion!): question
+  archive(question: Uquestion!): question
+  restore(question: Uquestion!): question
 }

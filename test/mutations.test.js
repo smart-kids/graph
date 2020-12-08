@@ -3196,3 +3196,136 @@ describe("Subtopics", () => {
       });
   });
 });
+
+describe("Questions", () => {
+  it("Can create a question", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iquestion: Iquestion!) {
+            questions {
+              create(question: $Iquestion) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Iquestion: {
+            subtopic: sharedInfo.subtopicId,
+            type: "SINGLECHOICE",
+            name: "Which image shows a cat?",
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.questions.create.id).to.be.a.string;
+
+        sharedInfo.questionId = res.body.data.questions.create.id;
+        done();
+      });
+  });
+
+  it("Can update a question", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iquestion: Uquestion!) {
+            questions {
+              update(question: $Iquestion) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Iquestion: {
+            id: sharedInfo.questionId,
+            subtopic: sharedInfo.subtopicId,
+            type: "MULTICHOICE",
+            name: "Which images show cats?",
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.questions.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke a question", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iquestion: Uquestion!) {
+            questions {
+              archive(question: $Iquestion) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Iquestion: {
+            id: sharedInfo.questionId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.questions.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an question", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iquestion: Uquestion!) {
+            questions {
+              restore(question: $Iquestion) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Iquestion: {
+            id: sharedInfo.questionId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});

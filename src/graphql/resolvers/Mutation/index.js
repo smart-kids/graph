@@ -19,6 +19,7 @@ import grades from "./grades"
 import subjects from "./subjects"
 import topics from "./topics"
 import subtopics from "./subtopics"
+import questions from "./questions"
 
 export default {
   admins,
@@ -42,6 +43,7 @@ export default {
   subjects,
   topics,
   subtopics,
+  questions,
   hello() {
     return "hello mutation";
   }

@@ -243,6 +243,11 @@ describe("Setup For Queries", () => {
                     subtopics {
                       id
                       name
+                      questions {
+                        id
+                        name
+                        type
+                      }
                     }
                   }
                 }
@@ -516,6 +521,7 @@ describe("Setup For Queries", () => {
           const subject = grade.subjects[0];
           const topic = subject.topics[0];
           const subtopic = topic.subtopics[0];
+          const question = subtopic.questions[0];
 
           // students
           expect(student.id).to.be.a.string;
@@ -609,6 +615,13 @@ describe("Setup For Queries", () => {
           // subtopics
           expect(subtopic.id).to.be.a.string;
           expect(topic.subtopics).to.be.instanceof(Array);
+
+          // questions
+          expect(question.id).to.be.a.string;
+          expect(question.name).to.be.a.string;
+          expect(question.answer).to.be.a.string;
+          expect(question.type).to.be.a.string;
+          expect(subtopic.questions).to.be.instanceof(Array);
 
           done();
         });

@@ -87,6 +87,12 @@ import {
   nested as Nsubtopic
 } from "./subtopics";
 
+import {
+  list as questions,
+  single as question,
+  nested as Nquestion
+} from "./questions";
+
 const nested = {};
 
 Object.assign(
@@ -108,6 +114,7 @@ Object.assign(
   Nsubject,
   Ntopic,
   Nsubtopic,
+  Nquestion,
 );
 
 const Query = {
@@ -171,6 +178,9 @@ const Query = {
 
   subtopic,
   subtopics,
+
+  question,
+  questions,
 
   hello: () => "hey"
 };
