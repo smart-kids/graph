@@ -59,6 +59,9 @@ type Query {
 
   topic: topic
   topics: [topic]
+
+  subtopic: subtopic
+  subtopics: [subtopic]
 }
 
 type Mutation {
@@ -84,6 +87,7 @@ type Mutation {
   grades: gradeMutations
   subjects: subjectMutations
   topics: topicMutations
+  subtopics: subtopicMutations
 }
 
 # user things
@@ -840,6 +844,7 @@ type topic {
   id: String
   name: String
   subject: subject
+  subtopics: [subtopic]
 }
 
 input Itopic {
@@ -858,4 +863,29 @@ type topicMutations {
   update(topic: Utopic!): topic
   archive(topic: Utopic!): topic
   restore(topic: Utopic!): topic
+}
+
+# subtopic things
+type subtopic {
+  id: String
+  name: String
+  topic: topic
+}
+
+input Isubtopic {
+  name: String!
+  topic: String!
+}
+
+input Usubtopic {
+  id: String!
+  name: String
+  topic: String
+}
+
+type subtopicMutations {
+  create(subtopic: Isubtopic!): subtopic
+  update(subtopic: Usubtopic!): subtopic
+  archive(subtopic: Usubtopic!): subtopic
+  restore(subtopic: Usubtopic!): subtopic
 }

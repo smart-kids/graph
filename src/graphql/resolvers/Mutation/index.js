@@ -18,6 +18,7 @@ import sms from "./sms"
 import grades from "./grades"
 import subjects from "./subjects"
 import topics from "./topics"
+import subtopics from "./subtopics"
 
 export default {
   admins,
@@ -40,6 +41,7 @@ export default {
   grades,
   subjects,
   topics,
+  subtopics,
   hello() {
     return "hello mutation";
   }

@@ -240,6 +240,10 @@ describe("Setup For Queries", () => {
                   topics {
                     id
                     name
+                    subtopics {
+                      id
+                      name
+                    }
                   }
                 }
               }
@@ -509,8 +513,9 @@ describe("Setup For Queries", () => {
           const schedule = school.schedules[0];
           const complaint = school.complaints[0];
           const grade = school.grades[0];
-          const subject = school.grades[0].subjects[0];
-          const topic = school.grades[0].subjects[0].topics[0];
+          const subject = grade.subjects[0];
+          const topic = subject.topics[0];
+          const subtopic = topic.subtopics[0];
 
           // students
           expect(student.id).to.be.a.string;
@@ -600,6 +605,10 @@ describe("Setup For Queries", () => {
           // topics
           expect(topic.id).to.be.a.string;
           expect(subject.topics).to.be.instanceof(Array);
+
+          // subtopics
+          expect(subtopic.id).to.be.a.string;
+          expect(topic.subtopics).to.be.instanceof(Array);
 
           done();
         });

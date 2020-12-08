@@ -2808,7 +2808,7 @@ describe("Grades", () => {
 
 
 describe("Subjects", () => {
-  it("Can create an subject", done => {
+  it("Can create a subject", done => {
     chai
       .request(app)
       .post("/graph")
@@ -2842,7 +2842,7 @@ describe("Subjects", () => {
       });
   });
 
-  it("Can update an subject", done => {
+  it("Can update a subject", done => {
     chai
       .request(app)
       .post("/graph")
@@ -2874,7 +2874,7 @@ describe("Subjects", () => {
       });
   });
 
-  it("Can nuke an subject", done => {
+  it("Can nuke a subject", done => {
     chai
       .request(app)
       .post("/graph")
@@ -2905,7 +2905,7 @@ describe("Subjects", () => {
       });
   });
 
-  it("Can restore an subject", done => {
+  it("Can restore a subject", done => {
     chai
       .request(app)
       .post("/graph")
@@ -2938,7 +2938,7 @@ describe("Subjects", () => {
 });
 
 describe("Topics", () => {
-  it("Can create an topic", done => {
+  it("Can create a topic", done => {
     chai
       .request(app)
       .post("/graph")
@@ -2972,7 +2972,7 @@ describe("Topics", () => {
       });
   });
 
-  it("Can update an topic", done => {
+  it("Can update a topic", done => {
     chai
       .request(app)
       .post("/graph")
@@ -3004,7 +3004,7 @@ describe("Topics", () => {
       });
   });
 
-  it("Can nuke an topic", done => {
+  it("Can nuke a topic", done => {
     chai
       .request(app)
       .post("/graph")
@@ -3035,7 +3035,7 @@ describe("Topics", () => {
       });
   });
 
-  it("Can restore an topic", done => {
+  it("Can restore a topic", done => {
     chai
       .request(app)
       .post("/graph")
@@ -3054,6 +3054,136 @@ describe("Topics", () => {
         variables: {
           Itopic: {
             id: sharedInfo.topicId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.admins.restore.id).to.be.string;
+        done();
+      });
+  });
+});
+
+describe("Subtopics", () => {
+  it("Can create a subtopic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubtopic: Isubtopic!) {
+            subtopics {
+              create(subtopic: $Isubtopic) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Isubtopic: {
+            name: "Basics",
+            topic: sharedInfo.topicId,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.subtopics.create.id).to.be.a.string;
+
+        sharedInfo.subtopicId = res.body.data.subtopics.create.id;
+        done();
+      });
+  });
+
+  it("Can update a subtopic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubtopic: Usubtopic!) {
+            subtopics {
+              update(subtopic: $Isubtopic) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Isubtopic: {
+            id: sharedInfo.subtopicId,
+            name: "Summary"
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.subtopics.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke a subtopic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubtopic: Usubtopic!) {
+            subtopics {
+              archive(subtopic: $Isubtopic) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Isubtopic: {
+            id: sharedInfo.subtopicId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.subtopics.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an subtopic", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Isubtopic: Usubtopic!) {
+            subtopics {
+              restore(subtopic: $Isubtopic) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Isubtopic: {
+            id: sharedInfo.subtopicId
           }
         }
       })
