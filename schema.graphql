@@ -602,6 +602,7 @@ type school {
   email: String
   address: String
   financial: financial
+  gradeOrder: [String]
 
   # relations for saas
   admins: [admin]
@@ -628,6 +629,7 @@ input ISchool {
   phone: String
   email: String
   address: String
+  gradeOrder:[String]
 }
 
 input USchool {
@@ -636,6 +638,7 @@ input USchool {
   phone: String
   email: String
   address: String
+  gradeOrder:[String]
 }
 
 type schoolMutations {
@@ -854,7 +857,6 @@ type subjectMutations {
   archive(subject: Usubject!): subject
   restore(subject: Usubject!): subject
 }
-
 
 # topic things
 type topic {

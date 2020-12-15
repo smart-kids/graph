@@ -109,10 +109,12 @@ describe("Schools", () => {
             phone: "0711111111",
             email: "mail@domain.com",
             address: "PO Box 1234-00000 Someplace somewhere",
+            gradeOrder: ['One', 'Two', 'Three', 'Five']
           }
         }
       })
       .end((err, res) => {
+        console.log(res.body.errors)
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
@@ -142,7 +144,8 @@ describe("Schools", () => {
         variables: {
           school: {
             id: sharedInfo.school,
-            name: "New School"
+            name: "New School",
+            gradeOrder: ['One', 'Two', 'Three', 'Five', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight']
           }
         }
       })
