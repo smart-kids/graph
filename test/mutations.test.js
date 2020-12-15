@@ -3589,3 +3589,132 @@ describe("Options", () => {
       });
   });
 });
+
+describe("Terms", () => {
+  it("Can create a term", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iterm: Iterm!) {
+            terms {
+              create(term: $Iterm) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Iterm: {
+            school: sharedInfo.school,
+            name: 'One',
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.terms.create.id).to.be.a.string;
+
+        sharedInfo.termId = res.body.data.terms.create.id;
+        done();
+      });
+  });
+
+  it("Can update a term", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iterm: Uterm!) {
+            terms {
+              update(term: $Iterm) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Iterm: {
+            id: sharedInfo.termId,
+            name: 'Three'
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.terms.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke a term", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iterm: Uterm!) {
+            terms {
+              archive(term: $Iterm) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Iterm: {
+            id: sharedInfo.termId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.terms.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore a term", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iterm: Uterm!) {
+            terms {
+              restore(term: $Iterm) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Iterm: {
+            id: sharedInfo.termId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        done();
+      });
+  });
+});

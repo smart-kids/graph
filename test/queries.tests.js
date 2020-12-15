@@ -231,6 +231,10 @@ describe("Setup For Queries", () => {
             schools {
               id,
               name,
+              terms {
+                id
+                name
+              }
               grades {
                 id
                 name
@@ -532,6 +536,7 @@ describe("Setup For Queries", () => {
           const question = subtopic.questions[0];
           const answer = question.answers[0];
           const option = question.options[0];
+          const term = school.terms[0];
 
           // students
           expect(student.id).to.be.a.string;
@@ -642,6 +647,11 @@ describe("Setup For Queries", () => {
           expect(option.id).to.be.a.string;
           expect(option.value).to.be.a.string;
           expect(question.options).to.be.instanceof(Array);
+
+          // terms
+          expect(term.id).to.be.a.string;
+          expect(term.name).to.be.a.string;
+          expect(school.terms).to.be.instanceof(Array);
 
           done();
         });

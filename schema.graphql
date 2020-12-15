@@ -71,6 +71,9 @@ type Query {
 
   option: option
   options: [option]
+
+  term: term
+  terms: [term]
 }
 
 type Mutation {
@@ -100,6 +103,7 @@ type Mutation {
   questions: questionMutations
   answers: answerMutations
   options: optionMutations
+  terms: termMutations
 }
 
 # user things
@@ -616,6 +620,7 @@ type school {
   payments:[payment]
   charges:[charge]
   grades:[grade]
+  terms:[term]
 }
 
 input ISchool {
@@ -986,4 +991,29 @@ type optionMutations {
   update(option: Uoption!): option
   archive(option: Uoption!): option
   restore(option: Uoption!): option
+}
+
+# term things
+type term {
+  id: String
+  name: String
+  school: school
+}
+
+input Iterm {
+  name: String!
+  school: String!
+}
+
+input Uterm {
+  id: String!
+  name: String
+  school: String
+}
+
+type termMutations {
+  create(term: Iterm!): term
+  update(term: Uterm!): term
+  archive(term: Uterm!): term
+  restore(term: Uterm!): term
 }

@@ -103,7 +103,13 @@ import {
   list as options,
   single as option,
   nested as Noption
-} from "./answers";
+} from "./options";
+
+import {
+  list as terms,
+  single as term,
+  nested as Nterm
+} from "./terms";
 
 const nested = {};
 
@@ -129,6 +135,7 @@ Object.assign(
   Nquestion,
   Nanswer,
   Noption,
+  Nterm,
 );
 
 const Query = {
@@ -201,6 +208,9 @@ const Query = {
 
   option,
   options,
+
+  term,
+  terms,
 
   hello: () => "hey"
 };
