@@ -841,17 +841,20 @@ type subject {
   name: String
   grade: grade
   topics: [topic]
+  topicOrder: [String]
 }
 
 input Isubject {
   name: String!
   grade: String!
+  topicOrder: [String]
 }
 
 input Usubject {
   id: String!
   name: String
   grade: String
+  topicOrder: [String]
 }
 
 type subjectMutations {

@@ -41,6 +41,9 @@ const nested = {
       });
       return entry;
     },
+    async topicOrder(root, args, { db: { collections } }) {
+      return root.topicOrder ? root.topicOrder.split(",") : [];
+    },
   }
 }
 

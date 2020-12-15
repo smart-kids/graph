@@ -2833,6 +2833,7 @@ describe("Subjects", () => {
           Isubject: {
             name: "Science",
             grade: sharedInfo.gradeId,
+            topicOrder: ['Introduction', 'Reproduction']
           }
         }
       })
@@ -2866,7 +2867,8 @@ describe("Subjects", () => {
         variables: {
           Isubject: {
             id: sharedInfo.subjectId,
-            name: "Social Studies"
+            name: "Social Studies",
+            topicOrder: ['Introduction', 'Reproduction', 'Energy']
           }
         }
       })

@@ -243,6 +243,7 @@ describe("Setup For Queries", () => {
                 subjects {
                   id
                   name
+                  topicOrder
                   topics {
                     id
                     name
@@ -660,6 +661,9 @@ describe("Setup For Queries", () => {
 
           // termOrder
           expect(school.termOrder).to.be.instanceof(Array);
+
+          // topicOrder
+          expect(subject.topicOrder).to.be.instanceof(Array);
 
           done();
         });
