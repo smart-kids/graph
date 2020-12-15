@@ -213,6 +213,9 @@ router.post(
         // check parents list
         const [parent] = await collections["parent"].find({ phone: user, isDeleted: false })
 
+        // check teacher list
+        const [teacher] = await collections["teacher"].find({ phone: user, isDeleted: false })
+
         // check admins list
         const [adminEmail] = await collections["admin"].find({ username: user, isDeleted: false })
         const [adminPhone] = await collections["admin"].find({ phone: user, isDeleted: false })
@@ -305,7 +308,7 @@ router.post(
                     id: new ObjectId().toHexString(),
                     userId: user,
                     userType,
-                    user: JSON.stringify(driver || parent || adminEmail || adminPhone),
+                    user: JSON.stringify(driver || parent || teacher || adminEmail || adminPhone),
                     password
                 })
 
@@ -324,6 +327,11 @@ router.post(
         if (parent) {
             userType = 'parent'
             return returnAuth(parent)
+        }
+
+        if (teacher) {
+            userType = 'teacher'
+            return returnAuth(teacher)
         }
 
         if (adminPhone || adminEmail) {
