@@ -603,6 +603,7 @@ type school {
   address: String
   financial: financial
   gradeOrder: [String]
+  termOrder: [String]
 
   # relations for saas
   admins: [admin]
@@ -630,6 +631,7 @@ input ISchool {
   email: String
   address: String
   gradeOrder:[String]
+  termOrder: [String]
 }
 
 input USchool {
@@ -639,6 +641,7 @@ input USchool {
   email: String
   address: String
   gradeOrder:[String]
+  termOrder: [String]
 }
 
 type schoolMutations {

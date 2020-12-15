@@ -232,6 +232,7 @@ describe("Setup For Queries", () => {
               id,
               name,
               gradeOrder,
+              termOrder,
               terms {
                 id
                 name
@@ -656,6 +657,9 @@ describe("Setup For Queries", () => {
 
           // gradeOrder
           expect(school.gradeOrder).to.be.instanceof(Array);
+
+          // termOrder
+          expect(school.termOrder).to.be.instanceof(Array);
 
           done();
         });

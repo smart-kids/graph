@@ -109,7 +109,8 @@ describe("Schools", () => {
             phone: "0711111111",
             email: "mail@domain.com",
             address: "PO Box 1234-00000 Someplace somewhere",
-            gradeOrder: ['One', 'Two', 'Three', 'Five']
+            gradeOrder: ['One', 'Two', 'Three', 'Five'],
+            termOrder: ['One', 'Two'],
           }
         }
       })
@@ -145,7 +146,8 @@ describe("Schools", () => {
           school: {
             id: sharedInfo.school,
             name: "New School",
-            gradeOrder: ['One', 'Two', 'Three', 'Five', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight']
+            gradeOrder: ['One', 'Two', 'Three', 'Five', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'],
+            termOrder: ['One', 'Two', 'Three']
           }
         }
       })

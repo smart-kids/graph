@@ -57,6 +57,9 @@ const nested = {
     async gradeOrder(root, args, { db: { collections } }) {
       return root.gradeOrder ? root.gradeOrder.split(",") : [];
     },
+    async termOrder(root, args, { db: { collections } }) {
+      return root.termOrder ? root.termOrder.split(",") : [];
+    },
     async students(root, args, { db: { collections } }) {
       const entries = await collections["student"].find({
         where: { school: root.id, isDeleted: false }
