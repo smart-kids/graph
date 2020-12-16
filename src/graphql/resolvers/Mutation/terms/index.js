@@ -5,9 +5,7 @@ const { UserError } = require("graphql-errors");
 
 const create = async (data, { db: { collections } }) => {
   const id = new ObjectId().toHexString();
-  let { topicOrder } = data[name];
-  topicOrder = topicOrder ? topicOrder.join(",") : "";
-  const entry = Object.assign(data[name], { id, topicOrder, isDeleted: false });
+  const entry = Object.assign(data[name], { id, isDeleted: false });
 
   try {
     await collections[name].create(entry);
@@ -21,8 +19,6 @@ const create = async (data, { db: { collections } }) => {
 const update = async (data, { db: { collections } }) => {
   const { id } = data[name];
   const entry = data[name];
-  let { topicOrder } = entry;
-  entry.topicOrder = topicOrder ? topicOrder.join(",") : "";
 
   try {
     delete entry.id;

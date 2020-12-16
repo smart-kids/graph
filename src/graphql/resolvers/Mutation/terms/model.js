@@ -1,5 +1,5 @@
 var Waterline = require("waterline");
-const { name: identity } = require("./about.js")
+const { name: identity } = require("./about.js");
 
 export default Waterline.Collection.extend({
   identity,
@@ -9,8 +9,7 @@ export default Waterline.Collection.extend({
   attributes: {
     id: { type: "string", required: true },
     name: { type: "string", required: true },
-    grade: { type: "string", required: true },
-    topicOrder: { type: "string", required: false },
+    school: { type: "string", required: true },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });

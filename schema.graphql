@@ -71,6 +71,9 @@ type Query {
 
   option: option
   options: [option]
+
+  term: term
+  terms: [term]
 }
 
 type Mutation {
@@ -100,6 +103,7 @@ type Mutation {
   questions: questionMutations
   answers: answerMutations
   options: optionMutations
+  terms: termMutations
 }
 
 # user things
@@ -598,6 +602,8 @@ type school {
   email: String
   address: String
   financial: financial
+  gradeOrder: [String]
+  termOrder: [String]
 
   # relations for saas
   admins: [admin]
@@ -616,6 +622,7 @@ type school {
   payments:[payment]
   charges:[charge]
   grades:[grade]
+  terms:[term]
 }
 
 input ISchool {
@@ -623,6 +630,8 @@ input ISchool {
   phone: String
   email: String
   address: String
+  gradeOrder:[String]
+  termOrder: [String]
 }
 
 input USchool {
@@ -631,6 +640,8 @@ input USchool {
   phone: String
   email: String
   address: String
+  gradeOrder:[String]
+  termOrder: [String]
 }
 
 type schoolMutations {
@@ -830,17 +841,20 @@ type subject {
   name: String
   grade: grade
   topics: [topic]
+  topicOrder: [String]
 }
 
 input Isubject {
   name: String!
   grade: String!
+  topicOrder: [String]
 }
 
 input Usubject {
   id: String!
   name: String
   grade: String
+  topicOrder: [String]
 }
 
 type subjectMutations {
@@ -849,7 +863,6 @@ type subjectMutations {
   archive(subject: Usubject!): subject
   restore(subject: Usubject!): subject
 }
-
 
 # topic things
 type topic {
@@ -986,4 +999,29 @@ type optionMutations {
   update(option: Uoption!): option
   archive(option: Uoption!): option
   restore(option: Uoption!): option
+}
+
+# term things
+type term {
+  id: String
+  name: String
+  school: school
+}
+
+input Iterm {
+  name: String!
+  school: String!
+}
+
+input Uterm {
+  id: String!
+  name: String
+  school: String
+}
+
+type termMutations {
+  create(term: Iterm!): term
+  update(term: Uterm!): term
+  archive(term: Uterm!): term
+  restore(term: Uterm!): term
 }

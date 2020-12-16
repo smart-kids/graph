@@ -54,6 +54,12 @@ const nested = {
         balance
       }
     },
+    async gradeOrder(root, args, { db: { collections } }) {
+      return root.gradeOrder ? root.gradeOrder.split(",") : [];
+    },
+    async termOrder(root, args, { db: { collections } }) {
+      return root.termOrder ? root.termOrder.split(",") : [];
+    },
     async students(root, args, { db: { collections } }) {
       const entries = await collections["student"].find({
         where: { school: root.id, isDeleted: false }
@@ -128,6 +134,12 @@ const nested = {
     },
     async grades(root, args, { db: { collections } }) {
       const entries = await collections["grade"].find({
+        where: { school: root.id, isDeleted: false }
+      });
+      return entries;
+    },
+    async terms(root, args, { db: { collections } }) {
+      const entries = await collections["term"].find({
         where: { school: root.id, isDeleted: false }
       });
       return entries;
