@@ -1,5 +1,7 @@
 import { ObjectId } from "mongodb";
 import sms from "../../../../utils/sms";
+import Handlebars from "handlebars"
+import moment from "moment"
 const { name } = require("./about.js");
 
 
@@ -44,20 +46,33 @@ const create = async (data, { db: { collections } }) => {
     where: { id: trip.schedule, isDeleted: false }
   });
 
+  const school = await collections["school"].findOne({
+    where: { id: trip.school, isDeleted: false }
+  });
+
   const actions = schedule.actions ? JSON.parse(schedule.actions) : null;
+
+  // {{student_name}} {{parent_name}} {{school_name}} {{time}}
+  const time = new Date()
+  const templateData = {
+    student_name: student.name,
+    parent_name: parent.name,
+    school_name: school.name,
+    time
+  }
 
   try {
     if (entry.type === "CHECKEDON")
       sms(
-        { data: { phone: parent.phone, message: messageMap[entry.type] } },
+        { data: { phone: parent.phone, message: Handlebars.compile(schedule.message)(templateData) } },
         async (res) => {
-          const {smsCost} = res
+          const { smsCost } = res
           await collections["charge"].create({
             id: new ObjectId().toHexString(),
             school: trip.school,
             ammount: smsCost,
-            reason: `sending message ${messageMap[entry.type]}`,
-            time: new Date(),
+            reason: `Sending message ${messageMap[entry.type]}`,
+            time,
             isDeleted: false
           })
         }
@@ -65,15 +80,15 @@ const create = async (data, { db: { collections } }) => {
 
     if (entry.type === "CHECKEDOFF")
       sms(
-        { data: { phone: parent.phone, message: messageMap[entry.type] } },
+        { data: { phone: parent.phone, message: Handlebars.compile(schedule.message)(templateData) } },
         async (res) => {
-          const {smsCost} = res
+          const { smsCost } = res
           await collections["charge"].create({
             id: new ObjectId().toHexString(),
             school: trip.school,
             ammount: smsCost,
-            reason: `sending message ${messageMap[entry.type]}`,
-            time: new Date(),
+            reason: `Sending message ${messageMap[entry.type]}`,
+            time,
             isDeleted: false
           })
         }
