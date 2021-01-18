@@ -50,12 +50,13 @@ const create = async (data, { db: { collections } }) => {
     if (entry.type === "CHECKEDON")
       sms(
         { data: { phone: parent.phone, message: messageMap[entry.type] } },
-        async () => {
+        async (res) => {
+          const {smsCost} = res
           await collections["charge"].create({
             id: new ObjectId().toHexString(),
             school: trip.school,
             ammount: smsCost,
-            reason: `sending message ${message}`,
+            reason: `sending message ${messageMap[entry.type]}`,
             time: new Date(),
             isDeleted: false
           })
@@ -65,12 +66,13 @@ const create = async (data, { db: { collections } }) => {
     if (entry.type === "CHECKEDOFF")
       sms(
         { data: { phone: parent.phone, message: messageMap[entry.type] } },
-        async () => {
+        async (res) => {
+          const {smsCost} = res
           await collections["charge"].create({
             id: new ObjectId().toHexString(),
             school: trip.school,
             ammount: smsCost,
-            reason: `sending message ${message}`,
+            reason: `sending message ${messageMap[entry.type]}`,
             time: new Date(),
             isDeleted: false
           })
