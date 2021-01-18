@@ -1225,7 +1225,7 @@ describe("Parent", () => {
           Iparent: {
             name: "parent1",
             national_id: "35718850",
-            phone: "0719420491",
+            phone: "0719420495",
             password: "rY8x5uW",
             school: sharedInfo.school,
             email: "parent1@gmail.com",
@@ -1264,7 +1264,7 @@ describe("Parent", () => {
           Iparent: {
             name: "parent2",
             national_id: "35718851",
-            phone: "0774751895",
+            phone: "0773751395",
             password: "rY8x5uW",
             school: sharedInfo.school,
             email: "parent2@gmail.com",
