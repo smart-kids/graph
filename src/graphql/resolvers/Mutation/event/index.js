@@ -2,6 +2,8 @@ import { ObjectId } from "mongodb";
 import sms from "../../../../utils/sms";
 const { name } = require("./about.js");
 
+
+// fetch from db and use handlebars to template the student details
 const messageMap = {
   CHECKEDON: `Our bus has confirmed that it dropped your child at his his ussual pickup/dropoff point. 
 
@@ -48,13 +50,31 @@ const create = async (data, { db: { collections } }) => {
     if (entry.type === "CHECKEDON")
       sms(
         { data: { phone: parent.phone, message: messageMap[entry.type] } },
-        console.log
+        async () => {
+          await collections["charges"].create({
+            id: new ObjectId().toHexString(),
+            school: trip.school,
+            ammount: smsCost,
+            reason: `sending message ${message}`,
+            time: new Date(),
+            isDeleted: false
+          })
+        }
       );
 
     if (entry.type === "CHECKEDOFF")
       sms(
         { data: { phone: parent.phone, message: messageMap[entry.type] } },
-        console.log
+        async () => {
+          await collections["charges"].create({
+            id: new ObjectId().toHexString(),
+            school: trip.school,
+            ammount: smsCost,
+            reason: `sending message ${message}`,
+            time: new Date(),
+            isDeleted: false
+          })
+        }
       );
   } catch (err) {
     console.error("Unnable to send sms", err);

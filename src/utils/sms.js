@@ -5,7 +5,7 @@ const PNF = require('google-libphonenumber').PhoneNumberFormat;
 // Get an instance of `PhoneNumberUtil`.
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
 
-const func = ({ data: { phone, message } }, reply) => {
+const func = ({ schoolId, data: { phone, message } }, reply) => {
     const number = phoneUtil.parseAndKeepRawInput(phone, 'KE');
     const coolNumber = phoneUtil.format(number, PNF.E164)
 
@@ -33,7 +33,7 @@ const func = ({ data: { phone, message } }, reply) => {
     request(options, function (error, response, body) {
         if (error) throw new Error(error);
         console.log(JSON.stringify(JSON.parse(body), null, '\t'))
-        reply();
+        reply(JSON.parse(body));
     });
 
 }

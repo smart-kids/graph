@@ -348,4 +348,40 @@ export {
     router
 };
 
-// sms({ data: { password: makeid(), phone: "+254711657108" } }, console.log)
+// const schoolId = "12345"
+// const message = "1234"
+
+// sms({ schoolId, data: { password: makeid(), phone: "+254711657108", message } }, async({
+//     code,
+//     messageID,
+//     status,
+//     smsCost,
+//     smsCount
+// }) => {
+//     await collections["charges"].create({
+//         id: new ObjectId().toHexString(),
+//         school: schoolId,
+//         ammount: smsCost,
+//         userId: user,
+//         reason: `sending message ${message}`,
+//         time: new Date(),
+//         isDeleted:false
+//     })
+
+//     // id: { type: "string", required: true },
+//     // school: { type: "string", required: true },
+//     // ammount: { type: "string", required: true },
+//     // reason: { type: "string", required: true },
+//     // time: { type: "string", required: true },
+//     // isDeleted: { type: "boolean", defaultsTo: false }
+
+
+//     console.log({
+//         schoolId,
+//         code,
+//         messageID,
+//         status,
+//         smsCost,
+//         smsCount
+//     })
+// })

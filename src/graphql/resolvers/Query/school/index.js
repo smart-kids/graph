@@ -50,8 +50,14 @@ const nested = {
 
       const balance = subtract(paymentsSum, chargesSum)
 
+      var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'KSH',
+      });
+
       return {
-        balance
+        balance,
+        balanceFormated: formatter.format(balance)
       }
     },
     async gradeOrder(root, args, { db: { collections } }) {

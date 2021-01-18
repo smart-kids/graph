@@ -591,7 +591,8 @@ type classMutations {
 }
 
 type financial {
-  balance: Float
+  balance: Float,
+  balanceFormated: String
 }
 
 # school things
