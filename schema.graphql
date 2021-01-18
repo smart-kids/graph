@@ -684,6 +684,7 @@ input Iaction {
 type schedule {
   id: String
   name: String
+  message: String
   time: String
   end_time: String
   days: [day]
@@ -696,6 +697,7 @@ type schedule {
 
 input Ischedule {
   name: String
+  message: String
   time: String
   end_time: String
   school: String!
@@ -709,6 +711,7 @@ input Ischedule {
 input Uschedule {
   id: String!
   name: String
+  message: String
   time: String
   end_time: String
   days: String

@@ -16,6 +16,7 @@ export default Waterline.Collection.extend({
     route: { type: "string", required: false },
     actions: { type: "string", required: false },
     bus: { type: "string", required: false },
+    message: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });
