@@ -4,26 +4,6 @@ import Handlebars from "handlebars"
 import moment from "moment"
 const { name } = require("./about.js");
 
-
-// fetch from db and use handlebars to template the student details
-const messageMap = {
-  CHECKEDON: `Our bus has confirmed that it dropped your child at his his ussual pickup/dropoff point. 
-
-  Map link is _____
-  
-  Please use the Bethlehem app to raise any issues, view live data of the bus location as well as raise any issues to our support staff.
-  
-  we appreciate your commitment to time and safety.`,
-
-  CHECKEDOFF: `Our bus has confirmed that our bus was unnable to pick your child at his/her ussual pick up point, please reach out to the school for explanation/corrections. 
-
-  we appreciate appreciates your commitment to time and safety.`,
-
-  TRIPSTARTED: `The school bus has left school and is on route to pick up your child, please ensure that he/she is ready to be picked up and his/her usual destination. 
-
-  we appreciate appreciates your commitment to keep time.`
-};
-
 const { UserError } = require("graphql-errors");
 
 const create = async (data, { db: { collections } }) => {
@@ -52,8 +32,13 @@ const create = async (data, { db: { collections } }) => {
 
   const actions = schedule.actions ? JSON.parse(schedule.actions) : null;
 
-  // {{student_name}} {{parent_name}} {{school_name}} {{time}}
-  const time = new Date()
+  const time = new Date().toLocaleDateString(undefined, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+
   const templateData = {
     student_name: student.names,
     parent_name: parent.name,
@@ -61,38 +46,23 @@ const create = async (data, { db: { collections } }) => {
     time
   }
 
-  try {
-    if (entry.type === "CHECKEDON")
-      sms(
-        { data: { phone: parent.phone, message: Handlebars.compile(schedule.message)(templateData) } },
-        async (res) => {
-          const { smsCost } = res
-          await collections["charge"].create({
-            id: new ObjectId().toHexString(),
-            school: trip.school,
-            ammount: smsCost,
-            reason: `Sending message ${messageMap[entry.type]}`,
-            time,
-            isDeleted: false
-          })
-        }
-      );
+  const message = Handlebars.compile(schedule.message)(templateData)
 
-    if (entry.type === "CHECKEDOFF")
-      sms(
-        { data: { phone: parent.phone, message: Handlebars.compile(schedule.message)(templateData) } },
-        async (res) => {
-          const { smsCost } = res
-          await collections["charge"].create({
-            id: new ObjectId().toHexString(),
-            school: trip.school,
-            ammount: smsCost,
-            reason: `Sending message ${messageMap[entry.type]}`,
-            time,
-            isDeleted: false
-          })
-        }
-      );
+  try {
+    sms(
+      { data: { phone: parent.phone, message } },
+      async (res) => {
+        const { smsCost } = res
+        await collections["charge"].create({
+          id: new ObjectId().toHexString(),
+          school: trip.school,
+          ammount: smsCost,
+          reason: `Sending message ${message}`,
+          time,
+          isDeleted: false
+        })
+      }
+    );
   } catch (err) {
     console.error("Unnable to send sms", err);
   }
