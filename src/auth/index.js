@@ -160,7 +160,7 @@ router.post(
         // send an sms with welcome and link to download the app
         sms({
             school: schoolId,
-            data: { message: `Thank you for registering ${name} to shule plus. Please login to our app to start enjoying your first free month`, phone }
+            data: { message: `Thank you for registering ${name} to ShulePlus. Please login to our app to start enjoying your first free month`, phone }
         }, console.log)
 
         const data = {
