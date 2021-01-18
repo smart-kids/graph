@@ -51,7 +51,7 @@ const create = async (data, { db: { collections } }) => {
       sms(
         { data: { phone: parent.phone, message: messageMap[entry.type] } },
         async () => {
-          await collections["charges"].create({
+          await collections["charge"].create({
             id: new ObjectId().toHexString(),
             school: trip.school,
             ammount: smsCost,
@@ -66,7 +66,7 @@ const create = async (data, { db: { collections } }) => {
       sms(
         { data: { phone: parent.phone, message: messageMap[entry.type] } },
         async () => {
-          await collections["charges"].create({
+          await collections["charge"].create({
             id: new ObjectId().toHexString(),
             school: trip.school,
             ammount: smsCost,
