@@ -55,7 +55,7 @@ const create = async (data, { db: { collections } }) => {
   // {{student_name}} {{parent_name}} {{school_name}} {{time}}
   const time = new Date()
   const templateData = {
-    student_name: student.name,
+    student_name: student.names,
     parent_name: parent.name,
     school_name: school.name,
     time
