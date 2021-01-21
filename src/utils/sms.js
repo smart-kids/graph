@@ -23,7 +23,7 @@ const func = ({ schoolId, data: { phone, message } }, reply) => {
         {
             api_key:
                 '$2y$10$lvLytGxvwzQkFN78K3ke7.2MFU.Mu9FWI35NNFzMeut/VxKgZSGR.',
-            senderID: 'MOBILESASA',
+            senderID: 'SHULEPLUS',
             phone: coolNumber,
             message: Body,
             username: 'branson'
