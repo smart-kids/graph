@@ -24,6 +24,7 @@ import answers from "./answers"
 import options from "./options"
 import terms from "./terms"
 import teams from "./teams"
+import team_members from "./team_members"
 
 export default {
   admins,
@@ -52,6 +53,7 @@ export default {
   options,
   terms,
   teams,
+  team_members,
   hello() {
     return "hello mutation";
   }

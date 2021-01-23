@@ -3857,3 +3857,132 @@ describe("Teams", () => {
       });
   });
 });
+
+describe("Team Members", () => {
+  it("Can create a team member", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Item: IteamMember!) {
+            team_members {
+              create(team_member: $Item) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Item: {
+            team: sharedInfo.teamId,
+            user: sharedInfo.teacherId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.team_members.create.id).to.be.a.string;
+
+        sharedInfo.teamMemberId = res.body.data.team_members.create.id;
+        done();
+      });
+  });
+
+  it("Can update a team member", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Item: UteamMember!) {
+            team_members {
+              update(team_member: $Item) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Item: {
+            id: sharedInfo.teamMemberId,
+            user: sharedInfo.driverId,
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.team_members.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke a team member", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Item: UteamMember!) {
+            team_members {
+              archive(team_member: $Item) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Item: {
+            id: sharedInfo.teamMemberId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.team_members.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore a team member", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Item: UteamMember!) {
+            team_members {
+              restore(team_member: $Item) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Item: {
+            id: sharedInfo.teamMemberId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        done();
+      });
+  });
+});

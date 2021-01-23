@@ -234,9 +234,9 @@ describe("Setup For Queries", () => {
               gradeOrder,
               termOrder,
               teams {
-                id,
-                name,
-                phone,
+                id
+                name
+                phone
                 email
               },
               terms {

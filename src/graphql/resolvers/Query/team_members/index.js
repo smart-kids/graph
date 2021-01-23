@@ -1,5 +1,3 @@
-import team_members from "../../Mutation/team_members/index.js";
-
 const { name } = require("./about.js")
 
 const list = async (root, args, { db: { collections } }) => {
@@ -30,13 +28,19 @@ const single = async (root, args, { db: { collections } }) => {
 };
 
 const nested = {
-  team: {
-    async school(root, args, { db: { collections } }) {
-      const entry = await collections["school"].findOne({
-        where: { id: root.school, isDeleted: false }
+  team_member: {
+    async team(root, args, { db: { collections } }) {
+      const entry = await collections["team"].findOne({
+        where: { id: root.team, isDeleted: false }
       });
       return entry;
     },
+    async user(root, args, { db: { collections } }) {
+        const entry = await collections["user"].findOne({
+          where: { id: root.user, isDeleted: false }
+        });
+        return entry;
+      },
   }
 }
 

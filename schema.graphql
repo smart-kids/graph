@@ -77,6 +77,9 @@ type Query {
 
   team: team
   teams: [team]
+
+  team_member: team_member
+  team_members: [team_member]
 }
 
 type Mutation {
@@ -108,6 +111,7 @@ type Mutation {
   options: optionMutations
   terms: termMutations
   teams: teamMutations
+  team_members: team_memberMutations
 }
 
 # user things
@@ -1045,6 +1049,8 @@ type team {
   phone: String
   email: String
   school: school
+
+  team_members:[team_member]
 }
 
 input Iteam {
@@ -1067,4 +1073,29 @@ type teamMutations {
   update(team: Uteam!): team
   archive(team: Uteam!): team
   restore(team: Uteam!): team
+}
+
+# team_member things
+type team_member {
+  id: String
+  team: String
+  user: String
+}
+
+input IteamMember {
+  team: String!
+  user: String!
+}
+
+input UteamMember {
+  id: String!
+  team: String
+  user: String
+}
+
+type team_memberMutations {
+  create(team_member: IteamMember!): team_member
+  update(team_member: UteamMember!): team_member
+  archive(team_member: UteamMember!): team_member
+  restore(team_member: UteamMember!): team_member
 }
