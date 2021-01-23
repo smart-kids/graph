@@ -3986,3 +3986,135 @@ describe("Team Members", () => {
       });
   });
 });
+
+describe("Invitations", () => {
+  it("Can create a invitation", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Item: Iinvitation!) {
+            invitations {
+              create(invitation: $Item) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Item: {
+            user: sharedInfo.teacherId,
+            school: sharedInfo.school,
+            message: 'Welcome to Shuleplus.',
+            phone: '0712345678',
+            email: 'invitation@teams.com'
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.invitations.create.id).to.be.a.string;
+
+        sharedInfo.invitationId = res.body.data.invitations.create.id;
+        done();
+      });
+  });
+
+  it("Can update an invitation", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Item: Uinvitation!) {
+            invitations {
+              update(invitation: $Item) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Item: {
+            id: sharedInfo.invitationId,
+            message: 'Welcome back to Shuleplus',
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.invitations.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an invitation", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Item: Uinvitation!) {
+            invitations {
+              archive(invitation: $Item) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Item: {
+            id: sharedInfo.invitationId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.invitations.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an invitation", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Item: Uinvitation!) {
+            invitations {
+              restore(invitation: $Item) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Item: {
+            id: sharedInfo.invitationId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        done();
+      });
+  });
+});

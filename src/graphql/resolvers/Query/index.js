@@ -121,7 +121,13 @@ import {
   list as team_members,
   single as team_member,
   nested as Nteam_member
-} from "./teams";
+} from "./team_members";
+
+import {
+  list as invitations,
+  single as invitation,
+  nested as Ninvitation
+} from "./invitations";
 
 const nested = {};
 
@@ -150,6 +156,7 @@ Object.assign(
   Nterm,
   Nteam,
   Nteam_member,
+  Ninvitation,
 );
 
 const Query = {
@@ -231,6 +238,9 @@ const Query = {
 
   team_member,
   team_members,
+
+  invitation,
+  invitations,
 
   hello: () => "hey"
 };

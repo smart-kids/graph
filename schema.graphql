@@ -80,6 +80,9 @@ type Query {
 
   team_member: team_member
   team_members: [team_member]
+
+  invitation: invitation
+  invitations: [invitation]
 }
 
 type Mutation {
@@ -112,6 +115,7 @@ type Mutation {
   terms: termMutations
   teams: teamMutations
   team_members: team_memberMutations
+  invitations: invitationMutations
 }
 
 # user things
@@ -634,6 +638,7 @@ type school {
   grades:[grade]
   terms:[term]
   teams:[team]
+  invitations: [invitation]
 }
 
 input ISchool {
@@ -1098,4 +1103,38 @@ type team_memberMutations {
   update(team_member: UteamMember!): team_member
   archive(team_member: UteamMember!): team_member
   restore(team_member: UteamMember!): team_member
+}
+
+# invitation things
+type invitation {
+  id: String
+  school: String
+  user: String
+  message: String
+  phone: String
+  email: String
+}
+
+input Iinvitation {
+  school: String!
+  user: String!
+  message: String!
+  phone: String
+  email: String
+}
+
+input Uinvitation {
+  id: String!
+  school: String
+  user: String
+  message: String
+  phone: String
+  email: String
+}
+
+type invitationMutations {
+  create(invitation: Iinvitation!): invitation
+  update(invitation: Uinvitation!): invitation
+  archive(invitation: Uinvitation!): invitation
+  restore(invitation: Uinvitation!): invitation
 }
