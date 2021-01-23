@@ -109,6 +109,7 @@ describe("Schools", () => {
             phone: "0711111111",
             email: "mail@domain.com",
             address: "PO Box 1234-00000 Someplace somewhere",
+            inviteSmsText: 'Welcome to {shool_name} Shileplus panel. visit https://www.shuleplus.co.ke/{school_name} to join',
             gradeOrder: ['One', 'Two', 'Three', 'Five'],
             termOrder: ['One', 'Two'],
           }

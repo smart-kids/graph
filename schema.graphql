@@ -607,6 +607,7 @@ type school {
   email: String
   address: String
   financial: financial
+  inviteSmsText: String
   gradeOrder: [String]
   termOrder: [String]
 
@@ -636,6 +637,7 @@ input ISchool {
   phone: String
   email: String
   address: String
+  inviteSmsText: String,
   gradeOrder:[String]
   termOrder: [String]
 }
@@ -646,6 +648,7 @@ input USchool {
   phone: String
   email: String
   address: String
+  inviteSmsText: String
   gradeOrder:[String]
   termOrder: [String]
 }
