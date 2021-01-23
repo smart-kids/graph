@@ -149,6 +149,12 @@ const nested = {
         where: { school: root.id, isDeleted: false }
       });
       return entries;
+    },
+    async teams(root, args, { db: { collections } }) {
+      const entries = await collections["team"].find({
+        where: { school: root.id, isDeleted: false }
+      });
+      return entries;
     }
   }
 };

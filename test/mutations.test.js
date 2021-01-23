@@ -3725,3 +3725,134 @@ describe("Terms", () => {
       });
   });
 });
+
+describe("Teams", () => {
+  it("Can create a team", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iteam: Iteam!) {
+            teams {
+              create(team: $Iteam) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Iteam: {
+            school: sharedInfo.school,
+            name: 'Alphas',
+            phone: '0712345678',
+            email: 'alpha@teams.com'
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.teams.create.id).to.be.a.string;
+
+        sharedInfo.teamId = res.body.data.teams.create.id;
+        done();
+      });
+  });
+
+  it("Can update a team", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iteam: Uteam!) {
+            teams {
+              update(team: $Iteam) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          Iteam: {
+            id: sharedInfo.teamId,
+            name: 'Betas',
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.teams.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke a team", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iteam: Uteam!) {
+            teams {
+              archive(team: $Iteam) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Iteam: {
+            id: sharedInfo.teamId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.teams.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore a team", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($Iteam: Uteam!) {
+            teams {
+              restore(team: $Iteam) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          Iteam: {
+            id: sharedInfo.teamId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        done();
+      });
+  });
+});

@@ -111,6 +111,12 @@ import {
   nested as Nterm
 } from "./terms";
 
+import {
+  list as teams,
+  single as team,
+  nested as Nteam
+} from "./teams";
+
 const nested = {};
 
 Object.assign(
@@ -136,6 +142,7 @@ Object.assign(
   Nanswer,
   Noption,
   Nterm,
+  Nteam,
 );
 
 const Query = {
@@ -211,6 +218,9 @@ const Query = {
 
   term,
   terms,
+
+  team,
+  teams,
 
   hello: () => "hey"
 };

@@ -74,6 +74,9 @@ type Query {
 
   term: term
   terms: [term]
+
+  team: team
+  teams: [team]
 }
 
 type Mutation {
@@ -104,6 +107,7 @@ type Mutation {
   answers: answerMutations
   options: optionMutations
   terms: termMutations
+  teams: teamMutations
 }
 
 # user things
@@ -624,6 +628,7 @@ type school {
   charges:[charge]
   grades:[grade]
   terms:[term]
+  teams:[team]
 }
 
 input ISchool {
@@ -1028,4 +1033,35 @@ type termMutations {
   update(term: Uterm!): term
   archive(term: Uterm!): term
   restore(term: Uterm!): term
+}
+
+# team things
+type team {
+  id: String
+  name: String
+  phone: String
+  email: String
+  school: school
+}
+
+input Iteam {
+  name: String!
+  phone: String!
+  email: String!
+  school: String!
+}
+
+input Uteam {
+  id: String!
+  name: String
+  phone: String
+  email: String
+  school: String
+}
+
+type teamMutations {
+  create(team: Iteam!): team
+  update(team: Uteam!): team
+  archive(team: Uteam!): team
+  restore(team: Uteam!): team
 }
