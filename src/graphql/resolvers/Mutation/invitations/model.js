@@ -8,13 +8,11 @@ export default Waterline.Collection.extend({
 
   attributes: {
     id: { type: "string", required: true },
-    name: { type: "string", required: true },
+    school: { type: "string", required: true },
     phone: { type: "string", required: true },
-    email: { type: "string", required: true },
-    address: { type: "string", required: true },
-    gradeOrder: { type: "string", required: false },
-    termOrder: { type: "string", required: false },
-    inviteSmsText: { type: "string", required: false },
+    message: { type: "string", required: true },
+    email: { type: "string", required: false },
+    user: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });

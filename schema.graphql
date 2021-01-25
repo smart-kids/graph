@@ -74,6 +74,15 @@ type Query {
 
   term: term
   terms: [term]
+
+  team: team
+  teams: [team]
+
+  team_member: team_member
+  team_members: [team_member]
+
+  invitation: invitation
+  invitations: [invitation]
 }
 
 type Mutation {
@@ -104,6 +113,9 @@ type Mutation {
   answers: answerMutations
   options: optionMutations
   terms: termMutations
+  teams: teamMutations
+  team_members: team_memberMutations
+  invitations: invitationMutations
 }
 
 # user things
@@ -603,6 +615,7 @@ type school {
   email: String
   address: String
   financial: financial
+  inviteSmsText: String
   gradeOrder: [String]
   termOrder: [String]
 
@@ -624,6 +637,8 @@ type school {
   charges:[charge]
   grades:[grade]
   terms:[term]
+  teams:[team]
+  invitations: [invitation]
 }
 
 input ISchool {
@@ -631,6 +646,7 @@ input ISchool {
   phone: String
   email: String
   address: String
+  inviteSmsText: String,
   gradeOrder:[String]
   termOrder: [String]
 }
@@ -641,6 +657,7 @@ input USchool {
   phone: String
   email: String
   address: String
+  inviteSmsText: String
   gradeOrder:[String]
   termOrder: [String]
 }
@@ -1028,4 +1045,96 @@ type termMutations {
   update(term: Uterm!): term
   archive(term: Uterm!): term
   restore(term: Uterm!): term
+}
+
+# team things
+type team {
+  id: String
+  name: String
+  phone: String
+  email: String
+  school: school
+
+  team_members:[team_member]
+}
+
+input Iteam {
+  name: String!
+  phone: String!
+  email: String!
+  school: String!
+}
+
+input Uteam {
+  id: String!
+  name: String
+  phone: String
+  email: String
+  school: String
+}
+
+type teamMutations {
+  create(team: Iteam!): team
+  update(team: Uteam!): team
+  archive(team: Uteam!): team
+  restore(team: Uteam!): team
+}
+
+# team_member things
+type team_member {
+  id: String
+  team: String
+  user: String
+}
+
+input IteamMember {
+  team: String!
+  user: String!
+}
+
+input UteamMember {
+  id: String!
+  team: String
+  user: String
+}
+
+type team_memberMutations {
+  create(team_member: IteamMember!): team_member
+  update(team_member: UteamMember!): team_member
+  archive(team_member: UteamMember!): team_member
+  restore(team_member: UteamMember!): team_member
+}
+
+# invitation things
+type invitation {
+  id: String
+  school: String
+  user: String
+  message: String
+  phone: String
+  email: String
+}
+
+input Iinvitation {
+  school: String!
+  user: String!
+  message: String!
+  phone: String
+  email: String
+}
+
+input Uinvitation {
+  id: String!
+  school: String
+  user: String
+  message: String
+  phone: String
+  email: String
+}
+
+type invitationMutations {
+  create(invitation: Iinvitation!): invitation
+  update(invitation: Uinvitation!): invitation
+  archive(invitation: Uinvitation!): invitation
+  restore(invitation: Uinvitation!): invitation
 }
