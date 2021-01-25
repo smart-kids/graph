@@ -5,10 +5,11 @@ import { sum, subtract } from "mathjs"
 const { name } = require("./about.js")
 
 const list = async (root, args, { auth, db: { collections } }) => {
-
+  console.log({ auth })
+  
   const entries = await collections[name].find({
     where: {
-      id: auth.admin.school,
+      id: auth[Object.keys(auth)[0]].school,
       isDeleted: false
     }
   });
@@ -26,6 +27,7 @@ const listDeleted = async (root, args, { db: { collections } }) => {
 };
 
 const single = async (root, args, { db: { collections } }) => {
+  console.log("single school")
   const entries = await collections[name].find({
     where: {
       isDeleted: false
