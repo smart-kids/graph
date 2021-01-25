@@ -111,6 +111,24 @@ import {
   nested as Nterm
 } from "./terms";
 
+import {
+  list as teams,
+  single as team,
+  nested as Nteam
+} from "./teams";
+
+import {
+  list as team_members,
+  single as team_member,
+  nested as Nteam_member
+} from "./team_members";
+
+import {
+  list as invitations,
+  single as invitation,
+  nested as Ninvitation
+} from "./invitations";
+
 const nested = {};
 
 Object.assign(
@@ -136,6 +154,9 @@ Object.assign(
   Nanswer,
   Noption,
   Nterm,
+  Nteam,
+  Nteam_member,
+  Ninvitation,
 );
 
 const Query = {
@@ -211,6 +232,15 @@ const Query = {
 
   term,
   terms,
+
+  team,
+  teams,
+
+  team_member,
+  team_members,
+
+  invitation,
+  invitations,
 
   hello: () => "hey"
 };

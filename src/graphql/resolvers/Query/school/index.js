@@ -1,6 +1,7 @@
 import payments from "../../Mutation/payments/index.js";
 import schedules from "../../Mutation/schedules/index.js";
 import { sum, subtract } from "mathjs"
+import invitations from "../../Mutation/invitations/index.js";
 
 const { name } = require("./about.js")
 
@@ -146,6 +147,18 @@ const nested = {
     },
     async terms(root, args, { db: { collections } }) {
       const entries = await collections["term"].find({
+        where: { school: root.id, isDeleted: false }
+      });
+      return entries;
+    },
+    async teams(root, args, { db: { collections } }) {
+      const entries = await collections["team"].find({
+        where: { school: root.id, isDeleted: false }
+      });
+      return entries;
+    },
+    async invitations(root, args, { db: { collections } }) {
+      const entries = await collections["invitation"].find({
         where: { school: root.id, isDeleted: false }
       });
       return entries;
