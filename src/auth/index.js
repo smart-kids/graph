@@ -220,7 +220,7 @@ router.post(
         const [adminEmail] = await collections["admin"].find({ username: user, isDeleted: false })
         const [adminPhone] = await collections["admin"].find({ phone: user, isDeleted: false })
 
-        const returnAuth = async (userData) => {
+        const returnAuth = async (userData, role) => {
             if (password && !userData.password) {
                 const [data] = await collections["otp"].find({
                     userId: user,
@@ -301,7 +301,7 @@ router.post(
                 if (!['development', "test"].includes(NODE_ENV))
                     sms({
                         // school: schoolId,
-                        data: { message: `${password} is your ShulePlus login code. Don't reply to this message with your code.`, phone: (driver && driver.phone || parent && parent.phone) }
+                        data: { message: `${password} is your ShulePlus login code. Don't reply to this message with your code.`, phone: (driver && driver.phone || parent && parent.phone || userData.phone) }
                     }, console.log)
 
                 await collections["otp"].create({
@@ -321,22 +321,22 @@ router.post(
 
         if (driver) {
             userType = 'driver'
-            return returnAuth(driver)
+            return returnAuth(driver, userType)
         }
 
         if (parent) {
             userType = 'parent'
-            return returnAuth(parent)
+            return returnAuth(parent, userType)
         }
 
         if (teacher) {
             userType = 'teacher'
-            return returnAuth(teacher)
+            return returnAuth(teacher, userType)
         }
 
         if (adminPhone || adminEmail) {
             userType = 'admin'
-            return returnAuth(adminPhone || adminEmail)
+            return returnAuth(adminPhone || adminEmail, userType)
         }
 
         return res.status(401).send({ message: "User not found, Please contact an administrator" })
