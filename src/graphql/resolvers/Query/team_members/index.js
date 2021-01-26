@@ -29,18 +29,12 @@ const single = async (root, args, { db: { collections } }) => {
 
 const nested = {
   team_member: {
-    async team(root, args, { db: { collections } }) {
-      const entry = await collections["team"].findOne({
-        where: { id: root.team, isDeleted: false }
+    async members(root, args, { db: { collections } }) {
+      const entry = await collections["teacher"].find({
+        where: { id: root.user, isDeleted: false }
       });
       return entry;
     },
-    async user(root, args, { db: { collections } }) {
-        const entry = await collections["user"].findOne({
-          where: { id: root.user, isDeleted: false }
-        });
-        return entry;
-      },
   }
 }
 

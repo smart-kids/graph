@@ -37,7 +37,13 @@ const nested = {
       });
       return entry;
     },
-  }
+    async team_members(root, args, { db: { collections } }) {
+      const entries = await collections["team_member"].find({
+        where: { team: root.id, isDeleted: false }
+      });
+      return entries;
+    }
+  },
 }
 
 export { list, single, listDeleted, nested };
