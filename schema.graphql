@@ -1055,6 +1055,7 @@ type team {
   email: String
   school: school
 
+  # relations
   team_members:[team_member]
 }
 
@@ -1077,6 +1078,7 @@ type teamMutations {
   create(team: Iteam!): team
   update(team: Uteam!): team
   archive(team: Uteam!): team
+  invite(team: Iinvite!): invitation
   restore(team: Uteam!): team
 }
 
@@ -1085,6 +1087,9 @@ type team_member {
   id: String
   team: String
   user: String
+
+  # relations
+  members: [teacher]
 }
 
 input IteamMember {
@@ -1121,6 +1126,11 @@ input Iinvitation {
   message: String!
   phone: String
   email: String
+}
+
+input Iinvite {
+  user: String!
+  school: String!
 }
 
 input Uinvitation {

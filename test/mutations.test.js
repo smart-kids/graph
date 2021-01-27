@@ -3912,7 +3912,6 @@ describe("Team Members", () => {
         variables: {
           Item: {
             id: sharedInfo.teamMemberId,
-            user: sharedInfo.driverId,
           }
         }
       })
@@ -3988,7 +3987,7 @@ describe("Team Members", () => {
 });
 
 describe("Invitations", () => {
-  it("Can create a invitation", done => {
+  it("Can create an invitation", done => {
     chai
       .request(app)
       .post("/graph")
@@ -4117,4 +4116,36 @@ describe("Invitations", () => {
         done();
       });
   });
+
+  // it("Can send an invitation", done => {
+  //   chai
+  //     .request(app)
+  //     .post("/graph")
+  //     .set("authorization", authorization)
+  //     .set("content-type", "application/json")
+  //     .send({
+  //       query: `
+  //         mutation ($Item: Iinvite!) {
+  //           teams {
+  //             invite(team: $Item) {
+  //               id
+  //             }
+  //           }
+  //         }            
+  //       `,
+  //       variables: {
+  //         Item: {
+  //           user: sharedInfo.teacherId,
+  //           school: sharedInfo.school,
+  //         }
+  //       }
+  //     })
+  //     .end((err, res) => {
+  //       res.should.have.status(200);
+  //       expect(res.body).to.not.be.null;
+  //       expect(res.body.errors).to.not.exist;
+  //       expect(res.body.data.teams.invite.id).to.be.a.string;
+  //       done();
+  //     });
+  // });
 });

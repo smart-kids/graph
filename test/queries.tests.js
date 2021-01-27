@@ -244,6 +244,18 @@ describe("Setup For Queries", () => {
                 name
                 phone
                 email
+                team_members{
+                  id
+                  user
+                  team
+                  members{
+                    id
+                    name
+                    phone
+                    email
+                    gender
+                  }
+                }
               },
               terms {
                 id
@@ -554,6 +566,8 @@ describe("Setup For Queries", () => {
           const term = school.terms[0];
           const team = school.teams[0];
           const invitation = school.invitations[0];
+          const team_member = team.team_members[0];
+          const member = team_member.members[0];
 
           // students
           expect(student.id).to.be.a.string;
@@ -691,6 +705,20 @@ describe("Setup For Queries", () => {
           expect(invitation.message).to.be.a.string;
           expect(invitation.user).to.be.a.string;
           expect(school.invitations).to.be.instanceof(Array);
+
+          // team members
+          expect(team_member.id).to.be.a.string;
+          expect(team_member.team).to.be.a.string;
+          expect(team_member.user).to.be.a.string;
+          expect(team.team_members).to.be.instanceof(Array);
+
+          // members
+          expect(member.id).to.be.a.string;
+          expect(member.name).to.be.a.string;
+          expect(member.phone).to.be.a.string;
+          expect(member.email).to.be.a.string;
+          expect(member.gender).to.be.a.string;
+          expect(team_member.members).to.be.instanceof(Array);
 
           done();
         });
