@@ -792,6 +792,7 @@ type teacher {
   phone: String
   email: String
   gender: gender
+  password: String
   classes: [class]
 }
 
@@ -802,6 +803,7 @@ input Iteacher {
   email: String
   school: String!
   gender: gender
+  password: String
 }
 
 input Uteacher {
@@ -811,6 +813,7 @@ input Uteacher {
   phone: String
   email: String
   gender: gender
+  password: String
 }
 
 type teacherMutations {
@@ -1051,8 +1054,6 @@ type termMutations {
 type team {
   id: String
   name: String
-  phone: String
-  email: String
   school: school
 
   # relations
@@ -1061,16 +1062,12 @@ type team {
 
 input Iteam {
   name: String!
-  phone: String!
-  email: String!
   school: String!
 }
 
 input Uteam {
   id: String!
   name: String
-  phone: String
-  email: String
   school: String
 }
 

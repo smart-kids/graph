@@ -242,8 +242,6 @@ describe("Setup For Queries", () => {
               teams {
                 id
                 name
-                phone
-                email
                 team_members{
                   id
                   user
@@ -696,8 +694,6 @@ describe("Setup For Queries", () => {
           // teams
           expect(team.id).to.be.a.string;
           expect(team.name).to.be.a.string;
-          expect(team.phone).to.be.a.string;
-          expect(team.email).to.be.a.string;
           expect(school.teams).to.be.instanceof(Array);
 
           // invitations
