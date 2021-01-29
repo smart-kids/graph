@@ -83,17 +83,17 @@ const invite = async (data, { db: { collections } }) => {
     const teamObj = await collections["team"].findOne({ where: { id: teamMember[0] ? teamMember[0].team : "", isDeleted: false } })
 
     // const template = Handlebars.compile(schoolObj.inviteSmsText)
-    const inviteSmsText = `Hello {{username}}, 
+    const inviteSmsText = `
+Hello {{username}}, 
 
-        You have been invited {{#if team_name}} to join{{team_name}} on {{else}} to {{/if}}ShulePlus.
+You have been invited {{#if team_name}} to join{{team_name}} on {{else}} to {{/if}}ShulePlus.
 
-        access admin here https://cloud.shuleplus.co.ke
+access admin here https://cloud.shuleplus.co.ke
 
-        use 
+use 
 
-        phone number: {{phone_number}}
-        password: {{password}}
-    `;
+phone number: {{phone_number}}
+password: {{password}}`;
 
     const template = Handlebars.compile(inviteSmsText)
     const password = makeid()
