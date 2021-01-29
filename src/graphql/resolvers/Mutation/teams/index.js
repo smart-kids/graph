@@ -98,7 +98,7 @@ const invite = async (data, { db: { collections } }) => {
     const template = Handlebars.compile(inviteSmsText)
     const password = makeid()
     const phone = userObj.phone;
-    const obj = {username: userObj.name, phone_number: phone, team_name: teamObj.name, password}
+    const obj = {username: userObj.name, phone_number: phone, team_name: teamObj ? teamObj.name : null, password}
     const message = template(obj)
     const time = new Date().toLocaleDateString(undefined, {
       weekday: 'long',
