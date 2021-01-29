@@ -37,11 +37,19 @@ const nested = {
       });
       return entry;
     },
-    async team_members(root, args, { db: { collections } }) {
-      const entries = await collections["team_member"].find({
+    async members(root, args, { db: { collections } }) {
+      const teachers = []
+      const team_members = await collections["team_member"].find({
         where: { team: root.id, isDeleted: false }
       });
-      return entries;
+
+      await Promise.all(team_members.map(async team_member=>{
+        const teacher = await collections["teacher"].find({
+          where: { id: team_member.user, isDeleted: false }
+        });
+        teachers.push(...teacher)
+      }))
+      return teachers
     }
   },
 }

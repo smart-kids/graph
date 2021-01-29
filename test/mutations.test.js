@@ -408,7 +408,7 @@ describe("Admins", () => {
 });
 
 describe("Teacher", () => {
-  it("Can create an teacher", done => {
+  it("Can create a teacher", done => {
     chai
       .request(app)
       .post("/graph")
@@ -431,7 +431,8 @@ describe("Teacher", () => {
             school: sharedInfo.school,
             phone: "0722222222",
             email: "teacher1@gmail.com",
-            gender: "MALE"
+            gender: "MALE",
+            password: '1234567890'
           }
         }
       })
@@ -446,7 +447,7 @@ describe("Teacher", () => {
       });
   });
 
-  it("Can update an teacher", done => {
+  it("Can update a teacher", done => {
     chai
       .request(app)
       .post("/graph")
@@ -481,7 +482,7 @@ describe("Teacher", () => {
       });
   });
 
-  it("Can nuke an teacher", done => {
+  it("Can nuke a teacher", done => {
     chai
       .request(app)
       .post("/graph")
@@ -512,7 +513,7 @@ describe("Teacher", () => {
       });
   });
 
-  it("Can restore an teacher", done => {
+  it("Can restore a teacher", done => {
     chai
       .request(app)
       .post("/graph")
@@ -3747,9 +3748,7 @@ describe("Teams", () => {
         variables: {
           Iteam: {
             school: sharedInfo.school,
-            name: 'Alphas',
-            phone: '0712345678',
-            email: 'alpha@teams.com'
+            name: 'Alphas'
           }
         }
       })
@@ -3912,6 +3911,8 @@ describe("Team Members", () => {
         variables: {
           Item: {
             id: sharedInfo.teamMemberId,
+            team: sharedInfo.teamId,
+            user: sharedInfo.teacherId
           }
         }
       })
@@ -3942,7 +3943,8 @@ describe("Team Members", () => {
         `,
         variables: {
           Item: {
-            id: sharedInfo.teamMemberId
+            team: sharedInfo.teamId,
+            user: sharedInfo.teacherId
           }
         }
       })
@@ -3973,7 +3975,9 @@ describe("Team Members", () => {
         `,
         variables: {
           Item: {
-            id: sharedInfo.teamMemberId
+            id: sharedInfo.teamMemberId,
+            team: sharedInfo.teamId,
+            user: sharedInfo.teacherId
           }
         }
       })

@@ -77,12 +77,23 @@ const invite = async (data, { db: { collections } }) => {
   const { school, user } = data[name]
 
   try {
-    const schoolObj = await collections["school"].findOne({ where : { id: school }})
-    const userObj = await collections["teacher"].findOne({ where : { id: user }})
-    const teamMember = await collections["team_member"].findOne({ where : { user: user }})
-    const teamObj = await collections["team"].findOne({ where : { id: teamMember.team }})
+    const schoolObj = await collections["school"].findOne({ where : { id: school, isDeleted: false }})
+    const userObj = await collections["teacher"].findOne({ where : { id: user, isDeleted: false }})
+    const teamMember = await collections["team_member"].find({ where : { user: user, isDeleted: false }})
+    const teamObj = await collections["team"].findOne({ where : { id: teamMember[0].team, isDeleted: false }})
 
-    const template = Handlebars.compile(schoolObj.inviteSmsText)
+    // const template = Handlebars.compile(schoolObj.inviteSmsText)
+    const inviteSmsText = `Hello {{username}}, 
+
+You have been invited to join {{team_name}} on ShulePlus.
+
+access admin here https://cloud.shuleplus.co.ke
+
+use 
+
+phone number: {{phone_number}}
+password: {{password}}`;
+    const template = Handlebars.compile(inviteSmsText)
     const password = makeid()
     const phone = userObj.phone;
     const obj = {username: userObj.name, phone_number: phone, team_name: teamObj.name, password}
@@ -107,17 +118,13 @@ const invite = async (data, { db: { collections } }) => {
         })
       }
     )
-    await collections["teacher"].update({ id: userObj.id }).set({ password });
+    await collections["teacher"].update({ id: userObj.id }).set({ password: password });
 
     const id = new ObjectId().toHexString();
     const entry = Object.assign({ id, school, user, message, phone, isDeleted: false });
 
-    try {
-      await collections["invitation"].create(entry);
-      return entry;
-    } catch (err) {
-      throw new UserError(err.details);
-    }
+    const invitation = await collections["invitation"].create(entry);
+    return invitation;
   } catch (err) {
     throw new UserError(err.details);
   }

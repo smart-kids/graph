@@ -34,13 +34,13 @@ const update = async (data, { db: { collections } }) => {
 };
 
 const archive = async (data, { db: { collections } }) => {
-  const { id } = data[name];
+  const { user, team } = data[name];
 
   try {
-    await collections[name].update({ id }).set({ isDeleted: true });
+    await collections[name].update({ user, team }).set({ isDeleted: true });
 
     return {
-      id
+      id: user
     };
   } catch (err) {
     throw new UserError(err.details);
@@ -48,13 +48,13 @@ const archive = async (data, { db: { collections } }) => {
 };
 
 const restore = async (data, { db: { collections } }) => {
-  const { id } = data[name];
+  const { user, team } = data[name];
 
   try {
-    await collections[name].update({ id }).set({ isDeleted: false });
+    await collections[name].update({ user, team }).set({ isDeleted: false });
 
     return {
-      id
+      id: user
     };
   } catch (err) {
     throw new UserError(err.details);

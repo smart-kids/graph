@@ -46,21 +46,23 @@ const create = async (data, { db: { collections } }) => {
     time
   }
 
-  const message = Handlebars.compile(schedule.message)(templateData)
+  const message = Handlebars.compile(schedule.message)(templateData) || "Schedule Message"
 
   try {
     sms(
       { data: { phone: parent.phone, message } },
       async (res) => {
         const { smsCost } = res
-        await collections["charge"].create({
-          id: new ObjectId().toHexString(),
-          school: trip.school,
-          ammount: smsCost,
-          reason: `Sending message ${message}`,
-          time,
-          isDeleted: false
-        })
+
+        if (smsCost)
+          await collections["charge"].create({
+            id: new ObjectId().toHexString(),
+            school: trip.school,
+            ammount: smsCost,
+            reason: `Sending message ${message}`,
+            time,
+            isDeleted: false
+          })
       }
     );
   } catch (err) {
