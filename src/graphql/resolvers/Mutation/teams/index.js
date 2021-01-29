@@ -128,6 +128,7 @@ const invite = async (data, { db: { collections } }) => {
     const invitation = await collections["invitation"].create(entry);
     return invitation;
   } catch (err) {
+    console.log(err)
     throw new UserError(err.details);
   }
 };
