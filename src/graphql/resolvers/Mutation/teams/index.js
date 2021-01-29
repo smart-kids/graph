@@ -80,7 +80,7 @@ const invite = async (data, { db: { collections } }) => {
     const schoolObj = await collections["school"].findOne({ where : { id: school, isDeleted: false }})
     const userObj = await collections["teacher"].findOne({ where : { id: user, isDeleted: false }})
     const teamMember = await collections["team_member"].find({ where : { user: user, isDeleted: false }})
-    const teamObj = await collections["team"].findOne({ where : { id: teamMember[0]?.team, isDeleted: false }})
+    const teamObj = await collections["team"].findOne({ where : { id: teamMember[0] ? teamMember[0].team : "", isDeleted: false }})
 
     // const template = Handlebars.compile(schoolObj.inviteSmsText)
     const inviteSmsText = `Hello {{username}}, 
