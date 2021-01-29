@@ -3911,6 +3911,8 @@ describe("Team Members", () => {
         variables: {
           Item: {
             id: sharedInfo.teamMemberId,
+            team: sharedInfo.teamId,
+            user: sharedInfo.teacherId
           }
         }
       })
@@ -3941,7 +3943,8 @@ describe("Team Members", () => {
         `,
         variables: {
           Item: {
-            id: sharedInfo.teamMemberId
+            team: sharedInfo.teamId,
+            user: sharedInfo.teacherId
           }
         }
       })
@@ -3972,7 +3975,9 @@ describe("Team Members", () => {
         `,
         variables: {
           Item: {
-            id: sharedInfo.teamMemberId
+            id: sharedInfo.teamMemberId,
+            team: sharedInfo.teamId,
+            user: sharedInfo.teacherId
           }
         }
       })

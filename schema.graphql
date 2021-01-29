@@ -1091,9 +1091,9 @@ input IteamMember {
 }
 
 input UteamMember {
-  id: String!
-  team: String
-  user: String
+  id: String
+  team: String!
+  user: String!
 }
 
 type team_memberMutations {
