@@ -10,7 +10,7 @@ function makeid() {
   var possible = "123456789";
 
   for (var i = 0; i < 5; i++)
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
 
   return text;
 }
@@ -77,15 +77,15 @@ const invite = async (data, { db: { collections } }) => {
   const { school, user } = data[name]
 
   try {
-    const schoolObj = await collections["school"].findOne({ where : { id: school, isDeleted: false }})
-    const userObj = await collections["teacher"].findOne({ where : { id: user, isDeleted: false }})
-    const teamMember = await collections["team_member"].find({ where : { user: user, isDeleted: false }})
-    const teamObj = await collections["team"].findOne({ where : { id: teamMember[0] ? teamMember[0].team : "", isDeleted: false }})
+    const schoolObj = await collections["school"].findOne({ where: { id: school, isDeleted: false } })
+    const userObj = await collections["teacher"].findOne({ where: { id: user, isDeleted: false } })
+    const teamMember = await collections["team_member"].find({ where: { user: user, isDeleted: false } })
+    const teamObj = await collections["team"].findOne({ where: { id: teamMember[0] ? teamMember[0].team : "", isDeleted: false } })
 
     // const template = Handlebars.compile(schoolObj.inviteSmsText)
     const inviteSmsText = `Hello {{username}}, 
 
-        You have been invited {{#if team_name}} to join {{team_name}} on {{else}} to {{/if}}  ShulePlus.
+        You have been invited {{#if team_name}} to join{{team_name}} on {{else}} to {{/if}}ShulePlus.
 
         access admin here https://cloud.shuleplus.co.ke
 
@@ -94,28 +94,24 @@ const invite = async (data, { db: { collections } }) => {
         phone number: {{phone_number}}
         password: {{password}}
     `;
-    
+
     const template = Handlebars.compile(inviteSmsText)
     const password = makeid()
     const phone = userObj.phone;
-    const obj = {username: userObj.name, phone_number: phone, team_name: teamObj ? teamObj.name : null, password}
-    const message = template(obj)
-    const time = new Date().toLocaleDateString(undefined, {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+    const smsTemplateData = {
+      username: userObj.name, phone_number: phone, team_name: teamObj ? teamObj.name : null, password
+    }
+    const message = template(smsTemplateData)
 
-    sms({ data: { phone, message }},
+    sms({ data: { phone, message } },
       async (res) => {
         const { smsCost } = res
         await collections["charge"].create({
           id: new ObjectId().toHexString(),
           school,
           ammount: smsCost,
-          reason: `Sending message ${message}`,
-          time,
+          reason: `Sending message '${message}'`,
+          time: new Date(),
           isDeleted: false
         })
       }
@@ -125,10 +121,11 @@ const invite = async (data, { db: { collections } }) => {
     const id = new ObjectId().toHexString();
     const entry = Object.assign({ id, school, user, message, phone, isDeleted: false });
 
-    const invitation = await collections["invitation"].create(entry);
-    return invitation;
+    collections["invitation"].create(entry);
+    return {
+      id
+    };
   } catch (err) {
-    console.log(err)
     throw new UserError(err.details);
   }
 };
