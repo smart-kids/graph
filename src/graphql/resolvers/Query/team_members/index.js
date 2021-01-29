@@ -27,15 +27,4 @@ const single = async (root, args, { db: { collections } }) => {
   return entry;
 };
 
-const nested = {
-  team_member: {
-    async members(root, args, { db: { collections } }) {
-      const entry = await collections["teacher"].find({
-        where: { id: root.user, isDeleted: false }
-      });
-      return entry;
-    },
-  }
-}
-
-export { list, single, listDeleted, nested };
+export { list, single, listDeleted };
