@@ -1061,16 +1061,12 @@ type team {
 
 input Iteam {
   name: String!
-  phone: String!
-  email: String!
   school: String!
 }
 
 input Uteam {
   id: String!
   name: String
-  phone: String
-  email: String
   school: String
 }
 
