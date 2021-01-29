@@ -47,10 +47,8 @@ const nested = {
         const teacher = await collections["teacher"].findOne({
           where: { id: team_member.user, isDeleted: false }
         });
-
         teachers.push(teacher)
       }))
-      console.log(JSON.stringify(teachers))
       return teachers
     }
   },
