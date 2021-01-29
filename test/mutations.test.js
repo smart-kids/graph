@@ -3748,7 +3748,7 @@ describe("Teams", () => {
         variables: {
           Iteam: {
             school: sharedInfo.school,
-            name: 'Alphas',
+            name: 'Alphas'
           }
         }
       })

@@ -1057,7 +1057,7 @@ type team {
   school: school
 
   # relations
-  team_members:[team_member]
+  members: [teacher]
 }
 
 input Iteam {
@@ -1082,11 +1082,7 @@ type teamMutations {
 # team_member things
 type team_member {
   id: String
-  team: String
   user: String
-
-  # relations
-  members: [teacher]
 }
 
 input IteamMember {
