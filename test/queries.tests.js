@@ -242,19 +242,12 @@ describe("Setup For Queries", () => {
               teams {
                 id
                 name
-                phone
-                email
-                team_members{
+                members{
                   id
-                  user
-                  team
-                  members{
-                    id
-                    name
-                    phone
-                    email
-                    gender
-                  }
+                  name
+                  phone
+                  email
+                  gender
                 }
               },
               terms {
