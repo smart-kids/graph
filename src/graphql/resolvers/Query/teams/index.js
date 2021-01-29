@@ -44,10 +44,10 @@ const nested = {
       });
 
       await Promise.all(team_members.map(async team_member=>{
-        const teacher = await collections["teacher"].findOne({
+        const teacher = await collections["teacher"].find({
           where: { id: team_member.user, isDeleted: false }
         });
-        teachers.push(teacher)
+        teachers.push(...teacher)
       }))
       return teachers
     }
