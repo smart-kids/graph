@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb"
+import argon2 from "argon2"
 const { name } = require("./about.js")
 import Handlebars from "handlebars"
 import sms from "../../../../utils/sms"
@@ -86,7 +87,7 @@ const invite = async (data, { db: { collections } }) => {
     const inviteSmsText = `
 Hello {{username}}, 
 
-You have been invited {{#if team_name}} to join{{team_name}} on {{else}} to {{/if}}ShulePlus.
+You have been invited {{#if team_name}} to join {{team_name}} on {{else}} to {{/if}}ShulePlus.
 
 access admin here https://cloud.shuleplus.co.ke
 
@@ -97,6 +98,7 @@ password: {{password}}`;
 
     const template = Handlebars.compile(inviteSmsText)
     const password = makeid()
+    const passwordHash = await argon2.hash(password);
     const phone = userObj.phone;
     const smsTemplateData = {
       username: userObj.name, phone_number: phone, team_name: teamObj ? teamObj.name : null, password
@@ -116,10 +118,10 @@ password: {{password}}`;
         })
       }
     )
-    await collections["teacher"].update({ id: userObj.id }).set({ password: password });
+    await collections["teacher"].update({ id: userObj.id }).set({ password: passwordHash });
 
     const id = new ObjectId().toHexString();
-    const entry = Object.assign({ id, school, user, message, phone, isDeleted: false });
+    const entry = Object.assign({ id, school, user, message, phone, emaili: userObj.email, sDeleted: false });
 
     collections["invitation"].create(entry);
     return {

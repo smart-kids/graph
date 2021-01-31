@@ -304,6 +304,7 @@ type driverMutations {
   update(driver: Udriver!): driver
   archive(driver: Udriver!): driver
   restore(driver: Udriver!): driver
+  invite(driver: Iinvite!): invitation
 }
 
 # bus things
