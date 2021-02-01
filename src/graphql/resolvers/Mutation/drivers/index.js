@@ -84,21 +84,17 @@ const invite = async (data, { db: { collections } }) => {
   const { school, user } = data[name]
 
   try {
-    const schoolObj = await collections["school"].findOne({ where: { id: school, isDeleted: false } })
     const driver = await collections["driver"].findOne({ where: { id: user, isDeleted: false } })
-    const teamMember = await collections["team_member"].find({ where: { user: user, isDeleted: false } })
-    const teamObj = await collections["team"].findOne({ where: { id: teamMember[0] ? teamMember[0].team : "", isDeleted: false } })
 
-    // const template = Handlebars.compile(schoolObj.inviteSmsText)
     const inviteSmsText = `
-Hello {{username}}, 
+    Hello {{username}}, 
 
-You have been invited {{#if team_name}} to join {{team_name}} on {{else}} to {{/if}}ShulePlus.
-
-access admin here https://cloud.shuleplus.co.ke
-
-use 
-
+You have been invited to ShulePlus.
+    
+access app here: https://play.google.com/store/apps/details?id=com.shule.plus
+    
+use the following details to login
+    
 phone number: {{phone_number}}
 password: {{password}}`;
 
@@ -107,7 +103,7 @@ password: {{password}}`;
     const hashedPassword = await argon2.hash(password);
     const phone = driver.phone;
     const smsTemplateData = {
-      username: driver.username, phone_number: phone, team_name: teamObj ? teamObj.name : null, password
+      username: driver.username, phone_number: phone, password
     }
     const message = template(smsTemplateData)
 
@@ -129,9 +125,11 @@ password: {{password}}`;
     const id = new ObjectId().toHexString();
     const entry = Object.assign({ id, school, user, message, phone, email: driver.email, isDeleted: false });
 
-    collections["invitation"].create(entry);
+    await collections["invitation"].create(entry);
     return {
-      id
+      id,
+      message,
+      phone
     };
   } catch (err) {
     throw new UserError(err.details);

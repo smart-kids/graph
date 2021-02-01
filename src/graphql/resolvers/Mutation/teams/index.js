@@ -123,9 +123,11 @@ password: {{password}}`;
     const id = new ObjectId().toHexString();
     const entry = Object.assign({ id, school, user, message, phone, emaili: userObj.email, sDeleted: false });
 
-    collections["invitation"].create(entry);
+    await collections["invitation"].create(entry);
     return {
-      id
+      id,
+      message,
+      phone
     };
   } catch (err) {
     throw new UserError(err.details);

@@ -783,6 +783,7 @@ type parentMutations {
   update(parent: Uparent!): parent
   archive(parent: Uparent!): parent
   restore(parent: Uparent!): parent
+  invite(parent: Iinvite!): invitation
 }
 
 # teacher things
