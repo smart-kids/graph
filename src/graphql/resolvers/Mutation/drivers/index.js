@@ -80,6 +80,19 @@ const restore = async (data, { db: { collections } }) => {
   }
 };
 
+const transfer = async (data, { db: { collections } }) => {
+  const { school, driver } = data[name]
+  try {
+    await collections[name].update({ id: driver }).set({ school });
+
+    return {
+      id
+    };
+  } catch (err) {
+    throw new UserError(err.details);
+  }
+};
+
 const invite = async (data, { db: { collections } }) => {
   const { school, user } = data[name]
 
@@ -143,5 +156,6 @@ export default () => {
     archive,
     restore,
     invite,
+    transfer,
   };
 };
