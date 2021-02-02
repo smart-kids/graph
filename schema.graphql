@@ -305,6 +305,7 @@ type driverMutations {
   archive(driver: Udriver!): driver
   restore(driver: Udriver!): driver
   invite(driver: Iinvite!): invitation
+  transfer(driver: Itransfer!): driver
 }
 
 # bus things
@@ -1125,6 +1126,11 @@ input Iinvitation {
 
 input Iinvite {
   user: String!
+  school: String!
+}
+
+input Itransfer {
+  driver: String!
   school: String!
 }
 
