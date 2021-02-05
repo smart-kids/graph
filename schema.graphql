@@ -616,6 +616,7 @@ type school {
   phone: String
   email: String
   address: String
+  error: String
   financial: financial
   inviteSmsText: String
   gradeOrder: [String]
@@ -669,6 +670,7 @@ type schoolMutations {
   update(school: USchool!): school
   archive(school: USchool!): school
   restore(school: USchool!): school
+  invite(school: USchool!): invitation
 }
 
 # schedule things
