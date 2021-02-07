@@ -86,7 +86,7 @@ const transfer = async (data, { db: { collections } }) => {
     await collections[name].update({ id: driver }).set({ school });
 
     return {
-      id
+      id: driver
     };
   } catch (err) {
     throw new UserError(err.details);
