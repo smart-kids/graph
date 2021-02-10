@@ -27,7 +27,6 @@ const listDeleted = async (root, args, { db: { collections } }) => {
 };
 
 const single = async (root, args, { auth, db: { collections } }) => {
-  console.log({ name, auth })
   const entries = await collections[name].find({
     where: {
       id: auth[Object.keys(auth)[0]].school,
