@@ -1,9 +1,24 @@
 import { ObjectId } from "mongodb"
 const { name } = require("./about.js")
+import argon2 from "argon2"
+import Handlebars from "handlebars"
+import sms from "../../../../utils/sms"
+import generatePassword from "../../../../utils/generatePassword"
 
 const { UserError } = require("graphql-errors");
 
 const create = async (data, { db: { collections } }) => {
+  const { phone } = data[name];
+  try{
+  const phoneTaken = await collections[name].find({ phone, isDeleted: false });
+    if(phoneTaken.length){
+      return {
+        error: `A school with the phone number ${phone} already exists!.`,
+      };
+    }
+  } catch(err){
+  }
+
   const id = new ObjectId().toHexString();
   const inviteSmsText = `Hello {{username}}, 
 
@@ -24,10 +39,20 @@ password: {{password}}`;
   const entry = Object.assign(data[name], { inviteSmsText, gradeOrder, termOrder, id, isDeleted: false });
 
   try {
-    await collections[name].create(entry);
+    const school = await collections[name].create(entry);
+    const { email, phone} = data[name];
+    const adminId = new ObjectId().toHexString();
+    await collections["admin"].create({
+        id: adminId,
+        username: email,
+        email: email,
+        phone: phone,
+        school: id,
+    });
 
     return entry;
   } catch (err) {
+    console.log(err)
     throw new UserError(err.details);
   }
 };
@@ -96,11 +121,68 @@ const pay = async (data, { db: { collections } }) => {
   }
 };
 
+const invite = async (data, { db: { collections } }) => {
+  const { id } = data[name];
+  try {
+    const admin = await collections["admin"].findOne({ where: { school: id, isDeleted: false } });
+
+    const inviteSmsText = `
+Hello {{username}}, 
+
+You have been invited to join ShulePlus.
+
+access admin here https://cloud.shuleplus.co.ke
+
+use the following details to login and start enjoying your first free month:
+
+phone number: {{phone_number}}
+password: {{password}}`;
+
+    const template = Handlebars.compile(inviteSmsText);
+    const password = generatePassword();
+    const hashedPassword = await argon2.hash(password);
+    const phone = admin.phone;
+    const smsTemplateData = {
+      username: admin.username, phone_number: phone, password
+    }
+    const message = template(smsTemplateData)
+
+    sms({ data: { phone, message } },
+      async (res) => {
+        const { smsCost } = res
+        await collections["charge"].create({
+          id: new ObjectId().toHexString(),
+          school: id,
+          ammount: smsCost,
+          reason: `Sending message '${message}'`,
+          time: new Date(),
+          isDeleted: false
+        })
+      }
+    )
+    await collections["admin"].update({ id: admin.id }).set({ password: hashedPassword });
+
+    const id = new ObjectId().toHexString();
+    const entry = Object.assign({ id, school: id, user: admin.id, message, phone, email: admin.email, isDeleted: false });
+
+    await collections["invitation"].create(entry);
+    return {
+      id,
+      message,
+      phone
+    };
+  } catch (err) {
+    console.log(err)
+    throw new UserError(err.details);
+  }
+};
+
 export default () => {
   return {
     create,
     update,
     archive,
-    restore
+    restore,
+    invite,
   };
 };

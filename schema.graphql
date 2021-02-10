@@ -304,6 +304,8 @@ type driverMutations {
   update(driver: Udriver!): driver
   archive(driver: Udriver!): driver
   restore(driver: Udriver!): driver
+  invite(driver: Iinvite!): invitation
+  transfer(driver: Itransfer!): driver
 }
 
 # bus things
@@ -614,6 +616,7 @@ type school {
   phone: String
   email: String
   address: String
+  error: String
   financial: financial
   inviteSmsText: String
   gradeOrder: [String]
@@ -667,6 +670,7 @@ type schoolMutations {
   update(school: USchool!): school
   archive(school: USchool!): school
   restore(school: USchool!): school
+  invite(school: USchool!): invitation
 }
 
 # schedule things
@@ -782,6 +786,7 @@ type parentMutations {
   update(parent: Uparent!): parent
   archive(parent: Uparent!): parent
   restore(parent: Uparent!): parent
+  invite(parent: Iinvite!): invitation
 }
 
 # teacher things
@@ -1123,6 +1128,11 @@ input Iinvitation {
 
 input Iinvite {
   user: String!
+  school: String!
+}
+
+input Itransfer {
+  driver: String!
   school: String!
 }
 
