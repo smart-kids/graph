@@ -7,6 +7,7 @@ const { name } = require("./about.js");
 const { UserError } = require("graphql-errors");
 
 const create = async (data, { db: { collections } }) => {
+  console.log("creating an event")
   const id = new ObjectId().toHexString();
   const entry = Object.assign(data[name], { id, isDeleted: false });
 
