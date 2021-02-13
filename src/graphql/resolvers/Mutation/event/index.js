@@ -42,12 +42,13 @@ const create = async (data, { db: { collections } }) => {
   const templateData = {
     student_name: student.names,
     parent_name: parent.name,
-    school_name: school.name,
+    school_name: school.name, 
     time
   }
 
   const message = Handlebars.compile(schedule.message)(templateData) || "Schedule Message"
 
+  console.log("Attemting to send sms" + JSON.stringify({ phone: parent.phone, message }))
   try {
     sms(
       { data: { phone: parent.phone, message } },
