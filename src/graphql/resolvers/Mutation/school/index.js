@@ -123,6 +123,7 @@ const pay = async (data, { db: { collections } }) => {
 
 const invite = async (data, { db: { collections } }) => {
   const { id } = data[name];
+  console.log({ data })
   try {
     const admins = await collections["admin"].find({ where: { school: id, isDeleted: false } });
 
