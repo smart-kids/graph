@@ -153,7 +153,7 @@ password: {{password}}`;
     const template = Handlebars.compile(inviteSmsText);
     const password = generatePassword();
     const hashedPassword = await argon2.hash(password);
-    const { phone, username } = admin.phone;
+    const { phone, username } = admin;
 
     const message = template({
       username,
