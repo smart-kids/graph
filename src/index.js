@@ -63,7 +63,10 @@ router.use(
         auth: req.decoded,
         db: req.app.locals.db
       },
-      formatError: err => notifyErrors.formatError(err)
+      formatError: err => {
+        console.log("sending data to bugsnag as", err)
+        notifyErrors.formatError(err)
+      }
     })(req, res, next)
   }
 );
