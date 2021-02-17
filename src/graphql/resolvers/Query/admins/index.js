@@ -18,7 +18,7 @@ const listDeleted = async (root, args, { db: { collections } }) => {
   return entries;
 };
 
-const single = async (root, args, { db: { collections } }) => {
+const single = async (root, args, { db: { collections }, auth }) => {
   if (auth.userType == 'admin')
     return auth.user
 
