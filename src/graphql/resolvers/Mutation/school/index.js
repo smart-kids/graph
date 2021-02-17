@@ -179,7 +179,7 @@ password: {{password}}`;
     await collections["admin"].update({ id: admin.id }).set({ password: hashedPassword });
 
     const invitationId = new ObjectId().toHexString();
-    const entry = Object.assign({ id, school: schoolId, user: admin.id, message, phone, email: admin.email, isDeleted: false });
+    const entry = Object.assign({ id: invitationId, school: schoolId, user: admin.id, message, phone, email: admin.email, isDeleted: false });
 
     await collections["invitation"].create(entry);
     return {
