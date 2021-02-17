@@ -19,12 +19,10 @@ const listDeleted = async (root, args, { db: { collections } }) => {
 };
 
 const single = async (root, args, { db: { collections } }) => {
-  const { id } = args[name];
+  if (auth.userType == 'admin')
+    return auth.user
 
-  const entry = await collections[name].findOne({
-    where: { id, isDeleted: false }
-  });
-  return entry;
+  return null
 };
 
 export { list, single, listDeleted };
