@@ -126,7 +126,7 @@ const invite = async (data, { db: { collections } }) => {
   try {
     const admins = await collections["admin"].find({ where: { school: id, isDeleted: false } });
 
-    if (admin.length > 1) {
+    if (admins.length > 1) {
       console.log("found multiple admins for ", id, data)
     }
 
