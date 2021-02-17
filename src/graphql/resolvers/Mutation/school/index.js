@@ -168,7 +168,7 @@ password: {{password}}`;
         const { smsCost } = res
         await collections["charge"].create({
           id: new ObjectId().toHexString(),
-          school: id,
+          school: schoolId,
           ammount: smsCost,
           reason: `Sending message '${message}'`,
           time: new Date(),
@@ -178,12 +178,12 @@ password: {{password}}`;
     )
     await collections["admin"].update({ id: admin.id }).set({ password: hashedPassword });
 
-    const id = new ObjectId().toHexString();
-    const entry = Object.assign({ id, school: id, user: admin.id, message, phone, email: admin.email, isDeleted: false });
+    const invitationId = new ObjectId().toHexString();
+    const entry = Object.assign({ id, school: schoolId, user: admin.id, message, phone, email: admin.email, isDeleted: false });
 
     await collections["invitation"].create(entry);
     return {
-      id,
+      id: invitationId,
       message,
       phone
     };
