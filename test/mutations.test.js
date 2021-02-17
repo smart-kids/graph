@@ -1227,7 +1227,7 @@ describe("Parent", () => {
           Iparent: {
             name: "parent1",
             national_id: "35718850",
-            phone: "0719420495",
+            phone: "0711657108",
             password: "rY8x5uW",
             school: sharedInfo.school,
             email: "parent1@gmail.com",
@@ -1266,7 +1266,7 @@ describe("Parent", () => {
           Iparent: {
             name: "parent2",
             national_id: "35718851",
-            phone: "0773751395",
+            phone: "0711657108",
             password: "rY8x5uW",
             school: sharedInfo.school,
             email: "parent2@gmail.com",
@@ -1431,7 +1431,7 @@ describe("Students", () => {
             gender: "FEMALE",
             registration: "1234",
             school: sharedInfo.school,
-            parent: sharedInfo.parentId,
+            // parent: sharedInfo.parentId,
             parent2: sharedInfo.parent2Id,
             class: sharedInfo.class
           }
@@ -1591,6 +1591,11 @@ describe("Schedule", () => {
         variables: {
           Ischedule: {
             name: "schedule 1",
+message: `Hello {{parent_name}}, 
+
+Our {{school_name}} bus has confirmed that it just dropped {{student_name}} at their usual pickup location. 
+            
+We would like to thank you for your continued commitment to time and safety.`,
             time: new Date().toISOString(),
             end_time: moment(new Date())
               .add(30, "m")

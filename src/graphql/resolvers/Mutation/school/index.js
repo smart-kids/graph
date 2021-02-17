@@ -9,14 +9,14 @@ const { UserError } = require("graphql-errors");
 
 const create = async (data, { db: { collections } }) => {
   const { phone } = data[name];
-  try{
-  const phoneTaken = await collections[name].find({ phone, isDeleted: false });
-    if(phoneTaken.length){
+  try {
+    const phoneTaken = await collections[name].find({ phone, isDeleted: false });
+    if (phoneTaken.length) {
       return {
         error: `A school with the phone number ${phone} already exists!.`,
       };
     }
-  } catch(err){
+  } catch (err) {
   }
 
   const id = new ObjectId().toHexString();
@@ -30,7 +30,7 @@ use
 
 phone number: {{phone_number}}
 password: {{password}}`;
-  
+
   let { gradeOrder } = data[name];
   let { termOrder } = data[name];
   gradeOrder = gradeOrder ? gradeOrder.join(",") : "";
@@ -40,14 +40,14 @@ password: {{password}}`;
 
   try {
     const school = await collections[name].create(entry);
-    const { email, phone} = data[name];
+    const { email, phone } = data[name];
     const adminId = new ObjectId().toHexString();
     await collections["admin"].create({
-        id: adminId,
-        username: email,
-        email: email,
-        phone: phone,
-        school: id,
+      id: adminId,
+      username: email,
+      email: email,
+      phone: phone,
+      school: id,
     });
 
     return entry;
@@ -124,7 +124,13 @@ const pay = async (data, { db: { collections } }) => {
 const invite = async (data, { db: { collections } }) => {
   const { id } = data[name];
   try {
-    const admin = await collections["admin"].findOne({ where: { school: id, isDeleted: false } });
+    const admins = await collections["admin"].find({ where: { school: id, isDeleted: false } });
+
+    if (admin.length > 1) {
+      console.log("found multiple admins for ", id, data)
+    }
+
+    admin = admins[0]
 
     const inviteSmsText = `
 Hello {{username}}, 

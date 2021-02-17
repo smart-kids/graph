@@ -718,7 +718,7 @@ type schedule {
 
 input Ischedule {
   name: String
-  message: String
+  message: String!
   time: String
   end_time: String
   school: String!
