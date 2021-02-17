@@ -22,6 +22,9 @@ const single = async (root, args, { db: { collections }, auth }) => {
   if (auth.userType == 'driver')
     return auth.user
 
+  if (auth.userType == 'admin')
+    return auth.user
+
   return null
 }
 
