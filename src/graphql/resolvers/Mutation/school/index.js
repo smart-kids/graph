@@ -135,9 +135,9 @@ const invite = async (data, { db: { collections } }) => {
     var admin = admins[0]
 
     const inviteSmsText = `
-Hello {{username}}, 
+Hello {{schoolName}} administrator, 
 
-You have been invited to join ShulePlus as an administrator for {{schoolName}}.
+You are being invited to join ShulePlus as an administrator for {{schoolName}} with the email {{username}}.
 
 access your portal here https://cloud.shuleplus.co.ke
 
