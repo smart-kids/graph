@@ -54,11 +54,10 @@ router.use(
         db: req.app.locals.db
       },
       formatError: (err) => {
-        const error = getErrorCode(err.message)
         if (BUGSNAG_API_KEY)
           Bugsnag.notify(err)
-          
-        return ({ message: error.message, statusCode: error.statusCode })
+
+        return (err)
       }
     })(req, res, next)
   }
