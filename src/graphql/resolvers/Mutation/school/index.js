@@ -162,6 +162,7 @@ password: {{password}}`;
       schoolName
     })
 
+    console.log("sending message", message)
     sms({ data: { phone, message } },
       async (res) => {
         const { smsCost } = res
