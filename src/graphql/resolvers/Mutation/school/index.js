@@ -130,7 +130,7 @@ const invite = async (data, { db: { collections } }) => {
       console.log("found multiple admins for ", id, data)
     }
 
-    admin = admins[0]
+    var admin = admins[0]
 
     const inviteSmsText = `
 Hello {{username}}, 

@@ -1,6 +1,15 @@
 require("dotenv").config();
 import "graphql-import-node";
 import "babel-polyfill";
+import 'source-map-support/register'
+
+var Bugsnag = require('@bugsnag/js')
+var BugsnagPluginExpress = require('@bugsnag/plugin-express')
+
+Bugsnag.start({
+  apiKey: process.env.BUGSNAG_API_KEY,
+  plugins: [BugsnagPluginExpress]
+})
 
 import express from "express";
 import { makeExecutableSchema } from "graphql-tools";
@@ -18,6 +27,9 @@ const typeDefs = importSchema('./schema.graphql')
 let schema = makeExecutableSchema({ typeDefs, resolvers });
 
 var router = express.Router()
+
+const { requestHandler: BugSnagrequestMiddleware, errorHandler: BugSnagErrorHandler } = Bugsnag.getPlugin('express')
+router.use(BugSnagrequestMiddleware, BugSnagErrorHandler);
 
 router.get("/health", (req, res) => res.send());
 
