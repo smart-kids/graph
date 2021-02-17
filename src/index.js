@@ -65,7 +65,7 @@ router.use(
       },
       formatError: err => {
         console.log("sending data to bugsnag as", err)
-        notifyErrors.formatError(err)
+        notifyErrors.formatError(JSON.stringify(err))
       }
     })(req, res, next)
   }
