@@ -123,13 +123,13 @@ const pay = async (data, { db: { collections } }) => {
 
 const invite = async (data, { db: { collections } }) => {
   try {
-    const { id } = data[name];
+    const { id:schoolId } = data[name];
     console.log({ data })
 
-    const admins = await collections["admin"].find({ where: { school: id, isDeleted: false } });
+    const admins = await collections["admin"].find({ where: { school: schoolId, isDeleted: false } });
 
     if (admins.length > 1) {
-      console.log("found multiple admins for ", id, data)
+      console.log("found multiple admins for ", schoolId, data)
     }
 
     var admin = admins[0]
