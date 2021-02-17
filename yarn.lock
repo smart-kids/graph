@@ -2503,6 +2503,11 @@ graphql-import@^0.7.1:
     lodash "^4.17.4"
     resolve-from "^4.0.0"
 
+graphql-notify-errors@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/graphql-notify-errors/-/graphql-notify-errors-1.0.0.tgz#6e9a6b373d591776c69ed474035d4fa57f5c59f1"
+  integrity sha512-dI3+tHKzkO43B/UkKuwVRdpyRdXIGpNjE1b6K22lZio2M/fp8DfNy56olqt0Gm7zs/bn44a6W+EJsqfkvmRD6A==
+
 graphql-tools@^4.0.5:
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/graphql-tools/-/graphql-tools-4.0.5.tgz#d2b41ee0a330bfef833e5cdae7e1f0b0d86b1754"

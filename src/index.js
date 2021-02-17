@@ -21,6 +21,15 @@ const validator = require('express-joi-validation').createValidator({})
 const typeDefs = importSchema('./schema.graphql')
 let schema = makeExecutableSchema({ typeDefs, resolvers });
 
+const NotifyErrors = require('graphql-notify-errors')
+const filter = err => !(err instanceof GraphQLError)
+const options = {
+  formatError,
+  filter,
+  notify: Bugsnag.notify
+}
+const notifyErrors = new NotifyErrors(options)
+
 var router = express.Router()
 
 if (BUGSNAG_API_KEY) {
@@ -53,12 +62,7 @@ router.use(
         auth: req.decoded,
         db: req.app.locals.db
       },
-      formatError: (err) => {
-        if (BUGSNAG_API_KEY)
-          Bugsnag.notify(err)
-
-        return (err)
-      }
+      formatError: err => notifyErrors.formatError(err)
     })(req, res, next)
   }
 );

@@ -34,6 +34,7 @@
     "graphql-errors": "^2.1.0",
     "graphql-import": "^0.7.1",
     "graphql-import-node": "^0.0.4",
+    "graphql-notify-errors": "^1.0.0",
     "graphql-tools": "^4.0.5",
     "handlebars": "^4.7.6",
     "joi": "^14.3.1",
