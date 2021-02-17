@@ -123,7 +123,7 @@ const pay = async (data, { db: { collections } }) => {
 
 const invite = async (data, { db: { collections } }) => {
   try {
-    const { id:schoolId } = data[name];
+    const { id: schoolId, name: schoolName } = data[name];
     console.log({ data })
 
     const admins = await collections["admin"].find({ where: { school: schoolId, isDeleted: false } });
@@ -137,23 +137,30 @@ const invite = async (data, { db: { collections } }) => {
     const inviteSmsText = `
 Hello {{username}}, 
 
-You have been invited to join ShulePlus.
+You have been invited to join ShulePlus as an administrator for {{schoolName}}.
 
-access admin here https://cloud.shuleplus.co.ke
+access your portal here https://cloud.shuleplus.co.ke
+
+and download mobile app here https://play.google.com/store/apps/details?id=com.shule.plus
 
 use the following details to login and start enjoying your first free month:
 
-phone number: {{phone_number}}
+open the app or admin and select "i already have an account", 
+
+phone number: {{phone}}
 password: {{password}}`;
 
     const template = Handlebars.compile(inviteSmsText);
     const password = generatePassword();
     const hashedPassword = await argon2.hash(password);
-    const phone = admin.phone;
-    const smsTemplateData = {
-      username: admin.username, phone_number: phone, password
-    }
-    const message = template(smsTemplateData)
+    const { phone, username } = admin.phone;
+
+    const message = template({
+      username,
+      phone,
+      password,
+      schoolName
+    })
 
     sms({ data: { phone, message } },
       async (res) => {
