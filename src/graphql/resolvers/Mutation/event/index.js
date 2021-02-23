@@ -16,7 +16,7 @@ const create = async (data, { db: { collections } }) => {
   });
 
   const parent = await collections["parent"].findOne({
-    where: { id: student.parent2, isDeleted: false }
+    where: { id: student.parent2 || student.parent, isDeleted: false }
   });
 
   const trip = await collections["trip"].findOne({
@@ -49,7 +49,7 @@ const create = async (data, { db: { collections } }) => {
 
   const message = Handlebars.compile(schedule.message)(templateData) || "Schedule Message"
 
-  console.log("Attemting to send sms" + JSON.stringify({ phone: parent.phone, message }))
+  console.log("Attemting to send sms" + JSON.stringify({ phone: parent?.phone, message }))
   try {
     sms(
       { data: { phone: parent.phone, message } },
