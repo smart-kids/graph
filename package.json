@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "test": "export NODE_ENV=test && mocha --require babel-register --inspect test/**/*.js --exit",
-    "dev": "nodemon --exec babel-node --presets babel-preset-env --inspect  ./src/server",
+    "dev": "nodemon --exec babel-node --inspect  ./src/server",
     "build": "babel ./src --out-dir dist --source-maps ",
     "deploy": "yarn build && gcloud functions deploy smartkids-graph --trigger-http --region=us-central1 --runtime=nodejs10 --entry-point=default --env-vars-file .env.yaml",
     "test-deployment": "yarn build && node dist/server",
@@ -15,11 +15,13 @@
     "debug": "babel-node debug ./src"
   },
   "dependencies": {
+    "@babel/preset-env": "^7.13.0",
     "@bugsnag/js": "^7.7.0",
     "@bugsnag/plugin-express": "^7.7.0",
     "@hapi/joi": "^16.1.7",
     "argon2": "^0.27.1",
     "babel-polyfill": "^6.26.0",
+    "babel-preset-latest-node": "^5.4.0",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^8.0.0",
@@ -60,9 +62,10 @@
     "waterline": "^0.13.6"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-preset-env": "^1.7.0",
+    "@babel/core": "^7.13.1",
+    "@babel/node": "^7.13.0",
+    "@babel/plugin-proposal-optional-chaining": "^7.13.0",
+    "babel-node": "^0.0.1-security",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
     "mocha": "^5.1.1",

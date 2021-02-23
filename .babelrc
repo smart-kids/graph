@@ -1,5 +1,8 @@
 {
     "presets": [
-        "env"
+        "latest-node"
+    ],
+    "plugins": [
+        "@babel/plugin-proposal-optional-chaining"
     ]
 }
