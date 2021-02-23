@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "test": "export NODE_ENV=test && mocha --require babel-register --inspect test/**/*.js --exit",
-    "dev": "nodemon --exec babel-node --inspect  ./src/server",
+    "dev": "nodemon --exec npx babel-node --inspect  ./src/server",
     "build": "npx babel ./src --out-dir dist --source-maps ",
     "deploy": "yarn build && gcloud functions deploy smartkids-graph --trigger-http --region=us-central1 --runtime=nodejs10 --entry-point=default --env-vars-file .env.yaml",
     "test-deployment": "yarn build && node dist/server",
@@ -62,6 +62,7 @@
     "waterline": "^0.13.6"
   },
   "devDependencies": {
+    "@babel/cli": "^7.13.0",
     "@babel/core": "^7.13.1",
     "@babel/node": "^7.13.0",
     "@babel/plugin-proposal-optional-chaining": "^7.13.0",
