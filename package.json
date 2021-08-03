@@ -6,7 +6,7 @@
   "author": "gitomehbranson <sirbranson67@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "export NODE_ENV=test && mocha --require babel-register --inspect test/**/*.js --exit",
+    "test": "export NODE_ENV=test && mocha --inspect test/**/*.js --exit",
     "dev": "nodemon --exec npx babel-node --inspect  ./src/server",
     "build": "npx babel ./src --out-dir dist --source-maps ",
     "deploy": "yarn build && gcloud functions deploy smartkids-graph --trigger-http --region=us-central1 --runtime=nodejs10 --entry-point=default --env-vars-file .env.yaml",
@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@babel/preset-env": "^7.13.0",
+    "@babel/register": "^7.14.5",
     "@bugsnag/js": "^7.7.0",
     "@bugsnag/plugin-express": "^7.7.0",
     "@hapi/joi": "^16.1.7",
