@@ -1572,7 +1572,7 @@ describe("Students", () => {
 });
 
 describe("Schedule", () => {
-  it("Can create an schedule", done => {
+  it("Can create a schedule", done => {
     chai
       .request(app)
       .post("/graph")
@@ -1603,6 +1603,7 @@ We would like to thank you for your continued commitment to time and safety.`,
             school: sharedInfo.school,
             route: sharedInfo.routeId,
             days: "MONDAY,TUESDAY",
+            type: "PICK",
             bus: sharedInfo.busId
           }
         }

@@ -12,6 +12,7 @@ export default Waterline.Collection.extend({
     school: { type: "string", required: false },
     time: { type: "string", required: true },
     end_time: { type: "string", required: true },
+    type: { type: "string", required: true },
     days: { type: "string", required: true },
     route: { type: "string", required: false },
     actions: { type: "string", required: false },
