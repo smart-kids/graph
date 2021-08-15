@@ -684,6 +684,11 @@ enum day {
   SUNDAY
 }
 
+enum scheduleType {
+  PICK
+  DROP
+}
+
 type smsActions {
   tick: String
   cancellation: String
@@ -709,6 +714,7 @@ type schedule {
   time: String
   end_time: String
   days: [day]
+  type: scheduleType
   route: route
   bus: bus
   trips: [trip]
@@ -723,6 +729,7 @@ input Ischedule {
   end_time: String
   school: String!
   route: String
+  type: scheduleType
   days: String
   bus: String
   driver: String
@@ -735,6 +742,7 @@ input Uschedule {
   message: String
   time: String
   end_time: String
+  type: scheduleType
   days: String
   route: String
   bus: String
