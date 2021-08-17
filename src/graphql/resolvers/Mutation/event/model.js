@@ -11,6 +11,8 @@ export default Waterline.Collection.extend({
     student: { type: "string", required: true },
     time: { type: "string", required: true },
     type: { type: "string", required: true },
+    latitude: { type: "string", required: true },
+    longitude: { type: "string", required: true },
     trip: { type: "string", required: true },
     isDeleted: { type: "boolean", defaultsTo: false }
   }

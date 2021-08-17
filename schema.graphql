@@ -349,6 +349,8 @@ enum eventType {
 type event {
   id: String
   student: student
+  latitude: String
+  longitude: String
   time: String
   type: eventType
   trip: trip
@@ -356,6 +358,8 @@ type event {
 
 input Ievent {
   student: String
+  latitude: String
+  longitude: String
   time: String
   school: String!
   type: String
@@ -365,6 +369,8 @@ input Ievent {
 input Uevent {
   id: String!
   student: String
+  latitude: String
+  longitude: String
   time: String
   type: String
   trip: String
@@ -459,6 +465,11 @@ type locReportMutations {
   restore(locreport: UlocReport!): locReport
 }
 
+enum tripType {
+  PICK
+  DROP
+}
+
 # trip things
 type trip {
   id: String
@@ -466,6 +477,7 @@ type trip {
   completedAt: String
   isCancelled: Boolean
   bus: bus
+  type: tripType
   driver: driver
   schedule: schedule
   events: [event]
@@ -476,6 +488,7 @@ input Itrip {
   startedAt: String
   completedAt: String
   isCancelled: Boolean
+  type: tripType
   school: String!
   driver: String!
   schedule: String
@@ -484,6 +497,7 @@ input Itrip {
 input Utrip {
   id: String!
   startedAt: String
+  type: tripType
   completedAt: String
   isCancelled: Boolean
   schedule: String

@@ -1743,7 +1743,7 @@ We would like to thank you for your continued commitment to time and safety.`,
 
 
 describe("Trips", () => {
-  it("Can create an trip", done => {
+  it("Can create a trip", done => {
     chai
       .request(app)
       .post("/graph")
@@ -1763,6 +1763,7 @@ describe("Trips", () => {
           Itrip: {
             startedAt: new Date().toISOString(),
             schedule: sharedInfo.scheduleId,
+            type: "DROP",
             driver: sharedInfo.driverId,
             school: sharedInfo.school,
           }
@@ -1798,6 +1799,7 @@ describe("Trips", () => {
         `,
         variables: {
           Itrip: {
+            type: "DROP",
             startedAt: new Date().toISOString(),
             completedAt: moment(new Date())
               .add(40, "m")
@@ -1836,6 +1838,7 @@ describe("Trips", () => {
         `,
         variables: {
           Itrip: {
+            type: "DROP",
             startedAt: new Date().toISOString(),
             schedule: sharedInfo.scheduleId,
             driver: sharedInfo.driverId,
@@ -1871,6 +1874,7 @@ describe("Trips", () => {
         `,
         variables: {
           Itrip: {
+            type: "PICK",
             isCancelled: true,
             school: sharedInfo.school,
             driver: sharedInfo.driverId,
@@ -1908,6 +1912,7 @@ describe("Trips", () => {
           trip: {
             id: sharedInfo.tripId,
             startedAt: new Date().toISOString(),
+            type: "PICK",
             completedAt: new Date().toISOString(),
             schedule: sharedInfo.scheduleId
           }
@@ -1922,7 +1927,7 @@ describe("Trips", () => {
       });
   });
 
-  it("Can nuke an trip", done => {
+  it("Can nuke a trip", done => {
     chai
       .request(app)
       .post("/graph")
@@ -2030,6 +2035,8 @@ describe("Event", () => {
         variables: {
           Ievent: {
             student: sharedInfo.studentId,
+            latitude: "-1.286389",
+            longitude: "36.817223",
             time: new Date().toLocaleTimeString(),
             type: "CHECKEDOFF",
             school: sharedInfo.school,
@@ -2067,6 +2074,8 @@ describe("Event", () => {
         variables: {
           event: {
             id: sharedInfo.eventId,
+            latitude: "-1.286389",
+            longitude: "36.817223",
             time: new Date().toLocaleTimeString()
           }
         }
