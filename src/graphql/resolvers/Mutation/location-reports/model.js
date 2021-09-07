@@ -10,7 +10,8 @@ export default Waterline.Collection.extend({
     id: { type: "string", required: true },
     time: { type: "string", required: true },
     loc: { type: "string", required: true },
-    trip: { type: "string", required: true },
+    trip: { type: "string", required: false },
+    event: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });

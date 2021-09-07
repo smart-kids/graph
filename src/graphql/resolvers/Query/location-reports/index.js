@@ -37,6 +37,12 @@ const nested = {
         where: { id: root.trip, isDeleted: false }
       });
       return entry;
+    },
+    async event(root, args, { db: { collections } }) {
+      const entry = await collections["event"].find({
+        where: { id: root.event, isDeleted: false }
+      });
+      return entry;
     }
   }
 }

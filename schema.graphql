@@ -354,6 +354,7 @@ type event {
   time: String
   type: eventType
   trip: trip
+  locReport: locReport
 }
 
 input Ievent {
@@ -443,12 +444,14 @@ type locReport {
   time: String
   loc: loc
   trip: trip
+  event: event
 }
 
 input IlocReport {
   time: String
   loc: Iloc
   trip: String
+  event: String
 }
 
 input UlocReport {
@@ -456,6 +459,7 @@ input UlocReport {
   time: String
   loc: Iloc
   trip: String
+  event: String
 }
 
 type locReportMutations {
