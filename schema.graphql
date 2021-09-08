@@ -349,8 +349,6 @@ enum eventType {
 type event {
   id: String
   student: student
-  latitude: String
-  longitude: String
   time: String
   type: eventType
   trip: trip
@@ -359,8 +357,6 @@ type event {
 
 input Ievent {
   student: String
-  latitude: String
-  longitude: String
   time: String
   school: String!
   type: String
@@ -370,8 +366,6 @@ input Ievent {
 input Uevent {
   id: String!
   student: String
-  latitude: String
-  longitude: String
   time: String
   type: String
   trip: String
@@ -445,6 +439,7 @@ type locReport {
   loc: loc
   trip: trip
   event: event
+  student: student
 }
 
 input IlocReport {
@@ -452,6 +447,7 @@ input IlocReport {
   loc: Iloc
   trip: String
   event: String
+  student: String
 }
 
 input UlocReport {
@@ -460,6 +456,7 @@ input UlocReport {
   loc: Iloc
   trip: String
   event: String
+  student: String
 }
 
 type locReportMutations {

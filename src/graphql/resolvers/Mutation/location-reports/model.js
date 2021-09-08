@@ -12,6 +12,7 @@ export default Waterline.Collection.extend({
     loc: { type: "string", required: true },
     trip: { type: "string", required: false },
     event: { type: "string", required: false },
+    student: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });
