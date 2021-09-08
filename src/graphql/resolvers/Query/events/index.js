@@ -52,7 +52,19 @@ const nested = {
         where: { id: root.trip, isDeleted: false }
       });
       return entry;
-    }
+    },
+    async locReport(
+      root,
+      args,
+      {
+        db: { collections }
+      }
+    ) {
+      const entry = await collections["locreport"].findOne({
+        where: { event: root.id, isDeleted: false }
+      });
+      return entry;
+    },
   }
 };
 

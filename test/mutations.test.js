@@ -1743,7 +1743,7 @@ We would like to thank you for your continued commitment to time and safety.`,
 
 
 describe("Trips", () => {
-  it("Can create an trip", done => {
+  it("Can create a trip", done => {
     chai
       .request(app)
       .post("/graph")
@@ -1763,6 +1763,7 @@ describe("Trips", () => {
           Itrip: {
             startedAt: new Date().toISOString(),
             schedule: sharedInfo.scheduleId,
+            type: "DROP",
             driver: sharedInfo.driverId,
             school: sharedInfo.school,
           }
@@ -1798,6 +1799,7 @@ describe("Trips", () => {
         `,
         variables: {
           Itrip: {
+            type: "DROP",
             startedAt: new Date().toISOString(),
             completedAt: moment(new Date())
               .add(40, "m")
@@ -1836,6 +1838,7 @@ describe("Trips", () => {
         `,
         variables: {
           Itrip: {
+            type: "DROP",
             startedAt: new Date().toISOString(),
             schedule: sharedInfo.scheduleId,
             driver: sharedInfo.driverId,
@@ -1871,6 +1874,7 @@ describe("Trips", () => {
         `,
         variables: {
           Itrip: {
+            type: "PICK",
             isCancelled: true,
             school: sharedInfo.school,
             driver: sharedInfo.driverId,
@@ -1908,6 +1912,7 @@ describe("Trips", () => {
           trip: {
             id: sharedInfo.tripId,
             startedAt: new Date().toISOString(),
+            type: "PICK",
             completedAt: new Date().toISOString(),
             schedule: sharedInfo.scheduleId
           }
@@ -1922,7 +1927,7 @@ describe("Trips", () => {
       });
   });
 
-  it("Can nuke an trip", done => {
+  it("Can nuke a trip", done => {
     chai
       .request(app)
       .post("/graph")
@@ -2329,7 +2334,7 @@ describe("Complaint", () => {
   });
 });
 
-describe("Location Reporting", () => {
+describe("Location Reporting (Trip)", () => {
   it("Can create an locReport", done => {
     chai
       .request(app)
@@ -2483,6 +2488,140 @@ describe("Location Reporting", () => {
         expect(res.body.errors).to.not.exist;
         // expect(res.body.data.locReports[0].id).to.be.a.string;
 
+        done();
+      });
+  });
+});
+
+describe("Location Reporting (Event)", () => {
+  it("Can create an event locReport", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($IlocReport: IlocReport!) {
+            locReports {
+              create(locreport: $IlocReport) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          IlocReport: {
+            event: sharedInfo.eventId,
+            time: new Date().toLocaleTimeString(),
+            loc: {
+              lat: 1.234,
+              lng: -0.456
+            }
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.locReports.create.id).to.be.a.string;
+
+        sharedInfo.eventLocReportId = res.body.data.locReports.create.id;
+        done();
+      });
+  });
+
+  it("Can update an event locReport", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($locReport: UlocReport!) {
+            locReports {
+              update(locreport: $locReport) {
+                id
+              }
+            }
+          }            
+        `,
+        variables: {
+          locReport: {
+            id: sharedInfo.eventLocReportId,
+            time: new Date().toLocaleTimeString()
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.locReports.update.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can nuke an event locReport", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($IlocReport: UlocReport!) {
+            locReports {
+              archive(locreport: $IlocReport) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          IlocReport: {
+            id: sharedInfo.eventLocReportId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.locReports.archive.id).to.be.a.string;
+        done();
+      });
+  });
+
+  it("Can restore an event locReport", done => {
+    chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($IlocReport: UlocReport!) {
+            locReports {
+              restore(locreport: $IlocReport) {
+                id
+              }
+            }
+          }                  
+        `,
+        variables: {
+          IlocReport: {
+            id: sharedInfo.eventLocReportId
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        // expect(res.body.data.locReports.restore.id).to.be.string;
         done();
       });
   });

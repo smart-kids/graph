@@ -459,6 +459,14 @@ describe("Setup For Queries", () => {
                   events {
                     time
                     type
+                    locReport {
+                      id
+                      time
+                      loc {
+                        lat
+                        lng
+                      }
+                    }
                     student {
                       id
                     }
@@ -617,6 +625,14 @@ describe("Setup For Queries", () => {
           expect(schedule.trips[0].events).to.be.instanceof(Array);
           expect(schedule.trips[0].events[0].student).to.exist;
           expect(schedule.trips[0].events[0].student.id).to.be.a.string;
+
+          // trip event locReport
+          expect(schedule.trips[0].events[0].locReport).to.be.instanceof(Object);
+          expect(schedule.trips[0].events[0].locReport.id).to.be.a.string;
+          expect(schedule.trips[0].events[0].locReport.time).to.be.a.string;
+          expect(schedule.trips[0].events[0].locReport.loc).to.exist;
+          expect(schedule.trips[0].events[0].locReport.loc.lat).to.be.a.string;
+          expect(schedule.trips[0].events[0].locReport.loc.lng).to.be.a.string;
 
           // trip locReports
           expect(schedule.trips[0].locReports).to.be.instanceof(Array);
