@@ -2625,31 +2625,6 @@ describe("Location Reporting (Event)", () => {
         done();
       });
   });
-
-  it("Can fetch restored event locReport", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("authorization", authorization)
-      .set("content-type", "application/json")
-      .send({
-        query: `
-        {
-          locReports{
-            id
-          }
-        }        
-        `
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        // expect(res.body.data.locReports[0].id).to.be.a.string;
-
-        done();
-      });
-  });
 });
 
 describe("SMS Communication", () => {
