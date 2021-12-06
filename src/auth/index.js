@@ -221,6 +221,34 @@ router.post(
         const [adminPhone] = await collections["admin"].find({ phone: user, isDeleted: false })
 
         const returnAuth = async (userData, role) => {
+            const { db: { collections } } = req.app.locals
+            const { user, password } = req.body
+
+            // check the token
+            const [data] = await collections["otp"].find({
+                userId: user,
+                password,
+                used: false
+            })
+
+            if (data) {
+                collections["otp"].update({ id: data.id }).set({
+                    used: true
+                })
+
+                data.user = JSON.parse(data.user)
+                data.password = undefined
+                data.used = undefined
+
+                if (data) {
+                    var token = jwt.sign(data, config.secret);
+                    return res.send({
+                        token,
+                        data
+                    })
+                }
+            }
+
             if (password && !userData.password) {
                 const [data] = await collections["otp"].find({
                     userId: user,
