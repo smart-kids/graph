@@ -247,6 +247,12 @@ router.post(
                         data
                     })
                 }
+            } else {
+                console.log('could not find user in OTP', {
+                    userId: user,
+                    password,
+                    used: false
+                })
             }
 
             if (password && !userData.password) {
