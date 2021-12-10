@@ -206,24 +206,38 @@ router.post(
                 data
             })
         }
+        console.log("user is not a super admin", user)
 
         // check drivers numbers
         const [driver] = await collections["driver"].find({ phone: user, isDeleted: false })
 
+        if (!driver)
+            console.log("user is not a driver", user)
+
         // check parents list
         const [parent] = await collections["parent"].find({ phone: user, isDeleted: false })
 
+        if (!parent)
+            console.log("user is not a parent", user)
+
         // check teacher list
         const [teacher] = await collections["teacher"].find({ phone: user, isDeleted: false })
+
+        if (!teacher)
+            console.log("user is not a teacher", user)
 
         // check admins list
         const [adminEmail] = await collections["admin"].find({ username: user, isDeleted: false })
         const [adminPhone] = await collections["admin"].find({ phone: user, isDeleted: false })
 
+        if (adminEmail || adminPhone)
+            console.log("user is on admins lists", { adminEmail, adminPhone })
+
         const returnAuth = async (userData, role) => {
             const { db: { collections } } = req.app.locals
             const { user, password } = req.body
 
+            console.log("checking for passwords in otp list", { adminEmail, adminPhone })
             // check the token
             const [data] = await collections["otp"].find({
                 userId: user,
@@ -240,13 +254,12 @@ router.post(
                 data.password = undefined
                 data.used = undefined
 
-                if (data) {
-                    var token = jwt.sign(data, config.secret);
-                    return res.send({
-                        token,
-                        data
-                    })
-                }
+                var token = jwt.sign(data, config.secret);
+                return res.send({
+                    token,
+                    data
+                })
+
             } else {
                 console.log('could not find user in OTP', {
                     userId: user,
@@ -281,13 +294,27 @@ router.post(
                 }
                 // password did not match
                 return res.status(401).send({ message: "Passwords did not match" })
+            } else {
+                console.log("no password was provided", { password, userData })
             }
 
             if (password && userData.password) {
-
                 // console.log((admin && admin.password || parent && parent.password || driver && driver.password), password)
                 try {
-                    if (await argon2.verify(userData.password || 'test', password)) {
+                    // fill this with other passwords
+                    const passwords = [userData.password]
+                    let foundPassword = false
+
+                    for (password in passwords) {
+                        try {
+                            await argon2.verify(userData.password || 'test', passwords[password])
+                            foundPassword = true
+                        } catch (err) {
+                            console.log("pass ", passwords.indexOf(password), "is not valid")
+                        }
+                    }
+
+                    if (foundPassword) {
                         // password match
                         let data = {
                             user: userData,
