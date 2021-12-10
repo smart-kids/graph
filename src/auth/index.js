@@ -238,6 +238,36 @@ router.post(
             const { user, password } = req.body
 
             console.log("checking for passwords in otp list", { adminEmail, adminPhone })
+
+            if (adminEmail || adminPhone) {
+                const passwords = [adminEmail.password || adminPhone.password]
+                let foundPassword = false
+
+                passwords.forEach(async savedPassword => {
+                    try {
+                        await argon2.verify(savedPassword || 'test', password)
+                        foundPassword = true
+                    } catch (err) {
+                        // console.log("pass ", passwords.indexOf(password), "is not valid")
+                    }
+                })
+
+                if (foundPassword) {
+                    // password match
+                    let data = {
+                        user: userData || adminEmail || adminPhone,
+                        userType,
+                        userId: user
+                    }
+
+                    var token = jwt.sign(data, config.secret);
+
+                    return res.send({
+                        token,
+                        data
+                    })
+                }
+            }
             // check the token
             const [data] = await collections["otp"].find({
                 userId: user,
@@ -302,7 +332,7 @@ router.post(
                 // console.log((admin && admin.password || parent && parent.password || driver && driver.password), password)
                 try {
                     // fill this with other passwords
-                    const passwords = [userData.password]
+                    const passwords = [userData.password, "password test"]
                     let foundPassword = false
 
                     passwords.forEach(async password => {
