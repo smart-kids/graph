@@ -305,14 +305,14 @@ router.post(
                     const passwords = [userData.password]
                     let foundPassword = false
 
-                    for (x in passwords) {
+                    passwords.forEach(async password => {
                         try {
-                            await argon2.verify(userData.password || 'test', passwords[x])
+                            await argon2.verify(userData.password || 'test', password)
                             foundPassword = true
                         } catch (err) {
-                            console.log("pass ", passwords.indexOf(passwords[x]), "is not valid")
+                            console.log("pass ", passwords.indexOf(password), "is not valid")
                         }
-                    }
+                    })
 
                     if (foundPassword) {
                         // password match
