@@ -240,7 +240,7 @@ router.post(
             console.log("checking for passwords in otp list", { adminEmail, adminPhone })
 
             if (adminEmail || adminPhone) {
-                const passwords = [adminEmail.password || adminPhone.password]
+                const passwords = [adminEmail?.password || adminPhone?.password]
                 let foundPassword = false
 
                 passwords.forEach(async savedPassword => {
