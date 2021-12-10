@@ -17,6 +17,7 @@ const create = async (data, { db: { collections } }) => {
       };
     }
   } catch (err) {
+
   }
 
   const id = new ObjectId().toHexString();
