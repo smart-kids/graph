@@ -18,6 +18,7 @@ export default Waterline.Collection.extend({
     home: { type: "string", required: false },
     experience: { type: "string", required: false },
     password: { type: "string", required: false },
+    google_id: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });

@@ -15,6 +15,7 @@ export default Waterline.Collection.extend({
     email: { type: "string", required: true },
     school: { type: "string", required: false },
     gender: { type: "string", required: true },
+    google_id: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });
