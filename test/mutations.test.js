@@ -4266,6 +4266,140 @@ describe("Invitations", () => {
       });
   });
 
+  describe("Google ID and Email from Google Auth API", () => {
+    it("Can update an admin with google ID and email", done => {
+      chai
+        .request(app)
+        .post("/graph")
+        .set("authorization", authorization)
+        .set("content-type", "application/json")
+        .send({
+          query: `
+            mutation ($admin: Uadmin!) {
+              admins {
+                update(admin: $admin) {
+                  id
+                }
+              }
+            }            
+          `,
+          variables: {
+            admin: {
+              id: sharedInfo.adminId,
+              google_id: '7380943243242378923432423424242233',
+              email: 'admin@domain.com'
+            }
+          }
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body).to.not.be.null;
+          expect(res.body.errors).to.not.exist;
+          expect(res.body.data.admins.update.id).to.be.a.string;
+          done();
+        });
+    });
+
+    it("Can update a parent with google ID and email", done => {
+      chai
+      .request(app)
+      .post("/graph")
+      .set("authorization", authorization)
+      .set("content-type", "application/json")
+      .send({
+        query: `
+          mutation ($parent: Uparent!) {
+            parents {
+              update(parent: $parent) {
+                id
+              }
+            }
+          }
+        `,
+        variables: {
+          parent: {
+            id: sharedInfo.parentId,
+            google_id: '23412345678923432423424242233',
+            email: 'parent@domain.com'
+          }
+        }
+      })
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body).to.not.be.null;
+        expect(res.body.errors).to.not.exist;
+        expect(res.body.data.parents.update.id).to.be.a.string;
+        done();
+      });
+    });
+
+    it("Can update a driver with google ID and email", done => {
+      chai
+        .request(app)
+        .post("/graph")
+        .set("authorization", authorization)
+        .set("content-type", "application/json")
+        .send({
+          query: `
+            mutation ($driver: Udriver!) {
+              drivers {
+                update(driver: $driver) {
+                  id
+                }
+              }
+            }            
+          `,
+          variables: {
+            driver: {
+              id: sharedInfo.driverId,
+              google_id: '3432114567892392347123124242233',
+              email: 'driver@domain.com'
+            }
+          }
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body).to.not.be.null;
+          expect(res.body.errors).to.not.exist;
+          expect(res.body.data.drivers.update.id).to.be.a.string;
+          done();
+        });
+    });
+
+    it("Can update a teacher with google ID and email", done => {
+      chai
+        .request(app)
+        .post("/graph")
+        .set("authorization", authorization)
+        .set("content-type", "application/json")
+        .send({
+          query: `
+          mutation ($teacher: Uteacher!) {
+            teachers {
+              update(teacher: $teacher) {
+                id
+              }
+            }
+          }
+        `,
+          variables: {
+            teacher: {
+              id: sharedInfo.teacherId,
+              google_id: '98938941123222222192347123124242233',
+              email: 'teacher@domain.com'
+            }
+          }
+        })
+        .end((err, res) => {
+          res.should.have.status(200);
+          expect(res.body).to.not.be.null;
+          expect(res.body.errors).to.not.exist;
+          expect(res.body.data.teachers.update.id).to.be.a.string;
+          done();
+        });
+    });
+  });
+
   // it("Can send an invitation", done => {
   //   chai
   //     .request(app)

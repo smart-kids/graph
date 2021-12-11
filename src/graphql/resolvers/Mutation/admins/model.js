@@ -13,6 +13,7 @@ export default Waterline.Collection.extend({
     phone: { type: "string", required: true },
     password: { type: "string" },
     school: { type: "string" },
+    google_id: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });
