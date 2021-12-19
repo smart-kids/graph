@@ -251,7 +251,11 @@ router.post(
                     used: true
                 })
 
-                data.user = JSON.parse(data.user)
+                console.log("User data", userData);
+
+                // data.user = JSON.parse(data.user) may contain stale user data without the updated google id and email after google auth authentication.
+                userData.password = undefined
+                data.user = userData
                 data.password = undefined
                 data.used = undefined
 
