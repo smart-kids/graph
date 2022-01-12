@@ -224,6 +224,7 @@ type admin {
   id: String
   name: String
   username: String
+  google_id: String
   email: String
   password: String
   
@@ -245,6 +246,7 @@ input Uadmin {
   name: String
   phone: String
   username: String
+  google_id: String
   email: String
   password: String
 }
@@ -265,6 +267,7 @@ type driver {
   photo: String
   license_expiry: String
   licence_number: String
+  google_id: String
   home: String
   experience: String
   password: String
@@ -293,6 +296,7 @@ input Udriver {
   photo: String
   license_expiry: String
   licence_number: String
+  google_id: String
   home: String
   experience: String
   password: String
@@ -776,6 +780,7 @@ type scheduleMutations {
 type parent {
   id: String
   national_id: String
+  google_id: String
   name: String
   phone: String
   email: String
@@ -797,6 +802,7 @@ input Iparent {
 input Uparent {
   id: String!
   national_id: String
+  google_id: String
   name: String
   phone: String
   password: String
@@ -816,6 +822,7 @@ type parentMutations {
 type teacher {
   id: String
   national_id: String
+  google_id: String
   name: String
   phone: String
   email: String
@@ -837,6 +844,7 @@ input Iteacher {
 input Uteacher {
   id: String!
   national_id: String
+  google_id: String
   name: String
   phone: String
   email: String
