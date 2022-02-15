@@ -1,4 +1,5 @@
 // Import the dependencies for testing
+require("dotenv").config()
 import chai from "chai";
 import chaiHttp from "chai-http";
 var rimraf = require("rimraf");
