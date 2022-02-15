@@ -46,7 +46,7 @@
     "moment": "^2.29.1",
     "mongodb": "^3.3.2",
     "morgan": "^1.9.1",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.7",
     "nodemailer": "^6.4.14",
     "nodemailer-smtp-transport": "^2.7.4",
     "passport": "^0.4.1",
