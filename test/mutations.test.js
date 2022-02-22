@@ -37,6 +37,16 @@ describe("Setup", () => {
           done();
         });
     });
+    it.only("Googlelogin should return 200", done => {
+      chai
+        .request(app)
+        .post("/googlelogin")
+        .end((err, res) => {
+          res.should.have.status(200);
+
+          done();
+        });
+    });
   });
 });
 
