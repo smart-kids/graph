@@ -335,6 +335,7 @@ describe("Setup For Queries", () => {
                 phone
                 license_expiry
                 licence_number
+                google_id
                 home
                 bus {
                   id
@@ -349,6 +350,7 @@ describe("Setup For Queries", () => {
               parents {
                 id
                 national_id
+                google_id
                 name
                 complaints {
                   id
@@ -392,6 +394,7 @@ describe("Setup For Queries", () => {
               teachers {
                 id
                 national_id
+                google_id
                 name
                 gender
                 phone
@@ -580,6 +583,7 @@ describe("Setup For Queries", () => {
 
           // drivers
           expect(driver.username).to.be.a.string;
+          expect(driver.google_id).to.be.a.string;
           expect(driver.email).to.be.a.string;
           expect(driver.phone).to.be.a.string;
           expect(driver.bus).to.exist;
@@ -588,6 +592,7 @@ describe("Setup For Queries", () => {
 
           // parents
           expect(parent.name).to.be.a.string;
+          expect(parent.google_id).to.be.a.string;
           expect(parent.id).to.be.a.string;
           expect(parent.students).to.be.instanceof(Array);
           expect(parent.students[0].names).to.be.a.string;
@@ -644,6 +649,7 @@ describe("Setup For Queries", () => {
 
           // teachers
           expect(teacher.id).to.be.a.string;
+          expect(teacher.google_id).to.be.a.string;
           expect(teacher.national_id).to.be.a.string;
           expect(teacher.name).to.be.a.string;
           expect(teacher.phone).to.be.a.string;
