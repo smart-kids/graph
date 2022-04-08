@@ -12,7 +12,7 @@ const create = async (data, { auth, db: { collections } }) => {
   const entry = Object.assign(data[name], { id, isDeleted: false });
   const { school } = entry
 
-  console.log(auth)
+  console.log({ auth })
 
   try {
     entry.password = undefined
@@ -25,6 +25,8 @@ const create = async (data, { auth, db: { collections } }) => {
       school,
       isDeleted: false
     }
+
+    console.log({ roleUser })
 
     await collections.user_role.create(roleUser);
 
