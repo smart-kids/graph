@@ -30,7 +30,8 @@ const create = async (data, { auth, db: { collections } }) => {
 
     await collections.user_role.create(roleUser);
 
-    console.log(await prepareUser(entry))
+    const readyUserObject = await prepareUser(entry)
+    readyUserObject.id = entry.id.toString()
     await collections.users.create(await prepareUser(entry));
 
     return entry;
