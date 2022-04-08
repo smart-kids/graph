@@ -87,7 +87,7 @@ describe("Super Auth", () => {
 });
 
 describe("Schools", () => {
-  it("Can create a school", done => {
+  it.only("Can create a school", done => {
     chai
       .request(app)
       .post("/graph")
@@ -107,6 +107,7 @@ describe("Schools", () => {
           school: {
             name: "School Name",
             phone: "0711111111",
+            userNames: "test names",
             email: "mail@domain.com",
             address: "PO Box 1234-00000 Someplace somewhere",
             inviteSmsText: 'Welcome to {shool_name} Shileplus panel. visit https://www.shuleplus.co.ke/{school_name} to join',
@@ -116,7 +117,7 @@ describe("Schools", () => {
         }
       })
       .end((err, res) => {
-        console.log(res.body.errors)
+
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
@@ -268,7 +269,7 @@ describe("Admins", () => {
         `,
         variables: {
           Iadmin: {
-            username: "admin1",
+            names: "admin1",
             email: "test",
             phone: "0711657108",
             password: "test",
@@ -306,7 +307,7 @@ describe("Admins", () => {
         variables: {
           admin: {
             id: sharedInfo.adminId,
-            username: "updated admin"
+            names: "updated admin names"
           }
         }
       })
@@ -1225,7 +1226,7 @@ describe("Parent", () => {
         `,
         variables: {
           Iparent: {
-            name: "parent1",
+            names: "parent1",
             national_id: "35718850",
             phone: "0711657108",
             password: "rY8x5uW",
@@ -1264,7 +1265,7 @@ describe("Parent", () => {
         `,
         variables: {
           Iparent: {
-            name: "parent2",
+            names: "parent2",
             national_id: "35718851",
             phone: "0711657108",
             password: "rY8x5uW",

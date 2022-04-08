@@ -6,7 +6,6 @@ import invitations from "../../Mutation/invitations/index.js";
 const { name } = require("./about.js")
 
 const list = async (root, args, { auth, db: { collections } }) => {
-  // console.log({ auth })
   const entries = await collections[name].find({
     where: {
       id: auth[Object.keys(auth)[0]].school,
@@ -113,6 +112,12 @@ const nested = {
     },
     async drivers(root, args, { db: { collections } }) {
       const entries = await collections["driver"].find({
+        where: { school: root.id, isDeleted: false }
+      });
+      return entries;
+    },
+    async admins(root, args, { db: { collections } }) {
+      const entries = await collections["admin"].find({
         where: { school: root.id, isDeleted: false }
       });
       return entries;

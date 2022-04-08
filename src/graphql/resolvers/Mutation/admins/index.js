@@ -1,17 +1,39 @@
 import { ObjectId } from "mongodb"
 const { name } = require("./about.js")
+const prepareUser = require("../../../../utils/prepapreUser")
+import roles from "../../../../utils/rolesMapping"
 
 const { UserError } = require("graphql-errors");
 
-const create = async (data, { db: { collections } }) => {
+
+const create = async (data, { auth, db: { collections } }) => {
   const id = new ObjectId().toHexString();
+  const roleId = new ObjectId().toHexString();
   const entry = Object.assign(data[name], { id, isDeleted: false });
+  const { school } = entry
+
+  console.log(auth)
 
   try {
+    entry.password = undefined
     await collections[name].create(entry);
+
+    const roleUser = {
+      id: roleId,
+      role: 1,
+      user: id,
+      school,
+      isDeleted: false
+    }
+
+    await collections.user_role.create(roleUser);
+
+    console.log(await prepareUser(entry))
+    await collections.users.create(await prepareUser(entry));
 
     return entry;
   } catch (err) {
+    console.log(err)
     throw new UserError(err.details);
   }
 };

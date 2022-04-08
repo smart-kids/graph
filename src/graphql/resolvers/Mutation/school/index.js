@@ -7,6 +7,13 @@ import generatePassword from "../../../../utils/generatePassword"
 
 const { UserError } = require("graphql-errors");
 
+const default_roles_per_school = [
+  "Admin",
+  "Driver",
+  // "Student",
+  // "Parent",
+]
+
 const create = async (data, { db: { collections } }) => {
   const { phone } = data[name];
   try {
@@ -43,7 +50,7 @@ password: {{password}}`;
     const school = await collections[name].create(entry);
     const { email, phone } = data[name];
     const adminId = new ObjectId().toHexString();
-    await collections["admin"].create({
+    await collections["user"].create({
       id: adminId,
       username: email,
       email: email,

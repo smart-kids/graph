@@ -222,8 +222,7 @@ type chargeMutations {
 # admins things
 type admin {
   id: String
-  name: String
-  username: String
+  names: String
   email: String
   password: String
   
@@ -232,9 +231,8 @@ type admin {
 }
 
 input Iadmin {
-  name: String
+  names: String
   phone: String
-  username: String!
   school: String!
   email: String!
   password: String!
@@ -242,9 +240,8 @@ input Iadmin {
 
 input Uadmin {
   id: String!
-  name: String
+  names: String
   phone: String
-  username: String
   email: String
   password: String
 }

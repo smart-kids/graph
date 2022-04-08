@@ -31,6 +31,11 @@ import terms from "./graphql/resolvers/Mutation/terms/model"
 import teams from "./graphql/resolvers/Mutation/teams/model"
 import team_members from "./graphql/resolvers/Mutation/team_members/model"
 import invitations from "./graphql/resolvers/Mutation/invitations/model"
+import users from "./graphql/resolvers/Mutation/users/model"
+import roles from "./graphql/resolvers/Mutation/roles/model"
+import user_roles from "./graphql/resolvers/Mutation/user_roles/model"
+import google_users from "./graphql/resolvers/Mutation/google_users/model"
+import school_creators from "./graphql/resolvers/Mutation/school_creators/model"
 
 const { NODE_ENV, DB_URL = 'db url here' } = process.env;
 
@@ -72,6 +77,11 @@ waterline.registerModel(teams)
 waterline.registerModel(team_members)
 waterline.registerModel(invitations)
 waterline.registerModel(OTP)
+waterline.registerModel(users)
+waterline.registerModel(roles)
+waterline.registerModel(user_roles)
+waterline.registerModel(google_users)
+waterline.registerModel(school_creators)
 
 var config = {
     adapters: {

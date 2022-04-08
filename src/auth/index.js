@@ -9,15 +9,15 @@ import jwt from "jsonwebtoken"
 import bodyParser from "body-parser"
 import argon2 from "argon2"
 import sms from "../utils/sms"
-
+import roles from "../utils/rolesMapping"
 
 const validator = require('express-joi-validation').createValidator({})
 
-const config = {
-    secret: "privateKEY"
-}
+const { NODE_ENV = 'development', SUPER_ADMIN_PASSWORD = '00000', ENCRYPTION_TOKEN = "privateKEY" } = process.env;
 
-const { NODE_ENV = 'development', SUPER_ADMIN_PASSWORD = '00000' } = process.env;
+const config = {
+    secret: ENCRYPTION_TOKEN
+}
 
 let checkToken = (req, res, next) => {
     let token = req.headers['x-access-token'] || req.headers['authorization']; // Express headers are auto converted to lowercase
@@ -27,6 +27,7 @@ let checkToken = (req, res, next) => {
     }
 
     jwt.verify(token, config.secret, (err, decoded) => {
+        console.log({ decoded })
         if (err) {
             return res.status(401).json({
                 success: false,
@@ -179,6 +180,14 @@ router.post(
 
     })
 
+const validateEmail = (email) => {
+    return String(email)
+        .toLowerCase()
+        .match(
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        );
+};
+
 router.post(
     "/login",
     validator.body(Joi.object({
@@ -208,150 +217,180 @@ router.post(
         }
         console.log("user is not a super admin", user)
 
+        const userSearchingObject = {
+            isDeleted: false
+        }
+
+        if (validateEmail(user)) {
+            Object.assign(userSearchingObject, { email: user })
+        } else {
+            Object.assign(userSearchingObject, { phone: user })
+        }
         // check drivers numbers
-        const [driver] = await collections["driver"].find({ phone: user, isDeleted: false })
+        const [userInfo] = await collections["users"].find(userSearchingObject)
 
-        if (!driver)
-            console.log("user is not a driver", user)
+        console.log({ userInfo })
+        if (!userInfo) {
+            return res.status(401).send({ message: "Passwords did not match" })
+        }
+        const [userRoleInfo] = await collections["user_role"].find({ user: userInfo?.id, isDeleted: false })
+        console.log({ userRoleInfo })
 
-        // check parents list
-        const [parent] = await collections["parent"].find({ phone: user, isDeleted: false })
+        const role = roles[userRoleInfo.role]
 
-        if (!parent)
-            console.log("user is not a parent", user)
+        console.log({ userInfo, userRoleInfo, role })
+        userInfo.school = userRoleInfo.school
 
-        // check teacher list
-        const [teacher] = await collections["teacher"].find({ phone: user, isDeleted: false })
+        // if (!driver)
+        //     console.log("user is not a driver", user)
 
-        if (!teacher)
-            console.log("user is not a teacher", user)
+        // // check parents list
+        // const [parent] = await collections["parent"].find({ phone: user, isDeleted: false })
+
+        // if (!parent)
+        //     console.log("user is not a parent", user)
+
+        // // check teacher list
+        // const [teacher] = await collections["teacher"].find({ phone: user, isDeleted: false })
+
+        // if (!teacher)
+        //     console.log("user is not a teacher", user)
 
         // check admins list
-        const [adminEmail] = await collections["admin"].find({ username: user, isDeleted: false })
-        const [adminPhone] = await collections["admin"].find({ phone: user, isDeleted: false })
+        // const [adminEmail] = await collections["admin"].find({ username: user, isDeleted: false })
+        // const [adminPhone] = await collections["admin"].find({ phone: user, isDeleted: false })
 
-        if (adminEmail || adminPhone)
-            console.log("user is on admins lists", { adminEmail, adminPhone })
+        // if (adminEmail || adminPhone)
+        //     console.log("user is on admins lists", { adminEmail, adminPhone })
 
-        const returnAuth = async (userData, role) => {
+        const returnAuth = async (userInfo, role) => {
             const { db: { collections } } = req.app.locals
             const { user, password } = req.body
 
-            console.log("checking for passwords in otp list", { adminEmail, adminPhone })
+            // console.log("checking for passwords in otp list", { adminEmail, adminPhone })
 
             // check the token
-            const [data] = await collections["otp"].find({
-                userId: user,
-                password,
-                used: false
-            })
+            // const [otpPassword] = await collections["otp"].find({
+            //     userId: user,
+            //     password,
+            //     used: false
+            // })
 
-            if (data) {
-                collections["otp"].update({ id: data.id }).set({
-                    used: true
-                })
+            // if (otpPassword) {
+            //     collections["otp"].update({ id: otpPassword.id }).set({
+            //         used: true
+            //     })
 
-                data.user = JSON.parse(data.user)
-                data.password = undefined
-                data.used = undefined
+            //     otpPassword.user = JSON.parse(data.user)
+            //     data.password = undefined
+            //     data.used = undefined
 
-                var token = jwt.sign(data, config.secret);
-                return res.send({
-                    token,
-                    data
-                })
+            //     var token = jwt.sign(data, config.secret);
+            //     return res.send({
+            //         token,
+            //         data
+            //     })
 
-            } else {
-                console.log('could not find user in OTP', {
-                    userId: user,
-                    password,
-                    used: false
-                })
-            }
+            // } else {
+            //     console.log('could not find user in OTP', {
+            //         userId: user,
+            //         password,
+            //         used: false
+            //     })
+            // }
 
-            if (password && !userData.password) {
-                const [data] = await collections["otp"].find({
-                    userId: user,
-                    password,
-                    used: false
-                })
+            // if (password && !userData.password) {
+            //     const [data] = await collections["otp"].find({
+            //         userId: user,
+            //         password,
+            //         used: false
+            //     })
 
-                if (data) {
-                    collections["otp"].update({ id: data.id }).set({
-                        used: true
-                    })
+            //     if (data) {
+            //         collections["otp"].update({ id: data.id }).set({
+            //             used: true
+            //         })
 
-                    data.user = JSON.parse(data.user)
-                    data.password = undefined
-                    data.used = undefined
+            //         data.user = JSON.parse(data.user)
+            //         data.password = undefined
+            //         data.used = undefined
 
-                    if (data) {
-                        var token = jwt.sign(data, config.secret);
-                        return res.send({
-                            token,
-                            data
-                        })
-                    }
-                }
-                // password did not match
-                return res.status(401).send({ message: "Passwords did not match" })
-            } else {
-                console.log("no password was provided", { password, userData })
-            }
+            //         if (data) {
+            //             var token = jwt.sign(data, config.secret);
+            //             return res.send({
+            //                 token,
+            //                 data
+            //             })
+            //         }
+            //     }
+            //     // password did not match
+            //     return res.status(401).send({ message: "Passwords did not match" })
+            // } else {
+            //     console.log("no password was provided", { password, userData })
+            // }
 
-            if (password && userData.password) {
-                // console.log((admin && admin.password || parent && parent.password || driver && driver.password), password)
+            if (password && userInfo.password) {
+                // console.log(password , userInfo.password)
                 try {
                     // fill this with other passwords
-                    const passwords = [userData.password, "password test"]
+                    const passwords = [password]
                     let foundPassword = false
 
-                    passwords.forEach(async password => {
+
+                    for await (const pass of passwords) {
                         try {
-                            await argon2.verify(userData.password || 'test', password)
+                            await argon2.verify(userInfo.password, pass)
                             foundPassword = true
+                            console.log("pass ", passwords.indexOf(pass), "is valid")
                         } catch (err) {
-                            console.log("pass ", passwords.indexOf(password), "is not valid")
+                            console.log("pass ", passwords.indexOf(pass), "is not valid")
                         }
-                    })
+                    }
+
+
+                    console.log({ foundPassword, userInfo })
 
                     if (foundPassword) {
                         // password match
+                        userInfo.password = undefined
                         let data = {
-                            user: userData,
+                            user: userInfo,
                             userType,
                             userId: user
                         }
 
+                        console.log("signing token")
                         var token = jwt.sign(data, config.secret);
 
                         return res.send({
                             token,
                             data
                         })
-                    } else {
-                        const [data] = await collections["otp"].find({
-                            userId: user,
-                            password,
-                            used: false
-                        })
-
-                        if (data) {
-                            data.user = JSON.parse(data.user)
-                            data.password = undefined
-                            data.used = undefined
-
-                            if (data) {
-                                var token = jwt.sign(data, config.secret);
-                                return res.send({
-                                    token,
-                                    data
-                                })
-                            }
-                        }
-                        // password did not match
-                        return res.status(401).send({ message: "Passwords did not match" })
                     }
+
+                    // else {
+                    //     const [data] = await collections["otp"].find({
+                    //         userId: user,
+                    //         password,
+                    //         used: false
+                    //     })
+
+                    //     if (data) {
+                    //         data.user = JSON.parse(data.user)
+                    //         data.password = undefined
+                    //         data.used = undefined
+
+                    //         if (data) {
+                    //             var token = jwt.sign(data, config.secret);
+                    //             return res.send({
+                    //                 token,
+                    //                 data
+                    //             })
+                    //         }
+                    //     }
+                    //     // password did not match
+                    //     return res.status(401).send({ message: "Passwords did not match" })
+                    // }
                 } catch (err) {
                     // internal failure
                     console.log(err)
@@ -381,25 +420,9 @@ router.post(
             }
         }
 
-        if (driver) {
-            userType = 'driver'
-            return returnAuth(driver, userType)
-        }
 
-        if (parent) {
-            userType = 'parent'
-            return returnAuth(parent, userType)
-        }
+        return returnAuth(userInfo, role)
 
-        if (teacher) {
-            userType = 'teacher'
-            return returnAuth(teacher, userType)
-        }
-
-        if (adminPhone || adminEmail) {
-            userType = 'admin'
-            return returnAuth(adminPhone || adminEmail, userType)
-        }
 
         return res.status(401).send({ message: "User not found, Please contact an administrator" })
     }

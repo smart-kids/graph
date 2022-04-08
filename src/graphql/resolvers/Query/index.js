@@ -161,6 +161,8 @@ Object.assign(
 
 const Query = {
   user,
+  admins,
+  admin,
   
   schools,
   school,
