@@ -56,7 +56,6 @@ app.use("/health", (req, res) => res.json({ status: "ok" }))
 // `))
 // }
 
-// attatchRouter(app)
 
 if (NODE_ENV !== "test")
     server.listen(PORT, () =>
