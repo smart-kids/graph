@@ -7,9 +7,7 @@ const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance()
 
 const func = ({ schoolId, data: { phone, message } }, reply) => {
     const number = phoneUtil.parseAndKeepRawInput(phone, 'KE');
-    const coolNumber = phoneUtil.format(number, PNF.E164)
-
-    const Body = `${message}`
+    const formattedNumber = phoneUtil.format(number, PNF.E164)
 
     const options = {
         method: 'POST',
@@ -24,15 +22,15 @@ const func = ({ schoolId, data: { phone, message } }, reply) => {
             api_key:
                 '$2y$10$lvLytGxvwzQkFN78K3ke7.2MFU.Mu9FWI35NNFzMeut/VxKgZSGR.',
             senderID: 'SHULEPLUS',
-            phone: coolNumber,
-            message: Body,
+            phone: formattedNumber,
+            message,
             username: 'branson'
         }
     }
 
     request(options, function (error, response, body) {
         if (error) throw new Error({ error, options });
-        console.log(JSON.stringify(JSON.parse(body), null, '\t'))
+        // console.log(JSON.stringify(JSON.parse(body), null, '\t'))
         reply(JSON.parse(body));
     });
 

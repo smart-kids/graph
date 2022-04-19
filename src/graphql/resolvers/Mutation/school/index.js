@@ -18,16 +18,16 @@ const create = async (data, { db: { collections } }) => {
   const { phone } = data[name];
   try {
     const phoneTaken = await collections[name].find({ phone, isDeleted: false });
+
     if (phoneTaken.length) {
-      return {
-        error: `A school with the phone number ${phone} already exists!.`,
-      };
+      throw new UserError(`A school with the phone number ${phone} already exists!.`);
     }
   } catch (err) {
-
+    console.log({ err })
   }
 
   const id = new ObjectId().toHexString();
+
   const inviteSmsText = `Hello {{username}}, 
 
 You have been invited to join {{team_name}} on ShulePlus.
@@ -50,11 +50,13 @@ password: {{password}}`;
     const school = await collections[name].create(entry);
     const { email, phone } = data[name];
     const adminId = new ObjectId().toHexString();
-    await collections["user"].create({
+
+    await collections["users"].create({
       id: adminId,
-      username: email,
+      names: email,
       email: email,
       phone: phone,
+      password:phone,
       school: id,
     });
 

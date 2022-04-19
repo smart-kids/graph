@@ -33,42 +33,48 @@ const notifyErrors = new NotifyErrors(options)
 
 var router = express.Router()
 
-if (BUGSNAG_API_KEY) {
-  var BugsnagPluginExpress = require('@bugsnag/plugin-express')
-
-  Bugsnag.start({
-    apiKey: BUGSNAG_API_KEY,
-    plugins: [BugsnagPluginExpress]
+export default (storage)=>{
+  if (BUGSNAG_API_KEY) {
+    var BugsnagPluginExpress = require('@bugsnag/plugin-express')
+  
+    Bugsnag.start({
+      apiKey: BUGSNAG_API_KEY,
+      plugins: [BugsnagPluginExpress]
+    })
+  
+    const { requestHandler: BugSnagrequestMiddleware, errorHandler: BugSnagErrorHandler } = Bugsnag.getPlugin('express')
+    router.use(BugSnagrequestMiddleware, BugSnagErrorHandler);
+  }
+  
+  router.get("/health", (req, res) => res.send());
+  
+  const headerSchema = Joi.object({
+    authorization: Joi.string().required()
   })
 
-  const { requestHandler: BugSnagrequestMiddleware, errorHandler: BugSnagErrorHandler } = Bugsnag.getPlugin('express')
-  router.use(BugSnagrequestMiddleware, BugSnagErrorHandler);
-}
+  var storage
+  
+  router.use(
+    "/graph",
+    validator.headers(headerSchema),
+    checkToken,
+    async (req, res, next) => {
+      const db = await storage
 
-router.get("/health", (req, res) => res.send());
+      return graphqlHTTP({
+        schema,
+        graphiql: true,
+        context: {
+          auth: req.decoded,
+          db
+        },
+        customFormatErrorFn: err => {
+          console.log("sending data to bugsnag as", err)
+          notifyErrors.formatError(JSON.stringify(err))
+        }
+      })(req, res, next)
+    }
+  );
 
-const headerSchema = Joi.object({
-  authorization: Joi.string().required()
-})
-
-router.use(
-  "/graph",
-  validator.headers(headerSchema),
-  checkToken,
-  (req, res, next) => {
-    return graphqlHTTP({
-      schema,
-      graphiql: true,
-      context: {
-        auth: req.decoded,
-        db: req.app.locals.db
-      },
-      formatError: err => {
-        console.log("sending data to bugsnag as", err)
-        notifyErrors.formatError(JSON.stringify(err))
-      }
-    })(req, res, next)
-  }
-);
-
-export default router;
+  return router
+};

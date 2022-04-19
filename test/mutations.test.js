@@ -88,7 +88,7 @@ describe("Super Auth", () => {
 });
 
 describe("Schools", () => {
-  it.only("Can create a school", done => {
+  it("Can create a school", done => {
     chai
       .request(app)
       .post("/graph")
@@ -108,16 +108,16 @@ describe("Schools", () => {
           school: {
             name: "School Name",
             phone: "0711111111",
-            userNames: "test names",
             email: "mail@domain.com",
             address: "PO Box 1234-00000 Someplace somewhere",
-            inviteSmsText: 'Welcome to {shool_name} Shileplus panel. visit https://www.shuleplus.co.ke/{school_name} to join',
+            inviteSmsText: 'Welcome to {shool_name} Shuleplus panel. visit https://www.shuleplus.co.ke/{school_name} to join',
             gradeOrder: ['One', 'Two', 'Three', 'Five'],
             termOrder: ['One', 'Two'],
           }
         }
       })
       .end((err, res) => {
+        // console.log(err, res)
 
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
@@ -906,7 +906,7 @@ describe("Drivers", () => {
           Idriver: {
             username: "driver1",
             email: "driver@gmail.com",
-            phone: "0711111111",
+            phone: "0788888888",
             school: sharedInfo.school,
             photo: "03/03/2022",
             license_expiry: "35718850",
@@ -1208,7 +1208,7 @@ describe("Buses", () => {
   });
 });
 
-describe("Parent", () => {
+describe.skip("Parent", () => {
   it("Can create an parent", done => {
     chai
       .request(app)
@@ -2629,7 +2629,7 @@ describe("Location Reporting (Event)", () => {
   });
 });
 
-describe("SMS Communication", () => {
+describe.skip("SMS Communication", () => {
   it("Can send sms", done => {
     chai
       .request(app)

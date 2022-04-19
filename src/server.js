@@ -25,39 +25,38 @@ var app = require('express')(),
     }),
     sharedsession = require("express-socket.io-session");
 
-const attatchRouter = async (app) => {
-    // app.use("/health", (req, res) => res.json({ status: "ok" }))
+// const attatchRouter = async (app) => {
+// app.use("/health", (req, res) => res.json({ status: "ok" }))
 
-    // Attach session
-    app.use(session);
+// Attach session
+app.use(session);
 
-    // Share session with io sockets
+// Share session with io sockets
 
-    io.use(sharedsession(session));
+io.use(sharedsession(session));
 
-    io.on("connection", require("./sockets/socket-pass"));
+io.on("connection", require("./sockets/socket-pass"));
 
-    if (NODE_ENV !== "test") app.use(morgan("tiny"), cors());
+if (NODE_ENV !== "test") app.use(morgan("tiny"), cors());
 
-    const db = await storage
+console.log(storage)
+Object.assign(app.locals, { db: storage })
 
-    Object.assign(app.locals, { db })
+app.use(["/", "/graph"], dataGraphRouter(storage))
 
-    app.use(["/", "/graph"], dataGraphRouter)
-
-    // app.use("/game-events", game_socket)
-    app.use("/auth", router)
-    app.use("/health", (req, res) => res.json({ status: "ok" }))
+// app.use("/game-events", game_socket)
+app.use("/auth", router)
+app.use("/health", (req, res) => res.json({ status: "ok" }))
 
 
-    // app.use("*", (req, res) => res.send(`
-    //     that url doesnt have a home here, are you lost? 
+// app.use("*", (req, res) => res.send(`
+//     that url doesnt have a home here, are you lost? 
 
-    //     <a url="/">go home </a>
-    // `))
-}
+//     <a url="/">go home </a>
+// `))
+// }
 
-attatchRouter(app)
+// attatchRouter(app)
 
 if (NODE_ENV !== "test")
     server.listen(PORT, () =>

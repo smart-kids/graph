@@ -27,7 +27,6 @@ let checkToken = (req, res, next) => {
     }
 
     jwt.verify(token, config.secret, (err, decoded) => {
-        console.log({ decoded })
         if (err) {
             return res.status(401).json({
                 success: false,
@@ -55,12 +54,31 @@ router.post(
         password: Joi.string().required()
     })),
     async (req, res) => {
-        const { db: { collections } } = req.app.locals
+        const db = await req.app.locals.db
+        const { collections } = db
         const { user, password } = req.body
+
+        const userSearchingObject = {
+            isDeleted: false
+        }
+
+        if (validateEmail(user)) {
+            Object.assign(userSearchingObject, { email: user })
+        } else {
+            Object.assign(userSearchingObject, { phone: user })
+        }
+
+        const [userInfo] = await collections["users"].find(userSearchingObject)
+
+        if (!userInfo) {
+            return res.status(401).send({
+                message: 'phone number not found',
+            })
+        }
 
         // check the token
         const [data] = await collections["otp"].find({
-            userId: user,
+            user: userInfo.id,
             password,
             used: false
         })
@@ -70,15 +88,15 @@ router.post(
                 used: true
             })
 
-            data.user = JSON.parse(data.user)
-            data.password = undefined
-            data.used = undefined
+            userInfo.password = undefined
+            data.user = userInfo
+            data.pas = userInfo
 
             if (data) {
                 var token = jwt.sign(data, config.secret);
                 return res.send({
                     token,
-                    data
+                    user:userInfo
                 })
             }
         }
@@ -136,7 +154,8 @@ router.post(
     })),
     async (req, res) => {
         // create a school object
-        const { db: { collections } } = req.app.locals
+        const db = await req.app.locals.db
+        const { collections } = db
         const { name, phone, email, address } = req.body
 
         const schoolId = new ObjectId().toHexString();
@@ -189,13 +208,74 @@ const validateEmail = (email) => {
 };
 
 router.post(
+    "/otp/send",
+    validator.body(Joi.object({
+        user: Joi.string().required(),
+        password: Joi.string()
+    })),
+    async (req, res) => {
+        console.log(req.body)
+        const db = await req.app.locals.db
+        const { collections } = db
+        const { user } = req.body
+
+        const userSearchingObject = {
+            isDeleted: false
+        }
+
+        if (validateEmail(user)) {
+            Object.assign(userSearchingObject, { email: user })
+        } else {
+            Object.assign(userSearchingObject, { phone: user })
+        }
+
+        const [userInfo] = await collections["users"].find(userSearchingObject)
+
+        if (!userInfo) {
+            return res.status(401).send({
+                success: false,
+            })
+        }
+
+        // generate OTP, send it and save it
+        const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
+
+        const otpSaveInfo = await collections["otp"].create({
+            id: new ObjectId().toHexString(),
+            user: userInfo.id,
+            password
+        })
+
+        console.log({otpSaveInfo})
+
+        // send sms to phone
+        if (!['development', "test"].includes(NODE_ENV)) {
+            sms({
+                // school: schoolId,
+                data: { message: `Shule-Plus Code: ${password}.`, phone: user }
+            }, ({ code }) => {
+                return res.send({
+                    success: true,
+                    otp: code
+                })
+            })
+        }
+
+        return res.send({
+            success: true,
+            otp: `0000 - for development`
+        })
+    })
+
+router.post(
     "/login",
     validator.body(Joi.object({
         user: Joi.string().required(),
         password: Joi.string()
     })),
     async (req, res) => {
-        const { db: { collections } } = req.app.locals
+        const db = await req.app.locals.db
+        const { collections } = db
         const { user, password } = req.body
 
         console.log("Attemting to authenticate", user)
@@ -227,6 +307,7 @@ router.post(
             Object.assign(userSearchingObject, { phone: user })
         }
         // check drivers numbers
+        console.log(Object.keys(collections))
         const [userInfo] = await collections["users"].find(userSearchingObject)
 
         console.log({ userInfo })
@@ -234,7 +315,7 @@ router.post(
             return res.status(401).send({ message: "Passwords did not match" })
         }
         const [userRoleInfo] = await collections["user_role"].find({ user: userInfo?.id, isDeleted: false })
-        console.log({ userRoleInfo })
+        console.log({ userInfo, userRoleInfo })
 
         const role = roles[userRoleInfo.role]
 
@@ -397,26 +478,7 @@ router.post(
                     return res.status(401).send({ message: "Internal failure" })
                 }
             } else {
-                const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
-                // send sms to phone
-                if (!['development', "test"].includes(NODE_ENV))
-                    sms({
-                        // school: schoolId,
-                        data: { message: `${password} is your ShulePlus login code. Don't reply to this message with your code.`, phone: (driver && driver.phone || parent && parent.phone || userData.phone) }
-                    }, console.log)
 
-                await collections["otp"].create({
-                    id: new ObjectId().toHexString(),
-                    userId: user,
-                    userType,
-                    user: JSON.stringify(driver || parent || teacher || adminEmail || adminPhone),
-                    password
-                })
-
-                return res.send({
-                    success: true,
-                    otp: true
-                })
             }
         }
 
