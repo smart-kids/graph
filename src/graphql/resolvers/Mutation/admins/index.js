@@ -12,8 +12,6 @@ const create = async (data, { auth, db: { collections } }) => {
   const entry = Object.assign(data[name], { id, isDeleted: false });
   const { school } = entry
 
-  console.log({ auth })
-
   try {
     entry.password = undefined
     await collections[name].create(entry);

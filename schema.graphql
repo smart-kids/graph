@@ -257,42 +257,34 @@ type adminMutations {
 type driver {
   id: String
   username: String
-  email: String
   phone: String
-  photo: String
   license_expiry: String
   licence_number: String
   home: String
   experience: String
-  password: String
   bus: bus
 }
 
 input Idriver {
   username: String
-  email: String
   phone: String
-  photo: String
+  email: String
   license_expiry: String
   licence_number: String
   home: String
   school: String!
   experience: String
-  password: String
   bus: String
 }
 
 input Udriver {
   id: String!
   username: String
-  email: String
   phone: String
-  photo: String
   license_expiry: String
   licence_number: String
   home: String
   experience: String
-  password: String
   bus: String
 }
 

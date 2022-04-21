@@ -3,6 +3,7 @@ import argon2 from "argon2"
 const { name } = require("./about.js")
 import Handlebars from "handlebars"
 import sms from "../../../../utils/sms"
+const prepareUser = require("../../../../utils/prepapreUser")
 
 const { UserError } = require("graphql-errors");
 
@@ -18,11 +19,34 @@ function makeid() {
 
 const create = async (data, { db: { collections } }) => {
   const id = new ObjectId().toHexString();
+  const roleId = new ObjectId().toHexString();
+  const userId = new ObjectId().toHexString();
 
-  const entry = Object.assign(data[name], { id, isDeleted: false });
+
+  const entry = Object.assign(data[name], { id, userId, isDeleted: false });
+  const { school } = entry
+
+  const roleUser = {
+    id: roleId,
+    role: 2, // driver
+    user: userId,
+    school,
+    isDeleted: false
+  }
+
+  await collections.user_role.create(roleUser);
+
+  const { username: names, email, phone } = data[name]
+  const userEntry = {
+    id:userId,
+    names,
+    email,
+    phone
+  }
 
   try {
     await collections[name].create(entry);
+    await collections.users.create(userEntry);
 
     return entry;
   } catch (err) {
