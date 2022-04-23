@@ -92,13 +92,12 @@ router.post(
             data.user = userInfo
             data.pas = userInfo
 
-            if (data) {
-                var token = jwt.sign(data, config.secret);
-                return res.send({
-                    token,
-                    user:userInfo
-                })
-            }
+            var token = jwt.sign(data, config.secret);
+            return res.send({
+                token,
+                user: userInfo
+            })
+
         }
 
         return res.status(401).send({ message: "OTP not found, or already used" })
@@ -246,15 +245,15 @@ router.post(
             password
         })
 
-        console.log({otpSaveInfo})
+        console.log({ otpSaveInfo })
 
         // send sms to phone
         if (!['development', "test"].includes(NODE_ENV)) {
-            sms({
+            return sms({
                 // school: schoolId,
                 data: { message: `Shule-Plus Code: ${password}.`, phone: user }
             }, ({ code }) => {
-                return res.send({
+                res.send({
                     success: true,
                     otp: code
                 })

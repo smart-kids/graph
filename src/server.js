@@ -39,7 +39,6 @@ io.on("connection", require("./sockets/socket-pass"));
 
 if (NODE_ENV !== "test") app.use(morgan("tiny"), cors());
 
-console.log(storage)
 Object.assign(app.locals, { db: storage })
 
 app.use(["/", "/graph"], dataGraphRouter(storage))
