@@ -904,16 +904,15 @@ describe("Drivers", () => {
       `,
         variables: {
           Idriver: {
-            username: "driver1",
+            names: "driver1",
             email: "driver@gmail.com",
             phone: "0788888888",
             school: sharedInfo.school,
-            photo: "03/03/2022",
             license_expiry: "35718850",
             licence_number: "IcanDrive099",
             experience: "4",
             home: "Juja, Kiambu, Kenya",
-            password: "4289Vtg"
+            school: sharedInfo.school
           }
         }
       })
@@ -947,7 +946,7 @@ describe("Drivers", () => {
         variables: {
           driver: {
             id: sharedInfo.driverId,
-            username: "driver2",
+            names: "driver2",
           }
         }
       })
@@ -1208,7 +1207,7 @@ describe("Buses", () => {
   });
 });
 
-describe.skip("Parent", () => {
+describe("Parent", () => {
   it("Can create an parent", done => {
     chai
       .request(app)
@@ -1227,7 +1226,7 @@ describe.skip("Parent", () => {
         `,
         variables: {
           Iparent: {
-            names: "parent1",
+            name: "parent1",
             national_id: "35718850",
             phone: "0711657108",
             password: "rY8x5uW",
@@ -1266,7 +1265,7 @@ describe.skip("Parent", () => {
         `,
         variables: {
           Iparent: {
-            names: "parent2",
+            name: "parent2",
             national_id: "35718851",
             phone: "0711657108",
             password: "rY8x5uW",
@@ -1765,7 +1764,6 @@ describe("Trips", () => {
           Itrip: {
             startedAt: new Date().toISOString(),
             schedule: sharedInfo.scheduleId,
-            type: "DROP",
             driver: sharedInfo.driverId,
             school: sharedInfo.school,
           }
@@ -1801,7 +1799,6 @@ describe("Trips", () => {
         `,
         variables: {
           Itrip: {
-            type: "DROP",
             startedAt: new Date().toISOString(),
             completedAt: moment(new Date())
               .add(40, "m")
@@ -1840,7 +1837,6 @@ describe("Trips", () => {
         `,
         variables: {
           Itrip: {
-            type: "DROP",
             startedAt: new Date().toISOString(),
             schedule: sharedInfo.scheduleId,
             driver: sharedInfo.driverId,
@@ -1876,7 +1872,6 @@ describe("Trips", () => {
         `,
         variables: {
           Itrip: {
-            type: "PICK",
             isCancelled: true,
             school: sharedInfo.school,
             driver: sharedInfo.driverId,
@@ -1914,7 +1909,6 @@ describe("Trips", () => {
           trip: {
             id: sharedInfo.tripId,
             startedAt: new Date().toISOString(),
-            type: "PICK",
             completedAt: new Date().toISOString(),
             schedule: sharedInfo.scheduleId
           }

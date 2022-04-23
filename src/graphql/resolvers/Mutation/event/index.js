@@ -43,30 +43,31 @@ const create = async (data, { db: { collections } }) => {
   const templateData = {
     student_name: student.names,
     parent_name: parent?.name,
-    school_name: school?.name, 
+    school_name: school?.name,
     time
   }
 
   const message = Handlebars.compile(schedule.message)(templateData) || "Schedule Message"
 
-  console.log("Attemting to send sms" + JSON.stringify({ phone: parent?.phone, message }))
+  console.log("Attemting to send sms " + JSON.stringify({ phone: parent?.phone, message }))
   try {
-    sms(
-      { data: { phone: parent.phone, message } },
-      async (res) => {
-        const { smsCost } = res
+    if (parent)
+      sms(
+        { data: { phone: parent.phone, message } },
+        async (res) => {
+          const { smsCost } = res
 
-        if (smsCost)
-          await collections["charge"].create({
-            id: new ObjectId().toHexString(),
-            school: trip.school,
-            ammount: smsCost,
-            reason: `Sending message ${message}`,
-            time,
-            isDeleted: false
-          })
-      }
-    );
+          if (smsCost)
+            await collections["charge"].create({
+              id: new ObjectId().toHexString(),
+              school: trip.school,
+              ammount: smsCost,
+              reason: `Sending message ${message}`,
+              time,
+              isDeleted: false
+            })
+        }
+      );
   } catch (err) {
     console.error("Unnable to send sms", err);
   }

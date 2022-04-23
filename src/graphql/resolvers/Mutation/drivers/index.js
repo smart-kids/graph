@@ -36,7 +36,7 @@ const create = async (data, { db: { collections } }) => {
 
   await collections.user_role.create(roleUser);
 
-  const { username: names, email, phone } = data[name]
+  const { names, email, phone } = data[name]
   const userEntry = {
     id:userId,
     names,

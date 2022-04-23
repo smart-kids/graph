@@ -10,7 +10,7 @@ export default Waterline.Collection.extend({
     id: { type: "string", required: true },
     userId: { type: "string", required: true },
     school: { type: "string", required: false },
-    username: { type: "string", required: true },
+    names: { type: "string", required: true },
     license_expiry: { type: "string", required: false },
     licence_number: { type: "string", required: false },
     home: { type: "string", required: false },

@@ -305,13 +305,12 @@ describe("Setup For Queries", () => {
                 make
                 size
                 driver {
-                  username
+                  names
                 }
               }
               drivers {
                 id
-                username
-                email
+                names
                 phone
                 license_expiry
                 licence_number
@@ -322,7 +321,7 @@ describe("Setup For Queries", () => {
                   make
                   size
                   driver {
-                    username
+                    names
                   }
                 }
               }
@@ -355,7 +354,7 @@ describe("Setup For Queries", () => {
                         plate
                       }
                       driver {
-                        username
+                        names
                       }
                       locReports {
                         id
@@ -464,7 +463,7 @@ describe("Setup For Queries", () => {
                 id
                 driver {
                   id
-                  username
+                  names
                 }
                 schedule {
                   name
@@ -496,7 +495,7 @@ describe("Setup For Queries", () => {
                 }
                 driver {
                   id
-                  username
+                  names
                 }
                 locReports {
                   id
@@ -559,12 +558,11 @@ describe("Setup For Queries", () => {
           expect(bus.size).to.be.a.string;
 
           // drivers
-          expect(driver.username).to.be.a.string;
+          expect(driver.names).to.be.a.string;
           expect(driver.email).to.be.a.string;
           expect(driver.phone).to.be.a.string;
           expect(driver.bus).to.exist;
           expect(driver.bus.id).to.be.a.string;
-          expect(driver.bus.username).to.be.a.string;
 
           // parents
           // expect(parent.name).to.be.a.string;

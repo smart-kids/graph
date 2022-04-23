@@ -256,7 +256,7 @@ type adminMutations {
 # driver things
 type driver {
   id: String
-  username: String
+  names: String
   phone: String
   license_expiry: String
   licence_number: String
@@ -266,7 +266,7 @@ type driver {
 }
 
 input Idriver {
-  username: String
+  names: String
   phone: String
   email: String
   license_expiry: String
@@ -279,7 +279,7 @@ input Idriver {
 
 input Udriver {
   id: String!
-  username: String
+  names: String
   phone: String
   license_expiry: String
   licence_number: String
@@ -478,7 +478,6 @@ input Itrip {
   startedAt: String
   completedAt: String
   isCancelled: Boolean
-  type: tripType
   school: String!
   driver: String!
   schedule: String
@@ -487,7 +486,6 @@ input Itrip {
 input Utrip {
   id: String!
   startedAt: String
-  type: tripType
   completedAt: String
   isCancelled: Boolean
   schedule: String
