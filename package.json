@@ -41,7 +41,7 @@
     "graphql-tools": "^4.0.5",
     "handlebars": "^4.7.6",
     "joi": "^14.3.1",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "mathjs": "^7.6.0",
     "moment": "^2.29.1",
     "mongodb": "^3.3.2",
