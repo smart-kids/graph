@@ -1,6 +1,6 @@
 import express from "express"
 
-import dataGraphRouter from "./index"
+import dataGraphRouter from "./router"
 import { router } from "./auth"
 import storage from "./storage"
 
@@ -63,4 +63,8 @@ if (NODE_ENV !== "test")
 
 app.locals.io = io
 
-export default app;
+// export default app;
+// Export the app as a Google Cloud Function
+functions.http('shuleplus-server', (req, res) => {
+    app(req, res);  // Handle requests with Express
+});

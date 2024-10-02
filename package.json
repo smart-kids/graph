@@ -7,9 +7,9 @@
   "license": "MIT",
   "scripts": {
     "test": "NODE_ENV=test nyc mocha --compilers js:@babel/register --inspect test/**/*.js --exit -r dotenv/config",
-    "dev": "nodemon --exec npx babel-node --inspect  ./src/server",
-    "build": "npx babel ./src --out-dir dist --source-maps ",
-    "deploy": "yarn build && gcloud functions deploy smartkids-graph --trigger-http --region=us-central1 --runtime=nodejs10 --entry-point=default --env-vars-file .env.yaml",
+    "dev": "nodemon --exec npx babel-node --inspect  ./src/function",
+    "build": "npx babel ./src --out-dir dist --source-maps && node copy-package.js",
+    "deploy": "yarn build && cd dist &&  gcloud functions deploy shuleplus-server --runtime=nodejs22 --trigger-http",
     "test-deployment": "yarn build && node dist/server",
     "start": "node ./dist/server",
     "debug": "babel-node debug ./src"
