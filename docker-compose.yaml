@@ -3,11 +3,11 @@ version: "3.8"
 services:
   app:
     build: .
-    container_name: node_function_app
+    container_name: bun_function_app
     restart: unless-stopped
     volumes:
       - .:/app
       - /app/node_modules
     environment:
       - NODE_ENV=production
-    command: ["node", "--experimental-modules", "src/function.js"]
+    command: ["bun", "src/function.js"]

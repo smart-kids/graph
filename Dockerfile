@@ -1,17 +1,17 @@
-# Use the official Node.js image
-FROM node:18-alpine
+# Use the official Bun image
+FROM oven/bun:1.0
 
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+# Copy package.json and bun.lockb first for better caching
+COPY package.json bun.lockb ./
 
-# Install dependencies
-RUN npm install --only=production
+# Install dependencies using Bun
+RUN bun install --production
 
 # Copy the rest of the application code
 COPY . .
 
-# Ensure ES module support
-CMD ["node", "--experimental-modules", "src/function.js"]
+# Set the command to run the function script
+CMD ["bun", "src/function.js"]
