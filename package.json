@@ -11,7 +11,7 @@
     "build": "npx babel ./src --out-dir dist --source-maps && node copy-package.js",
     "deploy": "yarn build && cd dist &&  gcloud functions deploy shuleplus-server --runtime=nodejs22 --trigger-http",
     "test-deployment": "yarn build && node dist/server",
-    "start": "node ./dist/function",
+    "start": "ls",
     "debug": "babel-node debug ./src"
   },
   "dependencies": {
