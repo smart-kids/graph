@@ -2,15 +2,23 @@ FROM oven/bun:1.0 as base
 
 WORKDIR /app
 
-# Copy package.json and lockfile (if using bun.lockb)
-COPY package.json ./
+# Copy package files first (for better caching)
+COPY package.json bun.lockb ./
 
-# Install dependencies (Bun is much faster than npm/Yarn)
-RUN bun install
+# Install dependencies
+RUN bun install --frozen-lockfile
 
-# Copy the rest of the app
+# Copy the rest of the app (excluding node_modules)
 COPY . .
 
+# Debug: Show files before build
+RUN ls -la
+
+# Build the app (adjust this command based on your project)
 RUN bun run build
-# Start the app
+
+# Debug: Show files after build (check if /dist exists)
+RUN ls -la /app || echo "Dist folder not found!"
+
+# Start the app (adjust CMD if needed)
 CMD ["bun", "start"]
