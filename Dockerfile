@@ -1,14 +1,19 @@
+# Single-stage Dockerfile (builds inside container)
 FROM node:16-alpine
 
 WORKDIR /app
 
-COPY package.json yarn.lock ./
+# 1. Copy everything
+COPY . .
 
-# Install ONLY production dependencies
-RUN yarn install --production --frozen-lockfile
+# 2. Install and build
+RUN yarn install --frozen-lockfile && \
+    yarn build && \
+    yarn install --production && \
+    rm -rf node_modules/.cache
 
-# Copy pre-built files (assumes you build locally first)
-COPY dist/ ./dist
+# 3. Verify dist exists
+RUN ls -la dist/ || { echo "Build failed - no dist folder"; exit 1; }
 
-# Start normal Node (no babel-node in production)
+# 4. Start
 CMD ["node", "dist/index.js"]
