@@ -18,7 +18,7 @@ RUN ls -la
 RUN bun run build
 
 # Debug: Show files after build (check if /dist exists)
-RUN ls -la /app || echo "Dist folder not found!"
+RUN ls .
 
 # Start the app (adjust CMD if needed)
 CMD ["bun", "start"]
