@@ -11,20 +11,18 @@ const func = ({ schoolId, data: { phone, message } }, reply) => {
 
     const options = {
         method: 'POST',
-        url: 'https://account.mobilesasa.com/api/express-post',
+        url: 'https://api.mobilesasa.com/v1/send/message',
         headers:
         {
             'content-type': 'application/x-www-form-urlencoded',
-            accept: 'application/json'
+            accept: 'application/json',
+            "Authorization": "Bearer QEAVBBLs2GsjN4OaQlRCW9o2nTVnZrTV509hOjG7leCZ3tD3ZSpdPFiPskqA"
         },
         form:
         {
-            api_key:
-                '$2y$10$lvLytGxvwzQkFN78K3ke7.2MFU.Mu9FWI35NNFzMeut/VxKgZSGR.',
             senderID: 'SHULEPLUS',
             phone: formattedNumber,
-            message,
-            username: 'branson'
+            message
         }
     }
 

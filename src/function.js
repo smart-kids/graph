@@ -11,6 +11,7 @@ import cors from "cors"
 const StreamTcp = require('./sockets/stream-tcp')
 
 const tcpSplit = new StreamTcp()
+const functions = require('@google-cloud/functions-framework');
 
 const { NODE_ENV, PORT = 4000 } = process.env;
 
@@ -37,9 +38,12 @@ io.use(sharedsession(session));
 
 io.on("connection", require("./sockets/socket-pass"));
 
-if (NODE_ENV !== "test") app.use(morgan("tiny"), cors());
+app.use(express.urlencoded({ extended: true, limit: '3mb' }));
+app.use(express.json());
+app.use(cors());
+app.use(morgan(['development', "test"].includes(NODE_ENV) ? 'tiny' : 'combined'))
 
-Object.assign(app.locals, { db: storage })
+Object.assign(app.locals, { db: storage, io })
 
 app.use(["/", "/graph"], dataGraphRouter(storage))
 
@@ -61,10 +65,11 @@ if (NODE_ENV !== "test")
         console.log(`School project running on port ${PORT}! on ${NODE_ENV} mode.`)
     );
 
-app.locals.io = io
-
 // export default app;
 // Export the app as a Google Cloud Function
 functions.http('shuleplus-server', (req, res) => {
     app(req, res);  // Handle requests with Express
 });
+
+
+export default app;

@@ -257,6 +257,8 @@ type adminMutations {
 type driver {
   id: String
   names: String
+  username: String
+  email: String
   phone: String
   license_expiry: String
   licence_number: String
@@ -268,6 +270,7 @@ type driver {
 input Idriver {
   names: String
   phone: String
+  username: String
   email: String
   license_expiry: String
   licence_number: String
@@ -281,6 +284,8 @@ input Udriver {
   id: String!
   names: String
   phone: String
+  username: String
+  email: String
   license_expiry: String
   licence_number: String
   home: String

@@ -146,11 +146,12 @@ password: {{password}}`;
 
     sms({ data: { phone, message } },
       async (res) => {
-        const { smsCost } = res
+        console.log(res)
+        // const { smsCost } = res
         await collections["charge"].create({
           id: new ObjectId().toHexString(),
           school,
-          ammount: smsCost,
+          // ammount: smsCost,
           reason: `Sending message '${message}'`,
           time: new Date(),
           isDeleted: false
