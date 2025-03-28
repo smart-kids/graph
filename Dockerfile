@@ -11,5 +11,6 @@ RUN bun install
 # Copy the rest of the app
 COPY . .
 
+RUN bun run build
 # Start the app
 CMD ["bun", "start"]
