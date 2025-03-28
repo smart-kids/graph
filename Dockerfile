@@ -1,24 +1,29 @@
-FROM oven/bun:1.0 as base
+# Stage 1: Build
+FROM oven/bun:1.0-slim as builder
 
 WORKDIR /app
 
-# Copy package files first (for better caching)
-COPY package.json ./
+# Copy dependency files first (for caching)
+COPY package.json bun.lockb* ./
 
-# Install dependencies
-RUN bun install
+# Install dependencies (production-only for deployment)
+RUN bun install --frozen-lockfile --production
 
-# Copy the rest of the app (excluding node_modules)
+# Copy all files (exclude node_modules via .dockerignore)
 COPY . .
 
-# Debug: Show files before build
-RUN ls -la
-
-# Build the app (adjust this command based on your project)
+# Build the app (adjust for your framework)
 RUN bun run build
 
-# Debug: Show files after build (check if /dist exists)
-RUN ls .
+# Stage 2: Runtime (optimized for production)
+FROM oven/bun:1.0-slim
 
-# Start the app (adjust CMD if needed)
-CMD ["bun", "start"]
+WORKDIR /app
+
+# Copy only necessary files from builder
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./
+
+# Start command (adjust for your app)
+CMD ["bun", "run", "start"]

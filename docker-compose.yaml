@@ -1,12 +1,26 @@
-version: '3.8'
+version: '3.8'  # Modern version (not obsolete)
 
 services:
-  myapp:
+  app:
     build:
       context: .
-      dockerfile: Dockerfile
-    env_file:
-      - .env
+      target: builder  # Use builder stage for development
+    platform: linux/amd64  # Force Intel compatibility (for M1/M2 Macs too)
     network_mode: "host"
-    # When using host mode, ports are automatically available on the host
-    # and port mappings (ports:) are ignored
+    volumes:
+      - ./:/app  # Live reload for development
+      - /app/node_modules  # Isolate host/node_modules
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+
+  # Production example (uncomment for deployment)
+  # app-prod:
+  #   build:
+  #     context: .
+  #     target: runtime  # Use optimized runtime stage
+  #   ports:
+  #     - "80:3000"
+  #   environment:
+  #     - NODE_ENV=production
+  #   restart: always
