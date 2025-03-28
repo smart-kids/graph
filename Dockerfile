@@ -1,29 +1,21 @@
-# Stage 1: Build
-FROM node:16-alpine as builder
-
-WORKDIR /app
-
-# Copy dependency files first (for caching)
-COPY package.json yarn.lock ./
-
-# Install dependencies
-RUN yarn install --frozen-lockfile
-
-# Copy all files (exclude node_modules via .dockerignore)
-COPY . .
-
-# Build the app
-RUN yarn build
-
-# Stage 2: Runtime (optimized for production)
 FROM node:16-alpine
 
 WORKDIR /app
 
-# Copy only necessary files from builder
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./
+# 1. Copy package files first for better caching
+COPY package.json yarn.lock ./
 
-# Verify files (optional)
-RUN ls -la
+# 2. Install dependencies
+RUN yarn install --frozen-lockfile
+
+# 3. Copy all source files
+COPY . .
+
+# 4. Build the app (creates dist folder)
+RUN yarn build
+
+# 5. Verify dist folder exists
+RUN ls -la dist/ || { echo "Error: dist folder missing after build!"; exit 1; }
+
+# 6. Start the app
+CMD ["yarn", "start"]
