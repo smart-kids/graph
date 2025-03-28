@@ -1,26 +1,16 @@
-version: '3.8'  # Modern version (not obsolete)
+version: '3.8'
 
 services:
   app:
     build:
       context: .
       target: builder  # Use builder stage for development
-    platform: linux/amd64  # Force Intel compatibility (for M1/M2 Macs too)
-    network_mode: "host"
+    platform: linux/amd64  # Force Intel compatibility
+    network_mode: "host"  # Keep host networking
     volumes:
-      - ./:/app  # Live reload for development
-      - /app/node_modules  # Isolate host/node_modules
+      - ./:/app  # Live reload
+      - /app/node_modules  # Isolate node_modules
     environment:
       - NODE_ENV=development
     restart: unless-stopped
-
-  # Production example (uncomment for deployment)
-  # app-prod:
-  #   build:
-  #     context: .
-  #     target: runtime  # Use optimized runtime stage
-  #   ports:
-  #     - "80:3000"
-  #   environment:
-  #     - NODE_ENV=production
-  #   restart: always
+    command: bun run start  # Explicit start command
