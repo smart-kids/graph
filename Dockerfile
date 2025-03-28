@@ -1,22 +1,22 @@
 # Stage 1: Build
-FROM oven/bun:1.0-slim as builder
+FROM node:16-alpine as builder
 
 WORKDIR /app
 
 # Copy dependency files first (for caching)
-COPY package.json bun.lockb* ./
+COPY package.json yarn.lock ./
 
-# Install dependencies (production-only for deployment)
-RUN bun install
+# Install dependencies
+RUN yarn install --frozen-lockfile
 
 # Copy all files (exclude node_modules via .dockerignore)
 COPY . .
 
-# Build the app (adjust for your framework)
-RUN bun run build
+# Build the app
+RUN yarn build
 
 # Stage 2: Runtime (optimized for production)
-FROM oven/bun:1.0-slim
+FROM node:16-alpine
 
 WORKDIR /app
 
@@ -24,3 +24,9 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./
+
+# Verify files (optional)
+RUN ls -la
+
+# Start command
+CMD ["yarn", "start"]
