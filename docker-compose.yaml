@@ -13,4 +13,4 @@ services:
     environment:
       - NODE_ENV=development
     restart: unless-stopped
-    command: bun run start  # Explicit start command
+    command: ls  # Explicit start command
