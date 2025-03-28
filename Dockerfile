@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json bun.lockb* ./
 
 # Install dependencies (production-only for deployment)
-RUN bun install --production
+RUN bun install
 
 # Copy all files (exclude node_modules via .dockerignore)
 COPY . .
