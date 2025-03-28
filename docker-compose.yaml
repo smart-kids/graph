@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  myapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    network_mode: "host"
+    # When using host mode, ports are automatically available on the host
+    # and port mappings (ports:) are ignored
