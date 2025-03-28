@@ -27,6 +27,3 @@ COPY --from=builder /app/package.json ./
 
 # Verify files (optional)
 RUN ls -la
-
-# Start command
-CMD ["yarn", "start"]

@@ -13,3 +13,4 @@ services:
     environment:
       - NODE_ENV=development
     restart: unless-stopped
+    command: yarn run start 
