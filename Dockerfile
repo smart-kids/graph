@@ -1,17 +1,17 @@
-# Use the official Bun image
-FROM oven/bun:1.0
+# Use Bun as the base image
+FROM oven/bun:1.0.3
 
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and bun.lockb first for better caching
-COPY package.json bun.lockb ./
+# Copy package.json and lock file first for better caching
+COPY package.json ./
 
-# Install dependencies using Bun
-RUN bun install --production
+# Install dependencies safely (disable symlinks)
+RUN BUN_INSTALL_NO_SYMLINKS=1 bun install
 
-# Copy the rest of the application code
+# Copy the rest of the application
 COPY . .
 
-# Set the command to run the function script
-CMD ["bun", "src/function.js"]
+# Run the ES6 function using Babel Node
+CMD ["bun", "run", "--bun", "@babel/node", "src/function.js"]
