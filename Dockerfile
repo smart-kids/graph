@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package.json ./
 
 # Install dependencies (Bun is much faster than npm/Yarn)
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Copy the rest of the app
 COPY . .
