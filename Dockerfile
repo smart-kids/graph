@@ -10,9 +10,7 @@ RUN yarn install --frozen-lockfile && \
     yarn add @babel/core @babel/cli @babel/preset-env --dev
 
 # 3. Copy babel config and source files
-COPY .babelrc ./
-COPY src/ ./src
-COPY copy-package.js ./
+COPY . .
 
 # 4. Build with modern babel
 RUN npx babel src --out-dir dist --source-maps && \
