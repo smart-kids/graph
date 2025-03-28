@@ -4,7 +4,6 @@ services:
   app:
     build:
       context: .
-      target: builder  # Use builder stage for development
     platform: linux/amd64  # Force Intel compatibility
     network_mode: "host"  # Keep host networking
     volumes:
