@@ -2,20 +2,17 @@ FROM node:16-alpine
 
 WORKDIR /app
 
-# 1. Copy package files first for better caching
+# Copy package files first (better caching)
 COPY package.json yarn.lock ./
 
-# 2. Install dependencies
+# Install dependencies (include devDependencies for babel)
 RUN yarn install --frozen-lockfile
 
-# 3. Copy all source files
+# Copy all source files
 COPY . .
 
-# 4. Build the app (creates dist folder)
-RUN yarn build
+# Verify babel-node is available
+RUN yarn list babel-node || { echo "babel-node not found!"; exit 1; }
 
-# 5. Verify dist folder exists
-RUN ls -la dist/ || { echo "Error: dist folder missing after build!"; exit 1; }
-
-# 6. Start the app
-CMD ["yarn", "start"]
+# Start with babel-node (development)
+CMD ["yarn", "run", "babel-node", "src/function.js"]  # Adjust entry point as needed
