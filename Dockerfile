@@ -1,10 +1,15 @@
-FROM node:16
+FROM oven/bun:1.0 as base
 
 WORKDIR /app
+
+# Copy package.json and lockfile (if using bun.lockb)
+COPY package.json bun.lockb ./
+
+# Install dependencies (Bun is much faster than npm/Yarn)
+RUN bun install --frozen-lockfile
+
+# Copy the rest of the app
 COPY . .
 
-# Updated Yarn 4.x command (replaces --frozen-lockfile)
-RUN npm install --legacy-peer-deps
-
-COPY . .
-CMD ["npm", "start"]
+# Start the app
+CMD ["bun", "start"]
