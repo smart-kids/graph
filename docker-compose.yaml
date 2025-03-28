@@ -1,15 +1,13 @@
-version: '3.8'
+version: "3.8"
 
 services:
   app:
-    build:
-      context: .
-    platform: linux/amd64  # Force Intel compatibility
-    network_mode: "host"  # Keep host networking
-    volumes:
-      - ./:/app  # Live reload
-      - /app/node_modules  # Isolate node_modules
-    environment:
-      - NODE_ENV=development
+    build: .
+    container_name: node_function_app
     restart: unless-stopped
-    command: npm run build && npm run start  # Explicit start command
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=production
+    command: ["node", "--experimental-modules", "src/function.js"]
