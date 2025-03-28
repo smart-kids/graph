@@ -1,5 +1,6 @@
 const presets = [
-    "latest-node"
+    "latest-node",
+    "@babel/preset-env"
 ]
 
 const plugins = [
