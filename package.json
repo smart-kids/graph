@@ -5,7 +5,6 @@
   "repository": "git@bitbucket.org:braiven/unit-trust-master.git",
   "author": "gitomehbranson <sirbranson67@gmail.com>",
   "license": "MIT",
-  "type": "module",
   "scripts": {
     "test": "NODE_ENV=production nyc mocha --compilers js:@babel/register --inspect test/**/*.js --exit -r dotenv/config",
     "dev": "nodemon --exec npx babel-node --inspect  ./src/function",
