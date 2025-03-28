@@ -1,7 +1,7 @@
-FROM node:18
+FROM node:16
 
 WORKDIR /app
-COPY package.json ./
+COPY . .
 
 # Updated Yarn 4.x command (replaces --frozen-lockfile)
 RUN npm install --legacy-peer-deps
