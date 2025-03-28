@@ -26,4 +26,4 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./
 
 # Start command (adjust for your app)
-CMD ["bun", "run", "start"]
+CMD ["bun", "run", "./dist/server"]
