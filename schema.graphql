@@ -248,6 +248,7 @@ input Uadmin {
 
 type adminMutations {
   create(admin: Iadmin!): admin
+  invite(admin: Iinvite!): invitation
   update(admin: Uadmin!): admin
   archive(admin: Uadmin!): admin
   restore(admin: Uadmin!): admin

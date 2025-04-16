@@ -151,7 +151,7 @@ You are being invited to join ShulePlus as an administrator for {{schoolName}} w
 
 access your portal here https://cloud.shuleplus.co.ke
 
-and download mobile app here https://play.google.com/store/apps/details?id=com.shule.plus
+and download mobile app here https://play.google.com/store/apps/details?id=com.shule.plusapp
 
 use the following details to login and start enjoying your first free month:
 

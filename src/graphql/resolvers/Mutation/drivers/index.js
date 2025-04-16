@@ -128,7 +128,7 @@ const invite = async (data, { db: { collections } }) => {
 
 You have been invited to ShulePlus.
     
-access app here: https://play.google.com/store/apps/details?id=com.shule.plus
+access app here: https://play.google.com/store/apps/details?id=com.shule.plusapp
     
 use the following details to login
     
