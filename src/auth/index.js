@@ -180,7 +180,27 @@ router.post(
         // send an sms with welcome and link to download the app
         sms({
             school: schoolId,
-            data: { message: `Thank you for registering ${name} to Shule Plus. Please login to our app to start enjoying our services`, phone }
+            data: { message: `Thank you for registering ${name} to Shule Plus. Shule Plus is an efficient, reliable and secure communication platform for schools to communicate with parents about the safety of their children. Please login to our app to start enjoying our services. For support please contact us on email: support@shuleplus.co.ke phone: +254743214479`, phone }
+        }, console.log)
+
+        sms({
+            school: schoolId,
+            data: { message: `
+                This is a sample message
+                
+                Hello {{parent_name}}, 
+
+Our {{school_name}} bus has confirmed that it just dropped {{student_name}} at their usual pickup location. 
+            
+We would like to thank you for your continued commitment to time and safety.`, phone }
+        }, console.log)
+
+        sms({
+            school: schoolId,
+            data: { 
+                message: `A new school with the following details has been registered: name - ${name}, email - ${email}, phone - ${phone}`, 
+                phone :"+254743214479"
+            }
         }, console.log)
 
         const data = {
