@@ -171,6 +171,7 @@ router.post(
         await collections["admin"].create({
             id: adminId,
             username: email,
+            names:name,
             email,
             phone,
             school: schoolId
@@ -179,7 +180,7 @@ router.post(
         // send an sms with welcome and link to download the app
         sms({
             school: schoolId,
-            data: { message: `Thank you for registering ${name} to ShulePlus. Please login to our app to start enjoying your first free month`, phone }
+            data: { message: `Thank you for registering ${name} to Shule Plus. Please login to our app to start enjoying our services`, phone }
         }, console.log)
 
         const data = {
