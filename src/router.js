@@ -56,25 +56,31 @@ export default (storage)=>{
   
   router.use(
     "/graph",
-    validator.headers(headerSchema),
-    checkToken,
+    validator.headers(headerSchema), // Keep validation
+    checkToken, // Use updated middleware
     async (req, res, next) => {
-      const db = await storage
+        const db = await storage; // Assuming storage resolves to your DB connection/collections
 
-      return graphqlHTTP({
-        schema,
-        graphiql: true,
-        context: {
-          auth: req.decoded,
-          db
-        },
-        customFormatErrorFn: err => {
-          console.log("sending data to bugsnag as", err)
-          notifyErrors.formatError(JSON.stringify(err))
-        }
-      })(req, res, next)
+        // Pass the validated req.auth object into the context
+        return graphqlHTTP({
+            schema,
+            graphiql: true, // Keep for development
+            context: {
+                auth: req.auth, // Pass the decoded token payload here
+                db
+            },
+            customFormatErrorFn: err => {
+                console.error("GraphQL Error:", err); // Log the full error
+                // Optionally notify Bugsnag or other services
+                if (notifyErrors) {
+                    notifyErrors.formatError(err); // Use original error object
+                }
+                // Return a formatted error to the client
+                return formatError(err);
+            }
+        })(req, res, next);
     }
-  );
+);
 
   return router
 };

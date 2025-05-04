@@ -27,8 +27,8 @@ const func = ({ schoolId, data: { phone, message } }, reply) => {
     }
 
     request(options, function (error, response, body) {
-        if (error) throw new Error({ error, options });
-        // console.log(JSON.stringify(JSON.parse(body), null, '\t'))
+        if (error) console.error(error);
+        else console.log(JSON.stringify(JSON.parse(body), null, '\t'))
         reply(JSON.parse(body));
     });
 

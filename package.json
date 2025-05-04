@@ -6,7 +6,7 @@
   "author": "gitomehbranson <sirbranson67@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "NODE_ENV=test nyc mocha --compilers js:@babel/register --inspect test/**/*.js --exit -r dotenv/config",
+    "test": "NODE_ENV=production nyc mocha --compilers js:@babel/register --inspect test/**/*.js --exit -r dotenv/config",
     "dev": "nodemon --exec npx babel-node --inspect  ./src/function",
     "build": "npx babel ./src --out-dir dist --source-maps && node copy-package.js",
     "deploy": "yarn build && cd dist &&  gcloud functions deploy shuleplus-server --runtime=nodejs22 --trigger-http",

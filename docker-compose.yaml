@@ -5,15 +5,14 @@ services:
   mongodb:
     image: mongo:latest # Use the official MongoDB image (consider specifying a version like mongo:7.0 for production)
     container_name: my_mongo_db # Optional: Give the container a specific name
-    restart: always # Automatically restart the container if it stops
+    # restart: always # Automatically restart the container if it stops
     ports:
       - "27017:27017" # Map port 27017 on your host machine to port 27017 inside the container
     volumes:
-      - mongodata:/data/db # Persist database data using a named volume
-    # Optional: Set root user credentials (recommended for security, especially newer Mongo versions)
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root # Change if needed
-      MONGO_INITDB_ROOT_PASSWORD: example*password # CHANGE THIS TO A STRONG PASSWORD!
+      - mongodata3:/data/db # Persist database data using a named volume
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root # Change if needed
+    #   MONGO_INITDB_ROOT_PASSWORD: example*password # CHANGE THIS TO A STRONG PASSWORD!
 
 volumes:
-  mongodata: # Defines the named volume used above
+  mongodata3: # Defines the named volume used above

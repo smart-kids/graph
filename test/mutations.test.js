@@ -747,8 +747,8 @@ describe("Routes", () => {
         `,
         variables: {
           Iroute: {
-            name: "marwa",
-            description: "marwa",
+            name: `Sample Route ${Math.floor(Math.random() * 1000)}`,
+            description: `Sample Route ${Math.floor(Math.random() * 1000)}`,
             school: sharedInfo.school,
           }
         }
@@ -783,8 +783,8 @@ describe("Routes", () => {
         variables: {
           route: {
             id: sharedInfo.routeId,
-            name: "tested",
-            description: "descr"
+            name: `Sample Edited Route ${Math.floor(Math.random() * 1000)}`,
+            description: `Sample Edited Route ${Math.floor(Math.random() * 1000)}`,
           }
         }
       })
@@ -946,7 +946,7 @@ describe("Drivers", () => {
         variables: {
           driver: {
             id: sharedInfo.driverId,
-            names: "driver2",
+            names: "Victor Mugambi",
           }
         }
       })
@@ -1066,8 +1066,8 @@ describe("Buses", () => {
         `,
         variables: {
           Ibus: {
-            make: "marwa",
-            plate: "test",
+            make: "Toyota",
+            plate: "KCF 123M",
             size: 2,
             school: sharedInfo.school,
             driver: sharedInfo.driverId
@@ -1104,8 +1104,8 @@ describe("Buses", () => {
         variables: {
           bus: {
             id: sharedInfo.busId,
-            make: "marwaed",
-            plate: "test",
+            make: "Toyota Edited",
+            plate: "KCF 124M",
             size: 3
           }
         }
@@ -1265,7 +1265,7 @@ describe("Parent", () => {
         `,
         variables: {
           Iparent: {
-            name: "parent2",
+            name: `Sample Parent ${Math.floor(Math.random() * 1000)}`,
             national_id: "35718851",
             phone: "0711657108",
             password: "rY8x5uW",
@@ -1409,43 +1409,58 @@ describe("Parent", () => {
 });
 
 describe("Students", () => {
-  it("Can create an student", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("authorization", authorization)
-      .set("content-type", "application/json")
-      .send({
-        query: `
-          mutation ($Istudent: Istudent!) {
-            students {
-              create(student: $Istudent) {
-                id
+  it("Can create 5 students with the same details", done => {
+    const names = [
+      "Kamau Njoroge",
+      "Wanjiru Kamau",
+      "Kungu Gathoni",
+      "Wachira Mwangi",
+      "Nyokabi Muthoni"
+    ];
+    const promises = names.map(name => {
+      return chai
+        .request(app)
+        .post("/graph")
+        .set("authorization", authorization)
+        .set("content-type", "application/json")
+        .send({
+          query: `
+            mutation ($Istudent: Istudent!) {
+              students {
+                create(student: $Istudent) {
+                  id
+                }
               }
             }
+          `,
+          variables: {
+            Istudent: {
+              names: name,
+              route: sharedInfo.routeId,
+              gender: "FEMALE",
+              registration: "1234",
+              school: sharedInfo.school,
+              // parent: sharedInfo.parentId,
+              parent2: sharedInfo.parent2Id,
+              class: sharedInfo.class
+            }
           }
-        `,
-        variables: {
-          Istudent: {
-            names: "student1",
-            route: sharedInfo.routeId,
-            gender: "FEMALE",
-            registration: "1234",
-            school: sharedInfo.school,
-            // parent: sharedInfo.parentId,
-            parent2: sharedInfo.parent2Id,
-            class: sharedInfo.class
-          }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.students.create.id).to.be.a.string;
-
-        sharedInfo.studentId = res.body.data.students.create.id;
+        })
+    });
+    Promise.all(promises)
+      .then(responses => {
+        responses.forEach(response => {
+          response.should.have.status(200);
+          expect(response.body).to.not.be.null;
+          expect(response.body.errors).to.not.exist;
+          expect(response.body.data.students.create.id).to.be.a.string;
+        });
+        sharedInfo.studentIds = responses.map(response => response.body.data.students.create.id);
         done();
+      })
+      .catch(err => {
+        console.log(err);
+        done(err);
       });
   });
 
@@ -1468,10 +1483,10 @@ describe("Students", () => {
         variables: {
           student: {
             id: sharedInfo.studentId,
-            names: "marwa",
+            names: `Sample Updated Student ${Math.floor(Math.random() * 1000)}`,
             route: sharedInfo.routeId,
             gender: "MALE",
-            parent: "test"
+            parent2: sharedInfo.parent2Id
           }
         }
       })
@@ -1574,13 +1589,15 @@ describe("Students", () => {
 
 describe("Schedule", () => {
   it("Can create a schedule", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("authorization", authorization)
-      .set("content-type", "application/json")
-      .send({
-        query: `
+    const days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
+    const promises = days.map(day => {
+      return chai
+        .request(app)
+        .post("/graph")
+        .set("authorization", authorization)
+        .set("content-type", "application/json")
+        .send({
+          query: `
           mutation ($Ischedule: Ischedule!) {
             schedules {
               create(schedule: $Ischedule) {
@@ -1589,35 +1606,39 @@ describe("Schedule", () => {
             }
           }            
         `,
-        variables: {
-          Ischedule: {
-            name: "schedule 1",
-message: `Hello {{parent_name}}, 
+          variables: {
+            Ischedule: {
+              name: `${day} Pick up`,
+              message: `Hello {{parent_name}}, 
 
 Our {{school_name}} bus has confirmed that it just dropped {{student_name}} at their usual pickup location. 
             
 We would like to thank you for your continued commitment to time and safety.`,
-            time: new Date().toISOString(),
-            end_time: moment(new Date())
-              .add(30, "m")
-              .toISOString(),
-            school: sharedInfo.school,
-            route: sharedInfo.routeId,
-            days: "MONDAY,TUESDAY",
-            type: "PICK",
-            bus: sharedInfo.busId
+              time: new Date().toISOString(),
+              end_time: moment(new Date())
+                .add(30, "m")
+                .toISOString(),
+              school: sharedInfo.school,
+              route: sharedInfo.routeId,
+              days: day,
+              type: "PICK",
+              bus: sharedInfo.busId
+            }
           }
-        }
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        expect(res.body.data.schedules.create.id).to.be.a.string;
+        })
+        .then(res => {
+          res.should.have.status(200);
+          expect(res.body).to.not.be.null;
+          expect(res.body.errors).to.not.exist;
+          expect(res.body.data.schedules.create.id).to.be.a.string;
+          return res.body.data.schedules.create.id;
+        });
+    });
 
-        sharedInfo.scheduleId = res.body.data.schedules.create.id;
-        done();
-      });
+    Promise.all(promises).then(ids => {
+      sharedInfo.schedules = ids;
+      done();
+    });
   });
 
   it("Can update an schedule", done => {
