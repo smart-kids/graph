@@ -164,12 +164,13 @@ var router = express.Router()
 
 router.use(bodyParser.urlencoded({ extended: false }))
 router.use(bodyParser.json())
-
 router.get("/health", async (req, res) => {
+    console.log("Health check requested");
     try {
         const db = req.app.locals.db;
-        const result = await db.models.admin.count();
-        res.json({ status: "ok", result: result });
+        await db.postgres.query("SELECT 1");
+        console.log("Health check successful");
+        res.json({ status: "ok" });
     } catch (error) {
         console.error("Health check failed:", error);
         res.status(500).json({ status: "error" });
