@@ -165,7 +165,17 @@ var router = express.Router()
 router.use(bodyParser.urlencoded({ extended: false }))
 router.use(bodyParser.json())
 
-router.get("/health", (req, res) => res.send());
+router.get("/health", async (req, res) => {
+    try {
+        const db = req.app.locals.db;
+        const result = await db.models.admin.count();
+        res.json({ status: "ok", result: result });
+    } catch (error) {
+        console.error("Health check failed:", error);
+        res.status(500).json({ status: "error" });
+    }
+});
+
 // / Define Superadmin Phone Numbers (move to .env ideally)
 const SUPERADMIN_PHONES = process.env.SUPERADMIN_PHONES ? process.env.SUPERADMIN_PHONES.split(',') : ['0743214470', '0711657108']; // Example: Load from env, comma-separated
 
