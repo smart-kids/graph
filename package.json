@@ -54,16 +54,17 @@
     "nodemailer-smtp-transport": "^2.7.4",
     "passport": "^0.4.1",
     "passport-facebook": "^3.0.0",
+    "pg": "^8.15.6",
     "request": "^2.88.0",
     "request-promise": "^4.2.6",
     "rimraf": "^2.6.3",
     "sails-disk": "^1.1.2",
     "sails-mongo": "^2.1.2",
-    "sails-postgresql": "^1.0.2",
+    "sails-postgresql": "^5.0.1",
     "socket.io": "^2.3.0",
     "source-map-support": "^0.5.19",
     "uuidv4": "^4.0.0",
-    "waterline": "^0.13.6"
+    "waterline": "^0.15.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.27.0",
