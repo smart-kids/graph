@@ -2,17 +2,17 @@
 version: '3.8' # Specifies the Compose file version
 
 services:
-  mongodb:
-    image: mongo:latest # Use the official MongoDB image (consider specifying a version like mongo:7.0 for production)
-    container_name: my_mongo_db # Optional: Give the container a specific name
+  postgres:
+    image: postgres:latest # Use the official PostgreSQL image (consider specifying a version like postgres:13 for production)
+    container_name: my_postgres_db # Optional: Give the container a specific name
     # restart: always # Automatically restart the container if it stops
     ports:
-      - "27017:27017" # Map port 27017 on your host machine to port 27017 inside the container
+      - "5432:5432" # Map port 5432 inside the container to port 5432 on the host machine
     volumes:
-      - mongodata3:/data/db # Persist database data using a named volume
-    # environment:
-    #   MONGO_INITDB_ROOT_USERNAME: root # Change if needed
-    #   MONGO_INITDB_ROOT_PASSWORD: example*password # CHANGE THIS TO A STRONG PASSWORD!
+      - pgdata3:/var/lib/postgresql/data # Persist database data using a named volume
+
+# To connect to the database from your local machine, use the following URL:
+# postgres://localhost:5432
 
 volumes:
-  mongodata3: # Defines the named volume used above
+  pgdata3: # Defines the named volume used above

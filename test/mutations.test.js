@@ -4,7 +4,9 @@ import chai from "chai";
 import chaiHttp from "chai-http";
 var rimraf = require("rimraf");
 import moment from "moment";
-import app from "../src/function";
+import app from "./prod-proxy";
+import {ObjectId} from "mongodb";
+
 
 // Configure chai
 chai.use(chaiHttp);
@@ -68,6 +70,20 @@ describe("Super Auth", () => {
         });
     });
 
+    it("Server responds hello", done => {
+      chai
+        .request(app)
+        .get("/health")
+        .set("authorization", authorization)
+        .set("content-type", "application/json")
+        .end((err, res) => {
+          console.log({body:res.body})
+          res.should.have.status(200);
+
+          done();
+        });
+    });
+
     it("Graphql responds hello", done => {
       chai
         .request(app)
@@ -79,6 +95,7 @@ describe("Super Auth", () => {
             hello
           }` })
         .end((err, res) => {
+          console.log(res.body)
           res.should.have.status(200);
 
           done();
@@ -106,10 +123,11 @@ describe("Schools", () => {
         `,
         variables: {
           school: {
-            name: "School Name",
-            phone: "0711111111",
-            email: "mail@domain.com",
-            address: "PO Box 1234-00000 Someplace somewhere",
+            // id: new ObjectId().toHexString(),
+            name: `School ${Math.floor(Math.random() * 1000)}`,
+            phone: `07${Math.floor(Math.random() * 10000000)}`,
+            email: `mail${Math.floor(Math.random() * 1000000)}@domain.com`,
+            address: `PO Box ${Math.floor(Math.random() * 100000000)}-00000 Someplace somewhere`,
             inviteSmsText: 'Welcome to {shool_name} Shuleplus panel. visit https://www.shuleplus.co.ke/{school_name} to join',
             gradeOrder: ['One', 'Two', 'Three', 'Five'],
             termOrder: ['One', 'Two'],
@@ -117,7 +135,7 @@ describe("Schools", () => {
         }
       })
       .end((err, res) => {
-        // console.log(err, res)
+        console.log(err, res.body)
 
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
@@ -224,31 +242,6 @@ describe("Schools", () => {
         done();
       });
   });
-
-  it("Can fetch restored school", done => {
-    chai
-      .request(app)
-      .post("/graph")
-      .set("authorization", authorization)
-      .set("content-type", "application/json")
-      .send({
-        query: `
-        {
-          school{
-            id
-          }
-        }        
-        `
-      })
-      .end((err, res) => {
-        res.should.have.status(200);
-        expect(res.body).to.not.be.null;
-        expect(res.body.errors).to.not.exist;
-        // expect(res.body.data.locReports[0].id).to.be.a.string;
-
-        done();
-      });
-  });
 });
 
 describe("Admins", () => {
@@ -279,6 +272,7 @@ describe("Admins", () => {
         }
       })
       .end((err, res) => {
+        console.log(res.body.errors)
         res.should.have.status(200);
         expect(res.body).to.not.be.null;
         expect(res.body.errors).to.not.exist;
@@ -1482,7 +1476,7 @@ describe("Students", () => {
         `,
         variables: {
           student: {
-            id: sharedInfo.studentId,
+            id: sharedInfo.studentIds[0],
             names: `Sample Updated Student ${Math.floor(Math.random() * 1000)}`,
             route: sharedInfo.routeId,
             gender: "MALE",

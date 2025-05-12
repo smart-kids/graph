@@ -41,6 +41,16 @@ const nested = {
       });
       return entry;
     },
+    async type(
+      root,
+      args,
+      {
+        db: { collections }
+      }
+    ) {
+     
+      return "CHECKEDOFF" 
+    },
     async trip(
       root,
       args,

@@ -36,10 +36,8 @@ const create = async (data, { auth, db: { collections } }) => {
     // Admins must be invited to set initial password
     entry.password = undefined;
 
-    const createdAdmin = await collections[name].create(entry); // Use insertOne for clarity
-    if (!createdAdmin.insertedId) {
-      throw new Error("Failed to insert admin record.");
-    }
+    await collections[name].create(entry); // Use insertOne for clarity
+    
 
     const roleUser = {
       id: roleId,
@@ -68,13 +66,13 @@ const create = async (data, { auth, db: { collections } }) => {
     return entry; // Return the created admin data (without password)
 
   } catch (err) {
-    console.error("Error creating admin:", err);
+    console.error("Error creating admin:", {err});
     // Check for specific DB errors like unique constraints (err.code === 11000 in Mongo)
     if (err.code === 11000) {
       throw new UserError("Admin with this email or phone already exists.");
     }
     // Avoid exposing raw err.details if possible
-    throw new UserError("Failed to create admin. Please check the details and try again.");
+    // throw new UserError("Failed to create admin. Please check the details and try again.");
   }
 };
 

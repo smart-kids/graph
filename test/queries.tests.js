@@ -4,7 +4,7 @@ require("./mutations.test.js");
 import chai from "chai";
 import chaiHttp from "chai-http";
 var rimraf = require("rimraf");
-import app from "../src/function";
+import app from "./prod-proxy";
 
 // Configure chai
 chai.use(chaiHttp);
