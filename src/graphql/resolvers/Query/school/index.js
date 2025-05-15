@@ -12,15 +12,20 @@ const { name } = require("./about.js")
 const list = async (root, args, { auth, db: { collections } }) => {
   console.log({auth})
   // Get user type and potentially school ID from the validated auth context
-  let { userType, school:schoolId, admin: { school: adminSchoolId, user: adminUserType } } = auth; // Destructure from context.auth
+  let { userType, school:schoolId, admin: { school: adminSchoolId, user: adminUserType }={} } = auth; // Destructure from context.auth
 
-  userType = adminUserType === 'Super Admin' ? 'sAdmin' : Object.keys(auth)[0]
+  if(adminSchoolId){
+    userType = 'admin'
+  }
 
-  console.log(`[GraphQL School List] UserType: ${userType}, SchoolId from Token: ${schoolId}, AdminSchoolId from Token: ${adminSchoolId}`);
-
-  let query = { where: { isDeleted: false } };
-
-  if (userType === 'admin') {
+  if (userType === 'sAdmin') {
+      // --- Superadmin: Full Access ---
+      console.log(`[GraphQL School List] Superadmin querying all schools.`);
+      const query = { where: { isDeleted: false } };
+      const entries = await collections[name].find(query);
+      console.log(`[GraphQL School List] Found ${entries.length} entries.`);
+      return entries;
+  } else if (userType === 'admin') {
       // --- Admin: Restricted Access ---
       if (!adminSchoolId) {
            // This should ideally be caught during token generation, but double-check
@@ -30,44 +35,17 @@ const list = async (root, args, { auth, db: { collections } }) => {
            });
       }
       // Filter strictly by the school ID from the token
-      query.where.id = adminSchoolId;
-      console.log(`[GraphQL School List] Querying for specific school: ${adminSchoolId}`);
-
-  } else if (userType === 'driver') {
-      // --- Driver: Restricted Access ---
-      if (!schoolId) {
-           // This should ideally be caught during token generation, but double-check
-           console.error(`Authorization Error: User type ${userType} requires a schoolId in token, but none found.`);
-           throw new GraphQLError('Access Denied: User configuration incomplete.', {
-               extensions: { code: 'FORBIDDEN' },
-           });
-      }
-      // Filter strictly by the school ID from the token
-      query.where.id = schoolId;
-      console.log(`[GraphQL School List] Querying for specific school: ${schoolId}`);
-
-  } else if (userType === 'sAdmin') {
-      // --- Superadmin: Full Access ---
-      // No additional school filtering needed, query remains { isDeleted: false }
-      console.log(`[GraphQL School List] Superadmin querying all schools.`);
-
-  } else { // This covers other roles like 'parent', 'student', or any other non-sAdmin, non-admin, non-driver type
-      // --- Other roles (e.g., parent, student) ---
-      // Assuming they also need to be tied to a specific school via schoolId in token
-      if (!schoolId) {
-           console.error(`Authorization Error: User type ${userType} requires a schoolId in token, but none found.`);
-            throw new GraphQLError('Access Denied: User configuration incomplete.', {
-               extensions: { code: 'FORBIDDEN' },
-           });
-      }
-      query.where.id = schoolId;
-       console.log(`[GraphQL School List] Querying for specific school for role ${userType}: ${schoolId}`);
-      // If parents/students might need access to multiple schools (unlikely?), adjust logic.
+      const query = { where: { id: adminSchoolId, isDeleted: false } };
+      const entries = await collections[name].find(query);
+      console.log(`[GraphQL School List] Found ${entries.length} entries.`);
+      return entries;
+  } else {
+      // Other roles not supported
+      console.error(`Authorization Error: User type ${userType} not supported.`);
+      throw new GraphQLError('Access Denied: User type not supported.', {
+          extensions: { code: 'FORBIDDEN' },
+      });
   }
-
-  const entries = await collections[name].find(query);
-  console.log(`[GraphQL School List] Found ${entries.length} entries.`);
-  return entries;
 };
 
 const single = async (root, args, { auth, db: { collections } }) => {
