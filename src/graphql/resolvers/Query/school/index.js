@@ -12,18 +12,29 @@ const { name } = require("./about.js")
 const list = async (root, args, { auth, db: { collections } }) => {
   console.log({auth})
   // Get user type and potentially school ID from the validated auth context
-  let { userType, school:schoolId } = auth; // Destructure from context.auth
+  let { userType, school:schoolId, admin: { school: adminSchoolId, user: adminUserType } } = auth; // Destructure from context.auth
 
-  userType = auth?.admin?.user === 'Super Admin' ? 'admin' : userType
+  userType = adminUserType === 'Super Admin' ? 'sAdmin' : Object.keys(auth)[0]
 
-  console.log(`[GraphQL School List] UserType: ${userType}, SchoolId from Token: ${schoolId}`);
+  console.log(`[GraphQL School List] UserType: ${userType}, SchoolId from Token: ${schoolId}, AdminSchoolId from Token: ${adminSchoolId}`);
 
   let query = { where: { isDeleted: false } };
 
-  // { admin: { user: 'Super Admin' }, iat: 1745186074 }
+  if (userType === 'admin') {
+      // --- Admin: Restricted Access ---
+      if (!adminSchoolId) {
+           // This should ideally be caught during token generation, but double-check
+           console.error(`Authorization Error: User type ${userType} requires a schoolId in token, but none found.`);
+           throw new GraphQLError('Access Denied: User configuration incomplete.', {
+               extensions: { code: 'FORBIDDEN' },
+           });
+      }
+      // Filter strictly by the school ID from the token
+      query.where.id = adminSchoolId;
+      console.log(`[GraphQL School List] Querying for specific school: ${adminSchoolId}`);
 
-  if (userType === 'admin' || userType === 'driver') {
-      // --- Admin/Driver: Restricted Access ---
+  } else if (userType === 'driver') {
+      // --- Driver: Restricted Access ---
       if (!schoolId) {
            // This should ideally be caught during token generation, but double-check
            console.error(`Authorization Error: User type ${userType} requires a schoolId in token, but none found.`);
