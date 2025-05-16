@@ -289,83 +289,477 @@ router.post(
 );
 
 
+// --- Helper function for seeding ---
+async function seedInitialDataForSchool(orm, schoolId, schoolDetails) {
+    const { name: schoolName, email: schoolEmail, phone: schoolPhone } = schoolDetails;
+    const collections = orm.collections;
+
+    console.log(`Starting to seed data for schoolId: ${schoolId}`);
+
+    try {
+        // 1. Grades
+        const grade1Id = new ObjectId().toHexString();
+        const grade2Id = new ObjectId().toHexString();
+        await collections.grade.createEach([
+            { id: grade1Id, name: "Grade 1", school: schoolId },
+            { id: grade2Id, name: "Grade 2", school: schoolId },
+        ]);
+        console.log("Created Grades");
+
+        // 2. Terms
+        const term1Id = new ObjectId().toHexString();
+        const term2Id = new ObjectId().toHexString();
+        await collections.term.createEach([
+            { id: term1Id, name: "Term 1", school: schoolId },
+            { id: term2Id, name: "Term 2", school: schoolId },
+        ]);
+        console.log("Created Terms");
+
+        // Update school with gradeOrder and termOrder
+        await collections.school.updateOne({ id: schoolId }).set({
+            // gradeOrder: [grade1Id, grade2Id], // Or use names if your schema expects that
+            // termOrder: [term1Id, term2Id],   // Or use names
+            inviteSmsText: `Welcome to ${schoolName} Shuleplus panel. Visit https://www.shuleplus.co.ke/${schoolName.toLowerCase().replace(/\s+/g, '-')} to join`
+        });
+        console.log("Updated School with Grade/Term Order");
+
+        // 3. Teacher
+        const teacher1Id = new ObjectId().toHexString();
+        await collections.teacher.create({
+            id: teacher1Id,
+            name: "Mrs. Jane Doe",
+            national_id: `TID${Math.floor(Math.random() * 100000)}`,
+            school: schoolId,
+            phone: `0700${Math.floor(100000 + Math.random() * 900000)}`, // Sample phone
+            email: `teacher1.${schoolId.substring(0,5)}@example.com`,
+            gender: "FEMALE",
+            password: "password123", // In a real app, hash this!
+        });
+        console.log("Created Teacher");
+
+        // 4. Class
+        const class1Id = new ObjectId().toHexString();
+        await collections.class.create({
+            id: class1Id,
+            name: "Grade 1 Alpha",
+            teacher: teacher1Id,
+            school: schoolId,
+            grade: grade1Id, // Link to one of the created grades
+        });
+        console.log("Created Class");
+
+        // 5. Route
+        const route1Id = new ObjectId().toHexString();
+        await collections.route.create({
+            id: route1Id,
+            name: "Morning Route A",
+            description: "Picks up students from Downtown area.",
+            school: schoolId,
+        });
+        console.log("Created Route");
+
+        // 6. Driver
+        const driver1Id = new ObjectId().toHexString();
+        const userId = new ObjectId().toHexString();
+        await collections.driver.create({
+            id: driver1Id,
+            userId,
+            names: "John Ryder",
+            email: `driver1.${schoolId.substring(0,5)}@example.com`,
+            phone: `0701${Math.floor(100000 + Math.random() * 900000)}`,
+            school: schoolId,
+            license_expiry: new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString(),
+            licence_number: `DL${Math.floor(Math.random() * 100000)}`,
+            experience: "5",
+            home: "Uptown, City",
+        });
+        console.log("Created Driver");
+
+        // 7. Bus
+        const bus1Id = new ObjectId().toHexString();
+        await collections.bus.create({
+            id: bus1Id,
+            make: "Toyota",
+            plate: `KDX ${Math.floor(100 + Math.random() * 900)}X`,
+            size: 30,
+            school: schoolId,
+            driver: driver1Id,
+        });
+        console.log("Created Bus");
+
+        // 8. Parents
+        const parent1Id = new ObjectId().toHexString();
+        const parent2Id = new ObjectId().toHexString();
+        await collections.parent.createEach([
+            {
+                id: parent1Id,
+                name: "Mr. Parent One",
+                national_id: `PID${Math.floor(Math.random() * 100000)}`,
+                phone: schoolPhone, // Use school's phone for one parent for easy testing
+                password: "password123",
+                school: schoolId,
+                email: `parent1.${schoolId.substring(0,5)}@example.com`,
+                gender: "MALE",
+            },
+            {
+                id: parent2Id,
+                name: "Ms. Parent Two",
+                national_id: `PID${Math.floor(Math.random() * 100000)}`,
+                phone: `0702${Math.floor(100000 + Math.random() * 900000)}`,
+                password: "password123",
+                school: schoolId,
+                email: `parent2.${schoolId.substring(0,5)}@example.com`,
+                gender: "FEMALE",
+            },
+        ]);
+        console.log("Created Parents");
+
+        // 9. Students
+        const studentNames = ["Alice Wonderland", "Bob The Builder", "Charlie Brown"];
+        const studentIds = studentNames.map(() => new ObjectId().toHexString());
+        const studentData = studentNames.map((name, index) => ({
+            id: studentIds[index],
+            names: name,
+            route: route1Id,
+            gender: index % 2 === 0 ? "FEMALE" : "MALE",
+            registration: `REG${Math.floor(1000 + Math.random() * 9000)}`,
+            school: schoolId,
+            parent: parent1Id, // Assign one parent
+            parent2: parent2Id, // Assign another parent
+            class: class1Id,
+            grade: grade1Id,
+        }));
+        await collections.student.createEach(studentData);
+        console.log("Created Students");
+
+        // 10. Schedule
+        const schedule1Id = new ObjectId().toHexString();
+        const scheduleStartTime = new Date();
+        scheduleStartTime.setHours(7, 0, 0, 0); // 7:00 AM
+        const scheduleEndTime = new Date(scheduleStartTime.getTime() + 30 * 60000); // 7:30 AM
+        await collections.schedule.create({
+            id: schedule1Id,
+            name: "Weekday Morning Pickup",
+            message: `Hello {{parent_name}}, our {{school_name}} bus has confirmed {{student_name}} is on board for the morning trip.`,
+            time: scheduleStartTime.toISOString(),
+            end_time: scheduleEndTime.toISOString(),
+            school: schoolId,
+            route: route1Id,
+            days: "MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY", // Comma-separated or array if model supports
+            type: "PICK",
+            bus: bus1Id,
+        });
+        console.log("Created Schedule");
+
+        // 11. Trip
+        const trip1Id = new ObjectId().toHexString();
+        const tripStartTime = new Date(); // Now
+        await collections.trip.create({
+            id: trip1Id,
+            startedAt: tripStartTime.toISOString(),
+            // completedAt: can be null for an ongoing trip
+            schedule: schedule1Id,
+            driver: driver1Id,
+            school: schoolId,
+            bus: bus1Id,
+        });
+        console.log("Created Trip");
+
+        // 12. Event (e.g., student checked in)
+        const event1Id = new ObjectId().toHexString();
+        await collections.event.create({
+            id: event1Id,
+            student: studentIds[0], // First sample student
+            time: new Date().toISOString(),
+            type: "CHECKEDIN",
+            school: schoolId,
+            trip: trip1Id,
+        });
+        console.log("Created Event");
+
+        // 13. LocReport
+        await collections.locreport.create({
+            id: new ObjectId().toHexString(),
+            trip: trip1Id,
+            time: new Date().toISOString(),
+            loc: JSON.stringify({ type: "Point", coordinates: [-1.286389, 36.817223] }), // Nairobi coordinates
+        });
+        console.log("Created LocReport");
+
+        // 14. Complaint
+        await collections.complaint.create({
+            id: new ObjectId().toHexString(),
+            parent: parent1Id,
+            time: new Date().toISOString(),
+            school: schoolId,
+            content: "The bus was 5 minutes late this morning.",
+            status: "PENDING",
+            isDeleted: false
+        });
+        console.log("Created Complaint");
+
+        // 15. Payment
+        await collections.payment.create({
+            id: new ObjectId().toHexString(),
+            school: schoolId,
+            ammount: "5000", // Represent as string if your model expects it
+            type: "MPESA",
+            phone: schoolPhone,
+            ref: `PAY${Math.floor(Math.random() * 1000000)}`,
+            time: new Date().toISOString(),
+        });
+        console.log("Created Payment");
+
+        // 16. Charge
+        await collections.charge.create({
+            id: new ObjectId().toHexString(),
+            school: schoolId,
+            ammount: "15", // Represent as string
+            reason: "SMS notification fee for welcome message.",
+            time: new Date().toISOString(),
+        });
+        console.log("Created Charge");
+
+        // 17. E-learning: Subject -> Topic -> Subtopic -> Question -> Options & Answer
+        const subject1Id = new ObjectId().toHexString();
+        await collections.subject.create({
+            id: subject1Id,
+            name: "Basic Mathematics",
+            grade: grade1Id, // Linked to Grade 1
+            school: schoolId, // Assuming subject is also school-specific
+            // topicOrder: ["Addition", "Subtraction"]
+        });
+
+        const topic1Id = new ObjectId().toHexString();
+        await collections.topic.create({
+            id: topic1Id,
+            name: "Addition",
+            subject: subject1Id,
+            // school: schoolId, // If topics are directly linked to school
+            subTopicOrder: ["Single Digit Addition"]
+        });
+
+        const subtopic1Id = new ObjectId().toHexString();
+        await collections.subtopic.create({
+            id: subtopic1Id,
+            name: "Single Digit Addition",
+            topic: topic1Id,
+            // school: schoolId, // If subtopics are directly linked to school
+        });
+
+        const question1Id = new ObjectId().toHexString();
+        await collections.question.create({
+            id: question1Id,
+            subtopic: subtopic1Id,
+            type: "SINGLECHOICE",
+            name: "What is 2 + 2?",
+            // school: schoolId, // If questions are directly linked to school
+        });
+
+        const option1Id = new ObjectId().toHexString();
+        const option2Id = new ObjectId().toHexString();
+        const option3Id = new ObjectId().toHexString();
+        await collections.option.createEach([
+            { id: option1Id, value: "3", question: question1Id },
+            { id: option2Id, value: "4", question: question1Id }, // Correct answer
+            { id: option3Id, value: "5", question: question1Id },
+        ]);
+
+        await collections.answer.create({
+            id: new ObjectId().toHexString(),
+            value: option2Id, // ID of the correct option
+            question: question1Id,
+        });
+        console.log("Created E-learning entities");
+
+        // 18. Teams
+        const team1Id = new ObjectId().toHexString();
+        await collections.team.create({
+            id: team1Id,
+            school: schoolId,
+            name: "Grade 1 Teaching Team"
+        });
+        console.log("Created Team");
+
+        // 19. Team Members (Assuming Admin is a user, link them)
+        // First, ensure an admin user exists in the 'user' collection or create one.
+        // For simplicity, let's assume the admin created during registration is usable here.
+        // If not, you might need to create a generic 'user' record for the admin.
+        // Let's assume adminId from school registration is a user ID.
+        // The `admin` created earlier is in the `admin` collection. We need a generic `user` representation.
+        // For now, let's link the teacher created earlier.
+        await collections.team_member.create({
+            id: new ObjectId().toHexString(),
+            team: team1Id,
+            user: teacher1Id, // Link the teacher to the team
+        });
+        console.log("Created Team Member");
+
+        // 20. Invitations
+        await collections.invitation.create({
+            id: new ObjectId().toHexString(),
+            user: teacher1Id, // Who is being invited (or who sent it if used differently)
+            school: schoolId,
+            message: `You're invited to join ${schoolName} on ShulePlus!`,
+            phone: `0703${Math.floor(100000 + Math.random() * 900000)}`,
+            email: `invited.user.${schoolId.substring(0,5)}@example.com`,
+            status: "PENDING"
+        });
+        console.log("Created Invitation");
+
+
+        console.log(`Successfully seeded initial data for school: ${schoolName} (ID: ${schoolId})`);
+
+    } catch (error) {
+        console.error(`Error seeding data for schoolId ${schoolId}:`, error);
+        // Decide if you want to throw the error or just log it
+        // throw error; // If you throw, the main registration might fail or need to handle it
+    }
+}
+
+
+// --- Your Router ---
+// Assuming router is already defined (e.g., const router = express.Router();)
+
 router.post(
     "/register",
-    validator.body(Joi.object({
+    validator.body(Joi.object({ // Ensure Joi and validator are imported/defined
         name: Joi.string().required(),
         phone: Joi.string(),
-        email: Joi.string(),
+        email: Joi.string().email(), // Added email validation
         address: Joi.string()
     })),
     async (req, res) => {
-        // create a school object
-        const db = await req.app.locals.db
-        const { collections } = db
-        const { name, phone, email, address } = req.body
-
-        const schoolId = new ObjectId().toHexString();
-        await collections["school"].create({
-            id: schoolId,
-            name,
-            phone,
-            email,
-            address
-        })
-
-        // create a use who is the admin with the phone number
-        const adminId = new ObjectId().toHexString();
-        await collections["admin"].create({
-            id: adminId,
-            username: email,
-            names: name,
-            email,
-            phone,
-            school: schoolId
-        })
-
-        // send an sms with welcome and link to download the app
-        sms({
-            school: schoolId,
-            data: { message: `Thank you for registering ${name} to Shule Plus. Shule Plus is an efficient, reliable and secure communication platform for schools to communicate with parents about the safety of their children. Please login to our app to start enjoying our services. For support please contact us on email: support@shuleplus.co.ke phone: +254743214479 :start here shuleplus.co.ke`, phone }
-        }, console.log)
-
-        sms({
-            school: schoolId,
-            data: {
-                message: `
-                This is a sample message
-
-                Hello {{parent_name}}, 
-
-Our {{school_name}} bus has confirmed that it just dropped {{student_name}} at their usual pickup location. 
-            
-We would like to thank you for your continued commitment to time and safety.`, phone
-            }
-        }, console.log)
-
-        sms({
-            school: schoolId,
-            data: {
-                message: `A new school with the following details has been registered: name - ${name}, email - ${email}, phone - ${phone}`,
-                phone: "+254743214479"
-            }
-        }, console.log)
-
-        const data = {
-            admin: {
-                school: schoolId,
-                user: email
-            }
+        const orm = await req.app.locals.db; // Get the ORM instance
+        console.log("ORM:", orm);
+        if (!orm) {
+            console.error("ORM not found in app.locals");
+            return res.status(500).send({ error: "Server configuration error: ORM not available." });
         }
+        const { collections } = orm; // Use ORM collections
+        const { name, phone, email, address } = req.body;
 
-        var token = jwt.sign(data, config.secret);
-        return res.send({
-            token,
-            data
-        })
-        //TODO send an email with the welcome page, app and admin login
+        try {
+            // create a school object
+            const schoolId = new ObjectId().toHexString();
+            const schoolRecord = await collections.school.create({ // Use Waterline create
+                id: schoolId,
+                name,
+                phone,
+                email,
+                address
+                // gradeOrder and termOrder will be updated by seeder
+            }).fetch(); // .fetch() returns the created record
+            console.log("School created:", schoolRecord.id);
 
-    })
+            // create a user who is the admin with the phone number
+            const adminId = new ObjectId().toHexString();
+            // NOTE: Your admin model might need `password`. If so, generate/hash one.
+            // Also, `username` is set to email. Ensure this is unique if your DB enforces it.
+            const adminPassword = "adminpassword123"; // Example, HASH THIS in a real app
+            
+            // Consider if your 'admin' model should also be a 'user' model for team membership
+            // For now, creating admin as per original logic
+            await collections.admin.create({
+                id: adminId,
+                username: email, // Potentially use a generated unique username
+                names: name, // Or "Admin for [School Name]"
+                email,
+                phone,
+                school: schoolId,
+                password: adminPassword, // Add if your admin model has a password
+            }).fetch();
+            console.log("Admin created:", adminId);
+            
+            // TODO: Create a corresponding record in `users` collection if admins are also generic users
+            // This is important for things like Team Members if 'user' is a generic foreign key
+            // const genericUserIdForAdmin = new ObjectId().toHexString();
+            // await collections.user.create({
+            //     id: genericUserIdForAdmin,
+            //     name: name, // Or "Admin for [School Name]"
+            //     email: email,
+            //     phone: phone,
+            //     password: adminPassword, // HASHED
+            //     // any other fields your user model needs
+            // }).fetch();
+            // await collections.user_role.create({ // Assign 'admin' role
+            //     id: new ObjectId().toHexString(),
+            //     user: genericUserIdForAdmin,
+            //     role: 'admin_role_id' // ID of your 'admin' role in the 'roles' table
+            // }).fetch();
+
+
+            // Call the seeding function - DO NOT await if you want to send response faster
+            // but it's safer to await to ensure data is there or errors are caught.
+            // For robustness, let's await.
+            await seedInitialDataForSchool(orm, schoolId, { name, email, phone });
+            console.log("Initial data seeding initiated/completed for school:", schoolId);
+
+            // send an sms with welcome and link to download the app
+            // Ensure `sms` function is defined and works
+            if (typeof sms === "function") {
+                sms({
+                    school: schoolId,
+                    data: { message: `Thank you for registering ${name} to Shule Plus. Shule Plus is an efficient, reliable and secure communication platform for schools to communicate with parents about the safety of their children. Please login to our app to start enjoying our services. For support please contact us on email: support@shuleplus.co.ke phone: +254743214479 :start here shuleplus.co.ke`, phone }
+                }, (err, result) => {
+                    if (err) console.error("Error sending welcome SMS:", err);
+                    else console.log("Welcome SMS sent:", result);
+                });
+
+                // Sample message SMS (consider if this should always be sent on registration)
+                sms({
+                    school: schoolId,
+                    data: {
+                        message: `This is a sample message\n\nHello {{parent_name}}, \n\nOur {{school_name}} bus has confirmed that it just dropped {{student_name}} at their usual pickup location. \n\nWe would like to thank you for your continued commitment to time and safety.`, phone
+                    }
+                }, (err, result) => {
+                    if (err) console.error("Error sending sample SMS:", err);
+                    else console.log("Sample SMS sent:", result);
+                });
+
+                // Notification SMS to your support number
+                sms({
+                    school: schoolId, // Context for logging/charging
+                    data: {
+                        message: `A new school has been registered: name - ${name}, email - ${email}, phone - ${phone}`,
+                        phone: "+254743214479" // Hardcoded support number
+                    }
+                }, (err, result) => {
+                    if (err) console.error("Error sending notification SMS:", err);
+                    else console.log("Notification SMS sent:", result);
+                });
+            } else {
+                console.warn("SMS function is not defined. Skipping SMS notifications.");
+            }
+
+
+            const tokenData = {
+                admin: { // Or more generic: user: { id: adminId, school: schoolId, role: 'admin' }
+                    school: schoolId,
+                    user: email, // or adminId
+                    id: adminId // include the admin's actual ID
+                }
+            };
+
+            var token = jwt.sign(tokenData, config.secret, { expiresIn: '24h' }); // Add expiry
+
+            //TODO send an email with the welcome page, app and admin login
+
+            return res.send({
+                token,
+                data: tokenData // Send back the payload that was used for the token
+            });
+
+        } catch (error) {
+            console.error("Error during school registration:", error);
+            // Check for unique constraint violations (e.g., email already exists)
+            if (error.code === 'E_UNIQUE') { // Waterline unique constraint error
+                return res.status(409).send({ error: "Registration failed: A user with this email or phone may already exist." });
+            }
+            return res.status(500).send({ error: "An unexpected error occurred during registration." });
+        }
+    }
+);
 
 const validateEmail = (email) => {
     return String(email)
