@@ -54,7 +54,7 @@ const datastoreConfig = {
     url: DB_URL,
     // 'migrate: alter' is for development. It attempts to auto-migrate schema changes.
     // WARNING: This can be destructive. Use 'safe' in production and manage migrations manually.
-    migrate: 'alter',
+    migrate: 'safe',
     // ssl: { rejectUnauthorized: false } // Example SSL config for some cloud providers, adjust as needed
 };
 

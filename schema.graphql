@@ -629,6 +629,8 @@ type school {
   inviteSmsText: String
   gradeOrder: [String]
   termOrder: [String]
+  logo: String
+  themeColor: String
 
   # relations for saas
   admins: [admin]
@@ -657,6 +659,8 @@ input ISchool {
   phone: String
   email: String
   address: String
+  logo: String
+  themeColor: String
   inviteSmsText: String,
   gradeOrder:[String]
   termOrder: [String]
@@ -667,6 +671,8 @@ input USchool {
   name: String
   phone: String
   email: String
+  logo: String
+  themeColor: String
   address: String
   inviteSmsText: String
   gradeOrder:[String]

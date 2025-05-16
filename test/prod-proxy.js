@@ -14,7 +14,7 @@ app.all("*", async (req, res) => {
 //   const backendURL = `https://graph-ongyy.kinsta.app${clientPathAndQuery}`;
   const backendURL = `http://localhost:4001${clientPathAndQuery}`;
 
-  console.log(`[${new Date().toISOString()}] PROXY ${req.method} ${clientPathAndQuery} -> ${backendURL}`);
+  console.log(`[${new Date().toISOString()}] PROXY ${req.method} ${clientPathAndQuery} -> ${backendURL}`);*
 
   // 2. Prepare headers for the backend request
   const forwardHeaders = {};
