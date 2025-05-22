@@ -49,12 +49,14 @@ const list = async (root, args, { auth, db: { collections } }) => {
 };
 
 const single = async (root, args, { auth, db: { collections } }) => {
-  const { id: requestedSchoolId } = args; // ID of the school being requested from query arguments
-  let { userType, school: userTokenSchoolId } = auth; // User's type and school ID from their token
-
+   // ID of the school being requested from query arguments
+  let { userType, school, schoolId } = auth; // User's type and school ID from their token
+  let userTokenSchoolId = schoolId || school
+  // const { id: requestedSchoolId } = args;
+  let requestedSchoolId = userTokenSchoolId
   userType = auth?.admin?.user === 'Super Admin' ? 'sAdmin' : userType
 
-  console.log(`[GraphQL School Single] UserType: ${userType}, UserTokenSchoolId: ${userTokenSchoolId}, RequestedSchoolId: ${requestedSchoolId}`, root);
+  console.log(`[GraphQL School Single] UserType: ${userType}, UserTokenSchoolId: ${schoolId}, RequestedSchoolId: ${requestedSchoolId}`, root);
 
   if (!requestedSchoolId) {
     throw new GraphQLError('Bad Request: School ID must be provided.', {
