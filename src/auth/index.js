@@ -769,6 +769,98 @@ const validateEmail = (email) => {
         );
 };
 
+router.get(
+    "/meta",
+    async (req, res) => {
+        console.log("finding school")
+        const db = await req.app.locals.db
+        const schoolId = req.query.schoolId
+        if (!schoolId) {
+            return res.status(400).send({ error: 'schoolId is required' })
+        }
+
+        console.log({schoolId})
+        try {
+            const school = await db.collections.school.findOne({ id: schoolId })
+            if (!school) {
+                console.error("School not found:", schoolId);
+                return res.status(404).send({ error: 'School not found' })
+            }
+            const { name, logo, themeColor } = school
+            return res.send({ name, logo, themeColor })
+        } catch (error) {
+            console.error("Error fetching school:", error);
+            return res.status(500).send({ error: "An unexpected error occurred during fetching school." });
+        }
+    }
+);
+
+router.get(
+    "/classes",
+    async (req, res) => {
+        const db = await req.app.locals.db
+        const { collections } = db
+        const { schoolid } = req.query
+
+        if (!schoolid) {
+            return res.status(400).send({ error: 'schoolid is required' })
+        }
+
+        try {
+            const classes = await collections.class.find({ school: schoolid, isDeleted: false }).sort({ name: 1 });
+            return res.send(classes);
+        } catch (error) {
+            console.error("Error fetching classes:", error);
+            return res.status(500).send({ error: "An unexpected error occurred during fetching classes." });
+        }
+    }
+);
+
+router.post(
+    "/register/student",
+    validator.body(Joi.object({
+        school: Joi.string().required(),
+        parent: Joi.object({
+            name: Joi.string().required(),
+            phone: Joi.string().required(),
+            email: Joi.string().required(),
+        }).required(),
+        student: Joi.object({
+            name: Joi.string().required(),
+            class: Joi.string().required(),
+            route: Joi.string().required()
+        }).required()
+    })),
+    async (req, res) => {
+        const db = await req.app.locals.db
+        const { collections } = db
+        const { school, parent, student } = req.body
+
+        const parentData = {
+            ...parent,
+            school
+        };
+        const studentData = {
+            ...student,
+            school,
+            parent: parent.name
+        };
+
+        try {
+            const [newParent] = await collections.parents.create(parentData).fetch();
+            const [newStudent] = await collections.students.create({ ...studentData, parent: newParent.id }).fetch();
+            const user = { ...newStudent, role: 'student' };
+            const token = jwt.sign(user, config.secret);
+            return res.send({ user, token });
+        } catch (error) {
+            console.error("Error during student registration:", error);
+            return res.status(500).send({ error: "An unexpected error occurred during registration." });
+        }
+    }
+);
+
+
+
 router.post(
     "/otp/send",
     validator.body(Joi.object({
