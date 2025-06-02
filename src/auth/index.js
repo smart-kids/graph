@@ -288,41 +288,242 @@ router.post(
     }
 );
 
+const MOCK_CURRICULUM_DATA = {
+    "form2": {
+        "physics": [
+            {
+                "title": "1. Magnetism",
+                "icon": "magnet", // Example icon name
+                "lessons": [
+                    { "id": "f2p1l1", "title": "Properties of magnets", "duration": "~ 8 mins", "completed": false },
+                    { "id": "f2p1l2", "title": "Direction of magnetic field", "duration": "~ 7 mins", "completed": false },
+                    { "id": "f2p1l3", "title": "Magnetic field patterns", "duration": "~ 10 mins", "completed": false },
+                    { "id": "f2p1l4", "title": "The Earth's magnetic field", "duration": "~ 8 mins", "completed": false },
+                    { "id": "f2p1l5", "title": "Exercise 1.1", "duration": "~ 15 mins", "completed": false },
+                    { "id": "f2p1l6", "title": "The Domain theory", "duration": "~ 10 mins", "completed": false },
+                    { "id": "f2p1l7", "title": "Magnetisation of a magnetic material", "duration": "~ 12 mins", "completed": false },
+                    { "id": "f2p1l8", "title": "Demagnetisation", "duration": "~ 8 mins", "completed": false },
+                    { "id": "f2p1l9", "title": "Hard and soft magnetic materials", "duration": "~ 7 mins", "completed": false },
+                    { "id": "f2p1l10", "title": "Application of magnets", "duration": "~ 10 mins", "completed": false },
+                    { "id": "f2p1l11", "title": "Revision Exercise 1", "duration": "~ 20 mins", "completed": false }
+                ]
+            },
+            {
+                "title": "2. Measurement (II)",
+                "icon": "ruler-square", // Example icon name
+                "lessons": [
+                    { "id": "f2p2l1", "title": "Engineer's callipers", "duration": "~ 5 mins", "completed": false }, // Assuming 'Engineer's callipers' is intended
+                    { "id": "f2p2l2", "title": "Vernier callipers", "duration": "~ 15 mins", "completed": false },
+                    { "id": "f2p2l3", "title": "Exercise 2.1", "duration": "~ 15 mins", "completed": false },
+                    { "id": "f2p2l4", "title": "Exercise 2.2", "duration": "~ 15 mins", "completed": false },
+                    { "id": "f2p2l5", "title": "Micrometer screw gauge", "duration": "~ 15 mins", "completed": false },
+                    { "id": "f2p2l6", "title": "Significant figures", "duration": "~ 10 mins", "completed": false },
+                    { "id": "f2p2l7", "title": "Standard form", "duration": "~ 8 mins", "completed": false },
+                    { "id": "f2p2l8", "title": "Prefixes used with SI units", "duration": "~ 7 mins", "completed": false },
+                    { "id": "f2p2l9", "title": "Decimal places", "duration": "~ 5 mins", "completed": false },
+                    { "id": "f2p2l10", "title": "Revision Exercise 2", "duration": "~ 20 mins", "completed": false }
+                ]
+            },
+            {
+                "title": "3. Turning Effect of a Force",
+                "icon": "rotate-3d-variant", // Example icon name
+                "lessons": [
+                    { "id": "f2p3l1", "title": "Moment of a force", "duration": "~ 10 mins", "completed": false },
+                    { "id": "f2p3l2", "title": "The principle of moments", "duration": "~ 12 mins", "completed": false },
+                    { "id": "f2p3l3", "title": "Moment due to weight of an object", "duration": "~ 10 mins", "completed": false },
+                    { "id": "f2p3l4", "title": "Moments of parallel forces", "duration": "~ 10 mins", "completed": false },
+                    { "id": "f2p3l5", "title": "Applications of Anti-parallel Forces", "duration": "~ 12 mins", "completed": false },
+                    { "id": "f2p3l6", "title": "Revision Exercise 3", "duration": "~ 20 mins", "completed": false }
+                ]
+            },
+            {
+                "title": "4. Equilibrium and Centre of Gravity",
+                "icon": "weight-lifter", // Example icon name (could also be scale-balance, axis-arrow)
+                "lessons": [
+                    { "id": "f2p4l1", "title": "Centre of gravity of regular shapes", "duration": "~ 10 mins", "completed": false },
+                    { "id": "f2p4l2", "title": "Centre of gravity of irregular shapes", "duration": "~ 12 mins", "completed": false },
+                    { "id": "f2p4l3", "title": "States of equilibrium", "duration": "~ 10 mins", "completed": false },
+                    { "id": "f2p4l4", "title": "Applications of stability", "duration": "~ 10 mins", "completed": false },
+                    { "id": "f2p4l5", "title": "Revision Exercise 4", "duration": "~ 20 mins", "completed": false }
+                ]
+            },
+            {
+                "title": "5. Reflection at Curved Surfaces",
+                "icon": "mirror-rectangle", // Example icon name (could also be reflect-horizontal)
+                "lessons": [
+                    { "id": "f2p5l1", "title": "Types of curved surfaces", "duration": "~ 8 mins", "completed": false },
+                    { "id": "f2p5l2", "title": "Reflection of light by curved mirrors", "duration": "~ 15 mins", "completed": false }
+                    // Add more lessons if they exist beyond the visible part of the image
+                ]
+            }
+            // Add other subjects for form2 if needed, following the same structure
+        ]
+    }
+    // Add other forms (form1, form3, etc.) if needed
+}
+
 
 // --- Helper function for seeding ---
 async function seedInitialDataForSchool(orm, schoolId, schoolDetails) {
     const { name: schoolName, email: schoolEmail, phone: schoolPhone } = schoolDetails;
     const collections = orm.collections;
 
+    // Helper to simulate ObjectId if not available in the environment (e.g. browser mock)
+    // In a real Node.js environment with MongoDB driver, `new ObjectId()` is preferred.
+    const generateId = () => {
+        if (typeof ObjectId !== 'undefined') {
+            return new ObjectId().toHexString();
+        }
+        // Simple fallback for environments without ObjectId (less robust for uniqueness)
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+    };
+
+
     console.log(`Starting to seed data for schoolId: ${schoolId}`);
 
     try {
-        // 1. Grades
-        const grade1Id = new ObjectId().toHexString();
-        const grade2Id = new ObjectId().toHexString();
-        await collections.grade.createEach([
-            { id: grade1Id, name: "Grade 1", school: schoolId },
-            { id: grade2Id, name: "Grade 2", school: schoolId },
-        ]);
-        console.log("Created Grades");
+        // --- Standard School Setup (from your original seeder) ---
+        // 1. Grades (We'll specifically create "Form 2" for e-learning later)
+        const grade1Id = generateId(); // Example "Grade 1"
+        // const grade2Id = generateId(); // Example "Grade 2"
+        await collections.grade.create({ id: grade1Id, name: "Grade 1", school: schoolId });
+        console.log("Created Grade 1");
 
         // 2. Terms
-        const term1Id = new ObjectId().toHexString();
-        const term2Id = new ObjectId().toHexString();
-        await collections.term.createEach([
-            { id: term1Id, name: "Term 1", school: schoolId },
-            { id: term2Id, name: "Term 2", school: schoolId },
-        ]);
-        console.log("Created Terms");
+        const term1Id = generateId();
+        await collections.term.create({ id: term1Id, name: "Term 1", school: schoolId });
+        console.log("Created Term 1");
 
-        // Update school with gradeOrder and termOrder
         await collections.school.updateOne({ id: schoolId }).set({
-            // gradeOrder: [grade1Id, grade2Id], // Or use names if your schema expects that
-            // termOrder: [term1Id, term2Id],   // Or use names
             inviteSmsText: `Welcome to ${schoolName} Shuleplus panel. Visit https://www.shuleplus.co.ke/${schoolName.toLowerCase().replace(/\s+/g, '-')} to join`
         });
-        console.log("Updated School with Grade/Term Order");
+        console.log("Updated School Details");
 
+        // ... (Keep other non-e-learning entities: Teacher, Class, Route, Driver, Bus, Parents, Students, Schedule, Trip, Event, etc.)
+        // For brevity, I'm omitting them here, but they should remain as in your original seeder.
+        // Make sure to link them to `grade1Id` or other relevant IDs if needed.
+        // For instance, the 'Class' created might be linked to 'grade1Id'.
+
+        console.log("--- Seeding E-Learning Content based on MOCK_CURRICULUM_DATA ---");
+
+        // --- E-Learning Content Seeding ---
+
+        // A. Create "Form 2" Grade (if it doesn't match grade1Id or grade2Id already created for other purposes)
+        const form2GradeName = "Form 2"; // From MOCK_CURRICULUM_DATA key "form2"
+        let form2Grade = await collections.grade.findOne({ name: form2GradeName, school: schoolId });
+        let form2GradeId;
+        if (!form2Grade) {
+            form2GradeId = generateId();
+            await collections.grade.create({ id: form2GradeId, name: form2GradeName, school: schoolId });
+            console.log(`Created Grade: ${form2GradeName}`);
+        } else {
+            form2GradeId = form2Grade.id;
+            console.log(`Found existing Grade: ${form2GradeName}`);
+        }
+
+        // B. Create "Physics" Subject for "Form 2"
+        const physicsSubjectName = "Physics"; // From MOCK_CURRICULUM_DATA key "physics"
+        let physicsSubject = await collections.subject.findOne({ name: physicsSubjectName, grade: form2GradeId });
+        let physicsSubjectId;
+        const physicsSubjectTopicOrder = []; // To store topic IDs for order
+
+        if (!physicsSubject) {
+            physicsSubjectId = generateId();
+            await collections.subject.create({
+                id: physicsSubjectId,
+                name: physicsSubjectName,
+                grade: form2GradeId,
+                school: schoolId,
+                icon: "atom", // Default icon for Physics
+                // topicOrder will be updated later
+            });
+            console.log(`Created Subject: ${physicsSubjectName} for ${form2GradeName}`);
+        } else {
+            physicsSubjectId = physicsSubject.id;
+            console.log(`Found existing Subject: ${physicsSubjectName} for ${form2GradeName}`);
+        }
+
+        // C. Iterate through Topics in MOCK_CURRICULUM_DATA for Physics
+        const mockPhysicsTopics = MOCK_CURRICULUM_DATA.form2.physics;
+
+        for (const mockTopic of mockPhysicsTopics) {
+            const dbTopicId = generateId();
+            physicsSubjectTopicOrder.push(dbTopicId); // Add to order array
+            const topicSubTopicOrder = []; // To store subtopic IDs for this topic
+
+            await collections.topic.create({
+                id: dbTopicId,
+                name: mockTopic.title, // e.g., "1. Magnetism"
+                subject: physicsSubjectId,
+                school: schoolId, // Assuming topics are directly linked to school
+                icon: mockTopic.icon, // From mock data
+                // subTopicOrder will be updated later
+            });
+            console.log(`  Created Topic: ${mockTopic.title}`);
+
+            // D. Iterate through Lessons (Subtopics) for the current Topic
+            for (const mockLesson of mockTopic.lessons) {
+                const dbSubtopicId = generateId();
+                // IMPORTANT: The original `LessonScreen.js` might have used `mockLesson.id` (e.g., "f2p1l1")
+                // to key into its internal `MOCK_LESSONS` object for question details.
+                // If your `QuestionPlayerScreen` now receives the `questions` array directly via navigation params
+                // (as the refactor suggested), then using a new `generateId()` for `dbSubtopicId` is fine.
+                // The `questions` for this subtopic will be seeded below.
+
+                topicSubTopicOrder.push(dbSubtopicId); // Add to order array for this topic
+
+                await collections.subtopic.create({
+                    id: dbSubtopicId,
+                    name: mockLesson.title, // e.g., "Properties of magnets"
+                    topic: dbTopicId,
+                    school: schoolId, // Assuming subtopics are directly linked to school
+                    duration: mockLesson.duration, // From mock data
+                    // The `icon` for subtopic/lesson items is usually handled client-side based on type/status
+                });
+                console.log(`    Created Subtopic: ${mockLesson.title} (ID: ${dbSubtopicId})`);
+
+                // E. Seed a Placeholder Question, Options, and Answer for each Subtopic
+                // This ensures the DataService query `subtopics { questions { ... } }` returns data.
+                const questionId = generateId();
+                await collections.question.create({
+                    id: questionId,
+                    subtopic: dbSubtopicId, // Link to the subtopic created above
+                    type: "SINGLECHOICE", // Default type
+                    name: `What is the main concept of "${mockLesson.title}"?`, // Placeholder question
+                    content: `This lesson, "${mockLesson.title}", covers fundamental principles. Select the best summary.`, // Placeholder content
+                    response_type: "single_choice", // Matching original LessonScreen structure if needed
+                    school: schoolId,
+                });
+
+                const option1Id = generateId();
+                const option2Id = generateId(); // Assume this is the "correct" placeholder
+                const option3Id = generateId();
+
+                await collections.option.createEach([
+                    { id: option1Id, value: "Placeholder Option A", question: questionId, school: schoolId },
+                    { id: option2Id, value: "Placeholder Option B (Correct)", question: questionId, school: schoolId },
+                    { id: option3Id, value: "Placeholder Option C", question: questionId, school: schoolId },
+                ]);
+
+                await collections.answer.create({
+                    id: generateId(),
+                    value: option2Id, // Link to the ID of the "correct" placeholder option
+                    question: questionId,
+                    school: schoolId,
+                });
+                // console.log(`      Created placeholder question for ${mockLesson.title}`);
+            }
+            // Update the current topic with its subTopicOrder
+            await collections.topic.updateOne({ id: dbTopicId }).set({ subTopicOrder: topicSubTopicOrder });
+            console.log(`    Updated Topic ${mockTopic.title} with subTopicOrder`);
+        }
+        // Update the Physics subject with its topicOrder
+        // await collections.subject.updateOne({ id: physicsSubjectId }).set({ topicOrder: physicsSubjectTopicOrder });
+        // console.log(`  Updated Subject ${physicsSubjectName} with topicOrder`);
+
+
+        // --- Resume other standard seeding if any ---
+        // e.g., Teams, Invitations, etc. from your original seeder.
         // 3. Teacher
         const teacher1Id = new ObjectId().toHexString();
         await collections.teacher.create({
@@ -331,7 +532,7 @@ async function seedInitialDataForSchool(orm, schoolId, schoolDetails) {
             national_id: `TID${Math.floor(Math.random() * 100000)}`,
             school: schoolId,
             phone: `0700${Math.floor(100000 + Math.random() * 900000)}`, // Sample phone
-            email: `teacher1.${schoolId.substring(0,5)}@example.com`,
+            email: `teacher1.${schoolId.substring(0, 5)}@example.com`,
             gender: "FEMALE",
             password: "password123", // In a real app, hash this!
         });
@@ -365,7 +566,7 @@ async function seedInitialDataForSchool(orm, schoolId, schoolDetails) {
             id: driver1Id,
             userId,
             names: "John Ryder",
-            email: `driver1.${schoolId.substring(0,5)}@example.com`,
+            email: `driver1.${schoolId.substring(0, 5)}@example.com`,
             phone: `0701${Math.floor(100000 + Math.random() * 900000)}`,
             school: schoolId,
             license_expiry: new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString(),
@@ -398,7 +599,7 @@ async function seedInitialDataForSchool(orm, schoolId, schoolDetails) {
                 phone: schoolPhone, // Use school's phone for one parent for easy testing
                 password: "password123",
                 school: schoolId,
-                email: `parent1.${schoolId.substring(0,5)}@example.com`,
+                email: `parent1.${schoolId.substring(0, 5)}@example.com`,
                 gender: "MALE",
             },
             {
@@ -408,7 +609,7 @@ async function seedInitialDataForSchool(orm, schoolId, schoolDetails) {
                 phone: `0702${Math.floor(100000 + Math.random() * 900000)}`,
                 password: "password123",
                 school: schoolId,
-                email: `parent2.${schoolId.substring(0,5)}@example.com`,
+                email: `parent2.${schoolId.substring(0, 5)}@example.com`,
                 gender: "FEMALE",
             },
         ]);
@@ -602,7 +803,7 @@ async function seedInitialDataForSchool(orm, schoolId, schoolDetails) {
             school: schoolId,
             message: `You're invited to join ${schoolName} on ShulePlus!`,
             phone: `0703${Math.floor(100000 + Math.random() * 900000)}`,
-            email: `invited.user.${schoolId.substring(0,5)}@example.com`,
+            email: `invited.user.${schoolId.substring(0, 5)}@example.com`,
             status: "PENDING"
         });
         console.log("Created Invitation");
@@ -610,10 +811,12 @@ async function seedInitialDataForSchool(orm, schoolId, schoolDetails) {
 
         console.log(`Successfully seeded initial data for school: ${schoolName} (ID: ${schoolId})`);
 
+        console.log(`--- Finished E-Learning Content Seeding ---`);
+        console.log(`Successfully seeded initial data for school: ${schoolName} (ID: ${schoolId})`);
+
     } catch (error) {
         console.error(`Error seeding data for schoolId ${schoolId}:`, error);
-        // Decide if you want to throw the error or just log it
-        // throw error; // If you throw, the main registration might fail or need to handle it
+        // throw error; // Optional: re-throw to halt further operations if seeding is critical
     }
 }
 
@@ -627,7 +830,8 @@ router.post(
         name: Joi.string().required(),
         phone: Joi.string(),
         email: Joi.string().email(), // Added email validation
-        address: Joi.string()
+        address: Joi.string(),
+        password: Joi.string()
     })),
     async (req, res) => {
         const orm = await req.app.locals.db; // Get the ORM instance
@@ -637,7 +841,7 @@ router.post(
             return res.status(500).send({ error: "Server configuration error: ORM not available." });
         }
         const { collections } = orm; // Use ORM collections
-        const { name, phone, email, address } = req.body;
+        const { name, phone, email, address, password:adminPassword } = req.body;
 
         try {
             // create a school object
@@ -656,8 +860,7 @@ router.post(
             const adminId = new ObjectId().toHexString();
             // NOTE: Your admin model might need `password`. If so, generate/hash one.
             // Also, `username` is set to email. Ensure this is unique if your DB enforces it.
-            const adminPassword = "adminpassword123"; // Example, HASH THIS in a real app
-            
+
             // Consider if your 'admin' model should also be a 'user' model for team membership
             // For now, creating admin as per original logic
             await collections.admin.create({
@@ -670,7 +873,7 @@ router.post(
                 password: adminPassword, // Add if your admin model has a password
             }).fetch();
             console.log("Admin created:", adminId);
-            
+
             // TODO: Create a corresponding record in `users` collection if admins are also generic users
             // This is important for things like Team Members if 'user' is a generic foreign key
             // const genericUserIdForAdmin = new ObjectId().toHexString();
@@ -779,7 +982,7 @@ router.get(
             return res.status(400).send({ error: 'schoolId is required' })
         }
 
-        console.log({schoolId})
+        console.log({ schoolId })
         try {
             const school = await db.collections.school.findOne({ id: schoolId })
             if (!school) {

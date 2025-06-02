@@ -48,7 +48,16 @@ const list = async (root, args, { auth, db: { collections } }) => {
   }
 };
 
-const single = async (root, args, { auth, db: { collections } }) => {
+const single = async (root, args, { auth, db: { collections }, open }) => {
+  if(open) {
+    const openSchoolId = "683db2cb5058724fca75b69d"
+
+    const entries = await collections[name].find({where: {id: openSchoolId, isDeleted: false}});
+    const entry = entries.length > 0 ? entries[0] : null;
+    console.log(`[GraphQL School Single] Open querying school: ${openSchoolId}`);
+    return entry;
+  }
+
    // ID of the school being requested from query arguments
   let { userType, school, schoolId } = auth; // User's type and school ID from their token
   let userTokenSchoolId = schoolId || school
@@ -65,6 +74,8 @@ const single = async (root, args, { auth, db: { collections } }) => {
   }
 
   let query = { where: { id: requestedSchoolId, isDeleted: false } };
+
+  
 
   if (userType === 'sAdmin') {
     // Superadmin can access any non-deleted school by its ID.
