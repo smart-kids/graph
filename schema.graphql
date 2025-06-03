@@ -978,6 +978,9 @@ type question {
   name: String
   type: answerType
   subtopic: subtopic
+  videos: [String]
+  attachments: [String]
+  images: [String]
   answers: [answer]
   options: [option]
 }
@@ -986,6 +989,10 @@ input Iquestion {
   name: String!
   type: String!
   subtopic: String!
+  videos: [String]
+  attachments: [String]
+  images: [String]
+  
 }
 
 input Uquestion {
@@ -993,6 +1000,9 @@ input Uquestion {
   name: String
   type: answerType
   subtopic: String
+  videos: [String]
+  attachments: [String]
+  images: [String]
 }
 
 type questionMutations {

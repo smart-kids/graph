@@ -2,6 +2,7 @@
 const pg = require('pg');
 const { Pool } = pg;
 const dotenv = require('dotenv');
+const readline = require('readline'); // For a more interactive confirmation (optional)
 
 // --- Model Imports ---
 const admins = require("../src/graphql/resolvers/Mutation/admins/model.js");
@@ -55,28 +56,22 @@ const pool = new Pool({
 // Helper to map Waterline types to PostgreSQL types
 function getPostgresType(attr) {
     if (attr.autoMigrations && attr.autoMigrations.columnType) {
-        return attr.autoMigrations.columnType.toUpperCase();
+        return attr.autoMigrations.columnType.toUpperCase(); // Ensure no semicolon here
     }
     if (attr.columnType) { // Mainly for sails-postgresql adapter specifics
-        return attr.columnType.toUpperCase();
+        return attr.columnType.toUpperCase(); // Ensure no semicolon here
     }
 
     switch (String(attr.type).toLowerCase()) {
-        case 'string':
-            return 'VARCHAR(255)';
-        case 'text':
-            return 'TEXT';
+        case 'string': return 'VARCHAR(255)';
+        case 'text': return 'TEXT';
         case 'number':
-            if (attr.autoMigrations && attr.autoMigrations.autoIncrement) return 'SERIAL'; // SERIAL implies INTEGER
-            return 'FLOAT'; // Default for 'number'
-        case 'boolean':
-            return 'BOOLEAN';
-        case 'json':
-            return 'JSONB'; // Use JSONB for 'json' type
-        case 'date':
-            return 'DATE';
-        case 'datetime':
-            return 'TIMESTAMPTZ';
+            if (attr.autoMigrations && attr.autoMigrations.autoIncrement) return 'SERIAL';
+            return 'FLOAT';
+        case 'boolean': return 'BOOLEAN';
+        case 'json': return 'JSONB'; // This is clean
+        case 'date': return 'DATE';
+        case 'datetime': return 'TIMESTAMPTZ';
         default:
             console.warn(`Unknown Waterline type: "${attr.type}" for an attribute. Defaulting to TEXT.`);
             return 'TEXT';
@@ -117,16 +112,54 @@ function normalizeDbType(udtName, dataType, charMaxLength) {
     return type;
 }
 
-async function createOrUpdateTables() {
+async function manageSchema(cleanDatabaseFirst = false) {
     console.log('Connecting to PostgreSQL...');
     const client = await pool.connect();
     console.log('Connected to PostgreSQL.');
 
     try {
         await client.query('BEGIN');
-        console.log('\n--- Starting Schema Synchronization (FULLY AUTOMATIC) ---');
-        console.warn('!!! WARNING: Columns will be added, DROPPED, and types ALTERED automatically where deemed safe. !!!');
-        console.warn('!!! Ensure you have backed up your data if running against a production database. !!!');
+
+        if (cleanDatabaseFirst) {
+            console.log('\n--- Starting Database Cleaning (DROPPING TABLES) ---');
+            console.warn('!!! WARNING: ALL DATA IN THE TARGETED TABLES WILL BE LOST. !!!');
+
+            // Drop the trigger function first as tables might depend on it during their drop/recreate.
+            console.log('Attempting to drop trigger function "update_updated_at_column" if it exists...');
+            await client.query('DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;'); // CASCADE will drop dependent triggers
+            console.log('Trigger function "update_updated_at_column" dropped or did not exist.');
+
+
+            // Drop model tables
+            for (const modelModule of [...modelModules].reverse()) { // Reverse order *might* help with FKs if they existed implicitly
+                const extendedCollection = modelModule.default || modelModule;
+                const modelIdentity = extendedCollection.prototype && extendedCollection.prototype.identity;
+                if (!modelIdentity) {
+                    console.warn("Skipping invalid model structure for dropping (no identity):", modelModule);
+                    continue;
+                }
+                const tableName = modelIdentity;
+                console.log(`  Dropping table "${tableName}" IF EXISTS...`);
+                await client.query(`DROP TABLE IF EXISTS "${tableName}" CASCADE;`); // CASCADE handles dependent objects
+                console.log(`  Table "${tableName}" dropped or did not exist.`);
+            }
+
+            // Drop special 'tests_isolated' table
+            const testTableName = 'tests_isolated';
+            console.log(`  Dropping table "${testTableName}" IF EXISTS...`);
+            await client.query(`DROP TABLE IF EXISTS "${testTableName}" CASCADE;`);
+            console.log(`  Table "${testTableName}" dropped or did not exist.`);
+
+            console.log('--- Database Cleaning Complete ---');
+        }
+
+
+        console.log('\n--- Starting Schema Synchronization ---');
+        if (!cleanDatabaseFirst) {
+            console.warn('!!! WARNING: Columns may be added, DROPPED, and types ALTERED automatically where deemed safe. !!!');
+            console.warn('!!! Ensure you have backed up your data if running against a production database. !!!');
+        }
+
 
         console.log('Ensuring update_updated_at_column trigger function...');
         const triggerFunctionQuery = `
@@ -151,9 +184,9 @@ async function createOrUpdateTables() {
                 console.warn("Skipping invalid model structure for module (no .extend, identity, or attributes):", modelModule);
                 continue;
             }
-            if (Object.keys(rawModelAttributes).length === 0) {
-                console.warn(`Skipping model "${modelIdentity}" as it has no attributes defined.`);
-                continue;
+            if (Object.keys(rawModelAttributes).length === 0 && modelPrimaryKeyName.toLowerCase() !== 'id') { // Allow empty attributes if implicit ID is the only thing
+                 console.warn(`Skipping model "${modelIdentity}" as it has no attributes defined and primary key is not 'id'.`);
+                 continue;
             }
 
             const tableName = modelIdentity;
@@ -161,7 +194,7 @@ async function createOrUpdateTables() {
 
             const desiredSchema = {};
             const pkAttrKeyInModel = Object.keys(rawModelAttributes).find(k => k.toLowerCase() === modelPrimaryKeyName.toLowerCase()) || modelPrimaryKeyName;
-            let pkColumnDefinition;
+            let pkColumnDefinition = `"${modelPrimaryKeyName}" VARCHAR(24) PRIMARY KEY`;
             const pkAttrInModel = rawModelAttributes[pkAttrKeyInModel];
 
             if (pkAttrInModel) {
@@ -183,7 +216,6 @@ async function createOrUpdateTables() {
             const columnDefinitionsForCreate = [pkColumnDefinition];
             for (const attrName in rawModelAttributes) {
                 if (attrName.toLowerCase() === modelPrimaryKeyName.toLowerCase()) continue;
-
                 const attr = rawModelAttributes[attrName];
                 if (attr.model || attr.collection || typeof attr !== 'object' || attr === null || !attr.type) {
                     if (attr.model || attr.collection) console.log(`  Info: Skipping association attribute "${attrName}".`);
@@ -193,87 +225,37 @@ async function createOrUpdateTables() {
 
                 let pgType = getPostgresType(attr);
                 let columnDef = `"${attrName}" ${pgType}`;
-
                 if (attr.required && !(attr.autoMigrations && attr.autoMigrations.autoIncrement) && attr.defaultsTo === undefined) {
                     columnDef += ' NOT NULL';
                 }
-
-                // --- START OF MODIFIED SECTION FOR DEFAULT VALUES ---
                 if (attr.defaultsTo !== undefined) {
-                    let defaultValueVal = attr.defaultsTo;
-                    let defaultValueSQL = null; // This will hold the SQL-formatted string for the default value
-                    const finalPgTypeUpper = pgType.toUpperCase();
-
-                    if (typeof defaultValueVal === 'function') {
+                    let defaultValue = attr.defaultsTo;
+                    if (typeof defaultValue === 'string') defaultValue = `'${String(defaultValue).replace(/'/g, "''")}'`;
+                    else if (typeof defaultValue === 'boolean') defaultValue = defaultValue ? 'TRUE' : 'FALSE';
+                    else if (typeof defaultValue === 'function') {
                         try {
-                            const val = defaultValueVal(); // Execute the function
-                            if (typeof val === 'string') {
-                                defaultValueSQL = `'${String(val).replace(/'/g, "''")}'`;
-                            } else if (typeof val === 'boolean') {
-                                defaultValueSQL = val ? 'TRUE' : 'FALSE';
-                            } else if (typeof val === 'number' && Number.isFinite(val)) {
-                                defaultValueSQL = val.toString();
-                            } else if (val instanceof Date) {
-                                defaultValueSQL = `'${val.toISOString()}'`;
-                            } else if (val === null) { // Function returned null
-                                defaultValueSQL = 'NULL';
-                            } else if ((Array.isArray(val) || (typeof val === 'object' && val !== null)) &&
-                                       (finalPgTypeUpper === 'JSON' || finalPgTypeUpper === 'JSONB')) {
-                                try {
-                                    const jsonString = JSON.stringify(val);
-                                    defaultValueSQL = `'${jsonString.replace(/'/g, "''")}'`;
-                                } catch (e_json) {
-                                    console.warn(`  Warning: Could not stringify JSON default from function for ${tableName}.${attrName}. Omitting DEFAULT. Error: ${e_json.message}`);
-                                    // defaultValueSQL remains null, so DEFAULT clause omitted
-                                }
-                            } else if (val === undefined) { // Function returned undefined
-                                console.warn(`  Warning: Dynamic default function for ${tableName}.${attrName} returned undefined. Omitting DEFAULT clause.`);
-                                // defaultValueSQL remains null
-                            } else {
-                                console.warn(`  Warning: Unsupported type from dynamic default function for ${tableName}.${attrName} (Type: ${typeof val}). Omitting DEFAULT clause.`);
-                                // defaultValueSQL remains null
+                            const val = defaultValue();
+                            if (typeof val === 'string') defaultValue = `'${String(val).replace(/'/g, "''")}'`;
+                            else if (typeof val === 'boolean') defaultValue = val ? 'TRUE' : 'FALSE';
+                            else if (typeof val === 'number' && Number.isFinite(val)) defaultValue = val;
+                            else if (val instanceof Date) defaultValue = `'${val.toISOString()}'`;
+                            else {
+                                console.warn(`  Warning: Unsupported dynamic default value for ${tableName}.${attrName}. Omitting DEFAULT.`);
+                                defaultValue = null;
                             }
-                        } catch (e_func) {
-                            console.warn(`  Warning: Error evaluating dynamic default function for ${tableName}.${attrName}. Omitting DEFAULT. Error: ${e_func.message}`);
-                            // defaultValueSQL remains null
+                        } catch (e) {
+                            console.warn(`  Warning: Error evaluating dynamic default for ${tableName}.${attrName}. Omitting DEFAULT. Error: ${e.message}`);
+                            defaultValue = null;
                         }
-                    } // End of function handling
-                    else if (typeof defaultValueVal === 'string') {
-                        defaultValueSQL = `'${String(defaultValueVal).replace(/'/g, "''")}'`;
-                    } else if (typeof defaultValueVal === 'boolean') {
-                        defaultValueSQL = defaultValueVal ? 'TRUE' : 'FALSE';
-                    } else if (typeof defaultValueVal === 'number' && Number.isFinite(defaultValueVal)) {
-                        defaultValueSQL = defaultValueVal.toString();
-                    } else if (defaultValueVal === null) { // Static `defaultsTo: null`
-                        defaultValueSQL = 'NULL';
-                    } else if ((Array.isArray(defaultValueVal) || (typeof defaultValueVal === 'object' && defaultValueVal !== null)) &&
-                               (finalPgTypeUpper === 'JSON' || finalPgTypeUpper === 'JSONB')) {
-                        try {
-                            const jsonString = JSON.stringify(defaultValueVal);
-                            defaultValueSQL = `'${jsonString.replace(/'/g, "''")}'`; // e.g. '[]' or '{}'
-                        } catch (e_json_static) {
-                            console.warn(`  Warning: Could not stringify static JSON default for ${tableName}.${attrName}. Omitting DEFAULT. Error: ${e_json_static.message}`);
-                            // defaultValueSQL remains null
-                        }
-                    } else {
-                        // Any other unhandled static type
-                        console.warn(`  Warning: Unsupported static defaultsTo type (${typeof defaultValueVal}) for ${tableName}.${attrName} (column type ${finalPgTypeUpper}). Omitting DEFAULT clause.`);
-                        // defaultValueSQL remains null
                     }
-
-                    if (defaultValueSQL !== null) { // Only add DEFAULT clause if we have a valid SQL string for it
-                        columnDef += ` DEFAULT ${defaultValueSQL}`;
-                    }
+                    if (defaultValue !== null) columnDef += ` DEFAULT ${defaultValue}`;
                 }
-                // --- END OF MODIFIED SECTION FOR DEFAULT VALUES ---
-
                 if (attr.autoMigrations && attr.autoMigrations.unique) {
                     columnDef += ' UNIQUE';
                 }
                 columnDefinitionsForCreate.push(columnDef);
                 desiredSchema[attrName.toLowerCase()] = { name: attrName, definition: columnDef, pgType: pgType, modelAttr: attr };
             }
-
             if (!desiredSchema['createdat']) {
                  desiredSchema['createdat'] = { name: 'createdAt', definition: '"createdAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP', pgType: 'TIMESTAMPTZ', modelAttr: { type: 'datetime', defaultsTo: 'CURRENT_TIMESTAMP' } };
                  columnDefinitionsForCreate.push(desiredSchema['createdat'].definition);
@@ -294,7 +276,7 @@ async function createOrUpdateTables() {
                 const createTableQuery = `CREATE TABLE "${tableName}" (\n    ${columnDefinitionsForCreate.join(',\n    ')}\n);`;
                 await client.query(createTableQuery);
                 console.log(`  Table "${tableName}" created.`);
-            } else {
+            } else if (!cleanDatabaseFirst) { // Only do column modifications if not cleaning (tables were just recreated if cleaning)
                 console.log(`  Verifying columns for existing table "${tableName}"...`);
                 const { rows: existingDbColumnsData } = await client.query(
                     `SELECT column_name, data_type, udt_name, is_nullable, column_default, character_maximum_length, numeric_precision, numeric_scale
@@ -335,12 +317,10 @@ async function createOrUpdateTables() {
                         if (modelPgType === 'TEXT' && (dbNormalizedType.startsWith('VARCHAR') || dbNormalizedType.startsWith('CHAR'))) {
                             alterations.push({ type: 'TYPE', newType: 'TEXT', reason: `Safe upgrade from ${dbNormalizedType} to TEXT.` });
                         } else if (modelPgType === 'JSONB' && dbNormalizedType === 'JSON') {
-                             alterations.push({ type: 'TYPE', newType: 'JSONB', reason: `Safe upgrade from JSON to JSONB.`});
-                        }
-                        else if (modelPgType !== dbNormalizedType &&
+                             alterations.push({ type: 'TYPE', newType: 'JSONB', reason: `Safe upgrade from JSON to JSONB.` });
+                        } else if (modelPgType !== dbNormalizedType &&
                                  !(modelPgType.startsWith('VARCHAR') && dbNormalizedType.startsWith('VARCHAR') && modelPgType === dbNormalizedType) &&
-                                 !(modelPgType === 'SERIAL' && dbNormalizedType === 'INTEGER')
-                                 ) {
+                                 !(modelPgType === 'SERIAL' && dbNormalizedType === 'INTEGER')) {
                             console.warn(`  [${tableName}.${modelAttrDetails.name}] Type Mismatch: Model wants ${modelPgType}, DB has ${dbNormalizedType}. Manual review recommended. Skipping auto-alter for this type change.`);
                         }
 
@@ -352,8 +332,6 @@ async function createOrUpdateTables() {
                         } else if (!modelRequiresNotNull && !dbIsNullable) {
                             alterations.push({ type: 'DROP NOT NULL', reason: `Model allows NULL.`});
                         }
-                        // Note: Modifying default values for existing columns is not yet implemented here.
-                        // This fix primarily addresses adding new columns with correct defaults.
 
                         if (alterations.length > 0) {
                             columnsToModify.push({ name: modelAttrDetails.name, alterations: alterations });
@@ -365,7 +343,6 @@ async function createOrUpdateTables() {
                     console.log(`  Columns to ADD to "${tableName}": ${columnsToAdd.map(c=>c.name).join(', ')}`);
                     for (const col of columnsToAdd) {
                         console.log(`    Adding column "${col.name}" (${col.pgType}) to "${tableName}"...`);
-                        // col.definition now contains the correctly formatted DEFAULT clause
                         await client.query(`ALTER TABLE "${tableName}" ADD COLUMN ${col.definition};`);
                         console.log(`    Column "${col.name}" added.`);
                     }
@@ -403,9 +380,14 @@ async function createOrUpdateTables() {
                 if (columnsToAdd.length === 0 && columnsToRemove.length === 0 && columnsToModify.length === 0) {
                     console.log(`  Table "${tableName}" schema is up to date with the model.`);
                 }
+            } else if (cleanDatabaseFirst && tableExists) {
+                 console.log(`  Table "${tableName}" was just recreated (due to --CLEAN-DATABASE-I-AM-SURE). Skipping column diff.`);
             }
 
+
             console.log(`  Ensuring "updatedAt" trigger for "${tableName}"...`);
+            // Trigger might have been dropped by CASCADE if table was dropped, or by the explicit function drop earlier.
+            // So, always try to drop (if exists) and recreate.
             await client.query(`DROP TRIGGER IF EXISTS "${tableName}_update_updated_at" ON "${tableName}";`);
             await client.query(`
                 CREATE TRIGGER "${tableName}_update_updated_at"
@@ -418,29 +400,37 @@ async function createOrUpdateTables() {
 
         console.log(`\nProcessing special table: "tests_isolated"`);
         const testTableName = 'tests_isolated';
-        const createTestTableQuery = `
-            CREATE TABLE IF NOT EXISTS "${testTableName}" (
-                "id" SERIAL PRIMARY KEY,
-                "counter" VARCHAR(255),
-                "description" TEXT,
-                "createdAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-                "updatedAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-            );
-        `;
-        await client.query(createTestTableQuery);
-        console.log(`Table "${testTableName}" ensured.`);
+        const testTableExistsRes = await client.query(
+            "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = $1);",
+            [testTableName]
+        );
+        if (!testTableExistsRes.rows[0].exists) { // Only create if it doesn't exist (was dropped or never created)
+            const createTestTableQuery = `
+                CREATE TABLE "${testTableName}" (
+                    "id" SERIAL PRIMARY KEY,
+                    "counter" VARCHAR(255),
+                    "description" TEXT,
+                    "createdAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+                    "updatedAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+                );
+            `;
+            await client.query(createTestTableQuery);
+            console.log(`Table "${testTableName}" created.`);
+        } else {
+             console.log(`Table "${testTableName}" already exists or was just recreated.`);
+        }
+
 
         console.log(`Ensuring "updatedAt" trigger for "${testTableName}"...`);
-        const dropTestTriggerQuery = `DROP TRIGGER IF EXISTS "${testTableName}_update_updated_at" ON "${testTableName}";`;
-        const createTestTriggerQuery = `
+        await client.query(`DROP TRIGGER IF EXISTS "${testTableName}_update_updated_at" ON "${testTableName}";`);
+        await client.query(`
             CREATE TRIGGER "${testTableName}_update_updated_at"
             BEFORE UPDATE ON "${testTableName}"
             FOR EACH ROW
             EXECUTE FUNCTION update_updated_at_column();
-        `;
-        await client.query(dropTestTriggerQuery);
-        await client.query(createTestTriggerQuery);
+        `);
         console.log(`"updatedAt" trigger ensured for "${testTableName}".`);
+
 
         await client.query('COMMIT');
         console.log("\n--- Schema Synchronization Complete. Transaction committed. ---");
@@ -457,7 +447,41 @@ async function createOrUpdateTables() {
     }
 }
 
-createOrUpdateTables().catch(err => {
+async function main() {
+    const args = process.argv.slice(2);
+    const cleanDatabaseFlag = '--CLEAN-DATABASE-I-AM-SURE';
+
+    if (args.includes(cleanDatabaseFlag)) {
+        console.warn("********************************************************************");
+        console.warn("!!! EXTREME CAUTION: You have requested to clean the database.     !!!");
+        console.warn("!!! This will DROP all tables defined in the models and            !!!");
+        console.warn("!!! 'tests_isolated'. ALL DATA IN THESE TABLES WILL BE LOST.       !!!");
+        console.warn("!!! THIS ACTION IS IRREVERSIBLE.                                   !!!");
+        console.warn("********************************************************************");
+
+        // Optional: Add a readline prompt for extra safety, especially for manual runs
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const answer = await new Promise(resolve => {
+            rl.question(`Type 'YES-DROP-ALL-MY-DATA' to confirm database cleaning: `, resolve);
+        });
+        rl.close();
+
+        if (answer === 'YES-DROP-ALL-MY-DATA') {
+            console.log("Confirmation received. Proceeding with database cleaning and recreation.");
+            await manageSchema(true);
+        } else {
+            console.log("Confirmation not received or incorrect. Aborting database cleaning.");
+            console.log("To proceed with normal schema sync (no dropping), run without the flag.");
+            process.exit(0);
+        }
+    } else {
+        console.log("Running in schema synchronization mode (create/update tables).");
+        console.log(`To clean and recreate the database from scratch, run with the ${cleanDatabaseFlag} flag.`);
+        await manageSchema(false);
+    }
+}
+
+main().catch(err => {
     console.error("Unhandled error in main execution:", err);
     process.exit(1);
 });

@@ -11,6 +11,9 @@ export default Waterline.Collection.extend({
     subtopic: { type: "string", required: true },
     name: { type: "string", required: true },
     type: { type: "string", required: true },
+    videos: { type: "json", defaultsTo: [] },
+    attachments: { type: "json", defaultsTo: [] },
+    images: { type: "json", defaultsTo: [] },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });
