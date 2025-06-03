@@ -50,7 +50,7 @@ const list = async (root, args, { auth, db: { collections } }) => {
 
 const single = async (root, args, { auth, db: { collections }, open }) => {
   if(open) {
-    const openSchoolId = "683db2cb5058724fca75b69d"
+    const openSchoolId = "683eb0b3269670f07ed0901c"
 
     const entries = await collections[name].find({where: {id: openSchoolId, isDeleted: false}});
     const entry = entries.length > 0 ? entries[0] : null;

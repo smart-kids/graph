@@ -8,6 +8,7 @@
   "scripts": {
     "test": "NODE_ENV=production nyc mocha --compilers js:@babel/register --inspect test/**/*.js --exit -r dotenv/config",
     "dev": "nodemon --exec npx babel-node --inspect  ./src/function",
+    "clean-db": "nodemon --watch ./graph/src --ext es6,mjs,js,cjs,json --exec \"npx babel-node --inspect ./utils/clean-tables.js\"",
     "setup-db": "nodemon --watch ./graph/src --ext es6,mjs,js,cjs,json --exec \"npx babel-node --inspect ./utils/create-tables.js\"",
     "build": "npx babel ./src --out-dir dist --source-maps && node copy-package.js",
     "deploy": "yarn build && cd dist &&  gcloud functions deploy shuleplus-server --runtime=nodejs22 --trigger-http",
