@@ -970,6 +970,7 @@ type subtopicMutations {
 enum answerType {
   SINGLECHOICE
   MULTICHOICE
+  CAMERA
 }
 
 # question things
