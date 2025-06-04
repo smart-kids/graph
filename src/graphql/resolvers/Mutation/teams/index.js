@@ -91,10 +91,8 @@ You have been invited {{#if team_name}} to join {{team_name}} on {{else}} to {{/
 
 access admin here https://cloud.shuleplus.co.ke
 
-use 
-
-phone number: {{phone_number}}
-password: {{password}}`;
+access: request for otp using {{phone_number}}
+`;
 
     const template = Handlebars.compile(inviteSmsText)
     const password = makeid()
@@ -111,7 +109,7 @@ password: {{password}}`;
         await collections["charge"].create({
           id: new ObjectId().toHexString(),
           school,
-          ammount: smsCost,
+          ammount: smsCost || 0,
           reason: `Sending message '${message}'`,
           time: new Date(),
           isDeleted: false

@@ -150,23 +150,17 @@ Hello {{names}},
 
 You have been invited to ShulePlus.
 
-Access the app here: https://play.google.com/store/apps/details?id=com.shule.plusapp
+Download the app from here: https://play.google.com/store/apps/details?id=com.shule.plusapp
 
-Use the following details to login:
-Phone Number: {{phone_number}}
-Password: {{password}}
-
-Please change this password after logging in.`; // Added advice
+Access: Use the following number to request login password on the app:
+Phone Number: {{phone_number}}.`;
 
     const template = Handlebars.compile(inviteSmsText);
-    const password = makeTempPassword(6); // Use stronger password function
-    const hashedPassword = await argon2.hash(password);
     const phone = admin.phone;
 
     const smsTemplateData = {
       names: admin.names || 'Admin', // Fallback name
       phone_number: phone,
-      password // Send plain text password
     };
     const message = template(smsTemplateData);
 
