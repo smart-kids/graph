@@ -12,11 +12,7 @@ const { name } = require("./about.js")
 const list = async (root, args, { auth, db: { collections } }) => {
   console.log({auth})
   // Get user type and potentially school ID from the validated auth context
-  let { userType, school:schoolId, admin: { school: adminSchoolId, user: adminUserType }={} } = auth; // Destructure from context.auth
-
-  if(adminSchoolId){
-    userType = 'admin'
-  }
+  let { userType, schoolId } = auth; // Destructure from context.auth
 
   if (userType === 'sAdmin') {
       // --- Superadmin: Full Access ---
@@ -27,7 +23,7 @@ const list = async (root, args, { auth, db: { collections } }) => {
       return entries;
   } else if (userType === 'admin') {
       // --- Admin: Restricted Access ---
-      if (!adminSchoolId) {
+      if (!schoolId) {
            // This should ideally be caught during token generation, but double-check
            console.error(`Authorization Error: User type ${userType} requires a schoolId in token, but none found.`);
            throw new GraphQLError('Access Denied: User configuration incomplete.', {
@@ -35,7 +31,7 @@ const list = async (root, args, { auth, db: { collections } }) => {
            });
       }
       // Filter strictly by the school ID from the token
-      const query = { where: { id: adminSchoolId, isDeleted: false } };
+      const query = { where: { id: schoolId, isDeleted: false } };
       const entries = await collections[name].find(query);
       console.log(`[GraphQL School List] Found ${entries.length} entries.`);
       return entries;
@@ -48,68 +44,68 @@ const list = async (root, args, { auth, db: { collections } }) => {
   }
 };
 
-const single = async (root, args, { auth, db: { collections }, open }) => {
-  if(open) {
-    const openSchoolId = "683eb0b3269670f07ed0901c"
+  const single = async (root, args, { auth, db: { collections }, open }) => {
+    if(open) {
+      const openSchoolId = "683eb0b3269670f07ed0901c"
 
-    const entries = await collections[name].find({where: {id: openSchoolId, isDeleted: false}});
-    const entry = entries.length > 0 ? entries[0] : null;
-    console.log(`[GraphQL School Single] Open querying school: ${openSchoolId}`);
-    return entry;
-  }
+      const entries = await collections[name].find({where: {id: openSchoolId, isDeleted: false}});
+      const entry = entries.length > 0 ? entries[0] : null;
+      console.log(`[GraphQL School Single] Open querying school: ${openSchoolId}`);
+      return entry;
+    }
 
-   // ID of the school being requested from query arguments
-  let { userType, school, schoolId } = auth; // User's type and school ID from their token
-  let userTokenSchoolId = schoolId || school
-  // const { id: requestedSchoolId } = args;
-  let requestedSchoolId = userTokenSchoolId
-  userType = auth?.admin?.user === 'Super Admin' ? 'sAdmin' : userType
+     // ID of the school being requested from query arguments
+    let { userType, school, schoolId } = auth; // User's type and school ID from their token
+    let userTokenSchoolId = schoolId || school
+    // const { id: requestedSchoolId } = args;
+    let requestedSchoolId = userTokenSchoolId
+    userType = auth?.admin?.user === 'Super Admin' ? 'sAdmin' : userType
 
-  console.log(`[GraphQL School Single] UserType: ${userType}, UserTokenSchoolId: ${schoolId}, RequestedSchoolId: ${requestedSchoolId}`, root);
+    console.log(`[GraphQL School Single] UserType: ${userType}, UserTokenSchoolId: ${schoolId}, RequestedSchoolId: ${requestedSchoolId}`, root);
 
-  if (!requestedSchoolId) {
-    throw new GraphQLError('Bad Request: School ID must be provided.', {
-      extensions: { code: 'BAD_USER_INPUT' },
-    });
-  }
+    if (!requestedSchoolId) {
+      throw new GraphQLError('Bad Request: School ID must be provided.', {
+        extensions: { code: 'BAD_USER_INPUT' },
+      });
+    }
 
-  let query = { where: { id: requestedSchoolId, isDeleted: false } };
+    let query = { where: { id: requestedSchoolId, isDeleted: false } };
 
-  
+    
 
-  if (userType === 'sAdmin') {
-    // Superadmin can access any non-deleted school by its ID.
-    console.log(`[GraphQL School Single] sAdmin querying school: ${requestedSchoolId}`);
-  } else if (userType === 'admin' || userType === 'driver' || userType === 'parent' || userType === 'student' || userType) { // Catches other known roles or any userType that implies restriction
-    // For any other user type that is school-bound.
-    if (!userTokenSchoolId) {
-      console.error(`Authorization Error: User type ${userType} requires a schoolId in token.`);
-      throw new GraphQLError('Access Denied: User configuration incomplete.', {
+    if (userType === 'sAdmin') {
+      // Superadmin can access any non-deleted school by its ID.
+      console.log(`[GraphQL School Single] sAdmin querying school: ${requestedSchoolId}`);
+    } else if (userType === 'admin' || userType === 'driver' || userType === 'parent' || userType === 'student' || userType) { // Catches other known roles or any userType that implies restriction
+      // For any other user type that is school-bound.
+      if (!userTokenSchoolId) {
+        console.error(`Authorization Error: User type ${userType} requires a schoolId in token.`);
+        throw new GraphQLError('Access Denied: User configuration incomplete.', {
+          extensions: { code: 'FORBIDDEN' },
+        });
+      }
+      // These users can only access their own assigned school.
+      if (requestedSchoolId !== userTokenSchoolId) {
+        console.warn(`[GraphQL School Single] Forbidden: User (${userType}) from school ${userTokenSchoolId} attempted to access school ${requestedSchoolId}.`);
+        return null; // Not authorized to see this specific school, or it doesn't exist for them.
+      }
+      // If we are here, requestedSchoolId === userTokenSchoolId. Query is already set correctly.
+      console.log(`[GraphQL School Single] User ${userType} querying for their school: ${requestedSchoolId}`);
+    } else {
+      // Fallback for undefined userType or unhandled roles.
+      console.error(`[GraphQL School Single] Access Denied: Unknown or unauthorized user type: ${userType}.`);
+      throw new GraphQLError('Access Denied.', {
         extensions: { code: 'FORBIDDEN' },
       });
     }
-    // These users can only access their own assigned school.
-    if (requestedSchoolId !== userTokenSchoolId) {
-      console.warn(`[GraphQL School Single] Forbidden: User (${userType}) from school ${userTokenSchoolId} attempted to access school ${requestedSchoolId}.`);
-      return null; // Not authorized to see this specific school, or it doesn't exist for them.
-    }
-    // If we are here, requestedSchoolId === userTokenSchoolId. Query is already set correctly.
-    console.log(`[GraphQL School Single] User ${userType} querying for their school: ${requestedSchoolId}`);
-  } else {
-    // Fallback for undefined userType or unhandled roles.
-    console.error(`[GraphQL School Single] Access Denied: Unknown or unauthorized user type: ${userType}.`);
-    throw new GraphQLError('Access Denied.', {
-      extensions: { code: 'FORBIDDEN' },
-    });
-  }
 
-  // Consider using findOne if your ORM/DB layer supports it efficiently for single record queries.
-  const entries = await collections[name].find(query);
-  const entry = entries.length > 0 ? entries[0] : null;
+    // Consider using findOne if your ORM/DB layer supports it efficiently for single record queries.
+    const entries = await collections[name].find(query);
+    const entry = entries.length > 0 ? entries[0] : null;
 
-  console.log(`[GraphQL School Single] Found entry: ${entry ? entry.id : 'null'}`);
-  return entry;
-};
+    console.log(`[GraphQL School Single] Found entry: ${entry ? entry.id : 'null'}`);
+    return entry;
+  };
 
 const listDeleted = async (root, args, { auth, db: { collections } }) => {
   const { userType } = auth; // Assuming auth.userType is 'sAdmin' for superadmins.
