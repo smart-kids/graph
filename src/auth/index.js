@@ -203,12 +203,16 @@ router.post(
             };
             const [adminUser] = await collections["admin"].find({ where: userSearchingObject });
             const [driverUser] = await collections["driver"].find({ where: userSearchingObject });
+            const [parentUser] = await collections["parent"].find({ where: userSearchingObject });
             if (adminUser) {
                 specificUserRecord = adminUser;
                 determinedUserType = 'admin';
             } else if (driverUser) {
                 specificUserRecord = driverUser;
                 determinedUserType = 'driver';
+            } else if (parentUser) {
+                specificUserRecord = parentUser;
+                determinedUserType = 'parent';
             } else {
                 console.log(`User not found for input: ${user}`);
                 return res.status(401).send({ message: 'User not found.' });
@@ -238,6 +242,9 @@ router.post(
             // --- 4. Generate Structured Token ---
             // We use specificUserRecord.id as the canonical user identifier
             const { token, user: safeUserData } = await generateTokenForUser(specificUserRecord.id, determinedUserType, collections);
+
+            // Add the determined UserType to the safe user data
+            safeUserData.userType = determinedUserType;
 
             // --- 5. Send Response ---
             return res.send({ token, user: safeUserData }); // Send structured token and sanitized user data
