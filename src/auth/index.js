@@ -1071,7 +1071,6 @@ router.post(
         password: Joi.string()
     })),
     async (req, res) => {
-        console.log(req.body)
         const db = await req.app.locals.db
         const { collections } = db
         const { user } = req.body
@@ -1102,13 +1101,20 @@ router.post(
                 determinedUserType = 'driver';
                 console.log(`User type determined: driver (phone: ${user}, id: ${specificUserRecord.id})`);
             } else {
-                // User exists in 'users' but not in specific role collections
-                determinedUserType = 'user'; // Assign a default type
-                specificUserRecord = await collections["users"].findOne(userSearchingObject); // Use base info
-                console.warn(`User ${user} (phone: ${user}) not found in admin, driver, or parent collections. Assigning default type 'user'.`);
-                // **Decision Point:** Should default 'user' type be allowed to log in?
-                // If not, throw an error here:
-                // return res.status(403).send({ message: "Access Denied: User role not configured for login." });
+                // Check Parent Collection
+                [specificUserRecord] = await collections["parent"].find(userSearchingObject);
+                if (specificUserRecord) {
+                    determinedUserType = 'parent';
+                    console.log(`User type determined: parent (phone: ${user}, id: ${specificUserRecord.id})`);
+                } else {
+                    // User exists in 'users' but not in specific role collections
+                    determinedUserType = 'user'; // Assign a default type
+                    specificUserRecord = await collections["users"].findOne(userSearchingObject); // Use base info
+                    console.warn(`User ${user} (phone: ${user}) not found in admin, driver, or parent collections. Assigning default type 'user'.`);
+                    // **Decision Point:** Should default 'user' type be allowed to log in?
+                    // If not, throw an error here:
+                    // return res.status(403).send({ message: "Access Denied: User role not configured for login." });
+                }
             }
         }
 
@@ -1126,8 +1132,6 @@ router.post(
             user: specificUserRecord.id,
             password
         })
-
-        console.log({ otpSaveInfo })
 
         // send sms to phone
         if (!['development', "test"].includes(NODE_ENV)) {
