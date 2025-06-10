@@ -4,6 +4,8 @@ import { sum, subtract } from "mathjs"
 import invitations from "../../Mutation/invitations/index.js";
 const { GraphQLError } = require('graphql')
 
+const openSchoolId = "683eb0b3269670f07ed0901c"
+
 const { name } = require("./about.js")
 // This 'name' variable would typically be defined based on the model/collection being accessed.
 // For example: const name = 'School'; // Or whatever your collection/model name is.
@@ -12,7 +14,7 @@ const { name } = require("./about.js")
 const list = async (root, args, { auth, db: { collections } }) => {
   console.log({auth})
   // Get user type and potentially school ID from the validated auth context
-  let { userType, schoolId } = auth; // Destructure from context.auth
+  let { userType, schoolId, userId } = auth; // Destructure from context.auth
 
   if (userType === 'sAdmin') {
       // --- Superadmin: Full Access ---
@@ -35,6 +37,26 @@ const list = async (root, args, { auth, db: { collections } }) => {
       const entries = await collections[name].find(query);
       console.log(`[GraphQL School List] Found ${entries.length} entries.`);
       return entries;
+  } else if (userType === 'parent') {
+      // --- Parent: Restricted Access ---
+
+      // Filter strictly by the school ID from the token in the parents collection
+      const query = { where: { id: userId, isDeleted: false } };
+      console.log(`[GraphQL School List] Querying parents collection for user ${userId} with schoolId ${schoolId}.`);
+      const parents = await collections["parent"].find(query);
+      if (parents.length === 0) {
+          console.error(`Authorization Error: User type ${userType} not found in parents collection with schoolId ${schoolId}.`);
+          throw new GraphQLError('Access Denied: User not found in parents collection.', {
+              extensions: { code: 'FORBIDDEN' },
+          });
+      }
+
+      const school = parents[0].school;
+      console.log(`[GraphQL School List] Found school ${school} for parent ${userId}.`);
+      const entry = await collections[name].findOne({where: {id: school, isDeleted: false}});
+      console.log({entry})
+      console.log(`[GraphQL School List] Found ${entry ? 1 : 0} entries.`);
+      return [entry];
   } else {
       // Other roles not supported
       console.error(`Authorization Error: User type ${userType} not supported.`);
@@ -46,7 +68,7 @@ const list = async (root, args, { auth, db: { collections } }) => {
 
   const single = async (root, args, { auth, db: { collections }, open }) => {
     if(open) {
-      const openSchoolId = "683eb0b3269670f07ed0901c"
+      
 
       const entries = await collections[name].find({where: {id: openSchoolId, isDeleted: false}});
       const entry = entries.length > 0 ? entries[0] : null;
