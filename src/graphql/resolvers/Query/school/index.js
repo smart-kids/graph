@@ -54,10 +54,31 @@ const list = async (root, args, { auth, db: { collections } }) => {
       const school = parents[0].school;
       console.log(`[GraphQL School List] Found school ${school} for parent ${userId}.`);
       const entry = await collections[name].findOne({where: {id: school, isDeleted: false}});
-      console.log({entry})
+      const openEntry = await collections[name].findOne({where: {id: openSchoolId, isDeleted: false}});
+      console.log({entry, openEntry})
       console.log(`[GraphQL School List] Found ${entry ? 1 : 0} entries.`);
-      return [entry];
-  } else {
+      return [entry, openEntry];
+  } else if (userType === 'driver') {
+    // --- Parent: Restricted Access ---
+
+    // Filter strictly by the school ID from the token in the drivers collection
+    const query = { where: { id: userId, isDeleted: false } };
+    console.log(`[GraphQL School List] Querying drivers collection for user ${userId} with schoolId ${schoolId}.`);
+    const drivers = await collections["driver"].find(query);
+    if (drivers.length === 0) {
+        console.error(`Authorization Error: User type ${userType} not found in drivers collection with schoolId ${schoolId}.`);
+        throw new GraphQLError('Access Denied: User not found in drivers collection.', {
+            extensions: { code: 'FORBIDDEN' },
+        });
+    }
+
+    const school = drivers[0].school;
+    console.log(`[GraphQL School List] Found school ${school} for driver ${userId}.`);
+    const entry = await collections[name].findOne({where: {id: school, isDeleted: false}});
+    console.log({entry})
+    console.log(`[GraphQL School List] Found ${entry ? 1 : 0} entries.`);
+    return [entry];
+} else {
       // Other roles not supported
       console.error(`Authorization Error: User type ${userType} not supported.`);
       throw new GraphQLError('Access Denied: User type not supported.', {
