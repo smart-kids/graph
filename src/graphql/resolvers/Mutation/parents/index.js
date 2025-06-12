@@ -73,28 +73,30 @@ const restore = async (data, { db: { collections } }) => {
 };
 
 const invite = async (data, { db: { collections } }) => {
-  const { school, user } = data[name]
+  const { school: schoolId, user } = data[name]
 
   try {
+    const school = await collections["school"].findOne({ where: { id: schoolId, isDeleted: false } })
     const parent = await collections["parent"].findOne({ where: { id: user, isDeleted: false } })
     const inviteSmsText = `
 Hello {{username}}, 
 
-You have been invited to join ShulePlus.
-
-access admin here https://cloud.shuleplus.co.ke
+You have been invited to join {{schoolName}} on ShulePlus.
 
 use the following details to login:
 
 phone number: {{phone_number}}
-password: {{password}}`;
+
+To get started, download the app from https://play.google.com/store/apps/details?id=com.shule.plusapp
+
+Thanks, ShulePlus.`;
 
     const template = Handlebars.compile(inviteSmsText)
     const password = generatePassword()
     const hashedPassword = await argon2.hash(password);
     const phone = parent.phone;
     const smsTemplateData = {
-      username: parent.name, phone_number: phone, password
+      username: parent.name, phone_number: phone, schoolName: school.name
     }
     const message = template(smsTemplateData)
 
@@ -103,8 +105,8 @@ password: {{password}}`;
         const { smsCost } = res
         await collections["charge"].create({
           id: new ObjectId().toHexString(),
-          school,
-          ammount: smsCost,
+          school: schoolId,
+          ammount: smsCost || 0,
           reason: `Sending message '${message}'`,
           time: new Date(),
           isDeleted: false
@@ -114,7 +116,7 @@ password: {{password}}`;
     await collections["parent"].update({ id: parent.id }).set({ password: hashedPassword });
 
     const id = new ObjectId().toHexString();
-    const entry = Object.assign({ id, school, user, message, phone, email: parent.email, isDeleted: false });
+    const entry = Object.assign({ id, school: schoolId, user, message, phone, email: parent.email, isDeleted: false });
 
     await collections["invitation"].create(entry);
     return {
