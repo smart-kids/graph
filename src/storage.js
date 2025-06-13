@@ -55,6 +55,7 @@ const datastoreConfig = {
     // 'migrate: alter' is for development. It attempts to auto-migrate schema changes.
     // WARNING: This can be destructive. Use 'safe' in production and manage migrations manually.
     migrate: 'safe',
+    poolSize: 5
     // ssl: { rejectUnauthorized: false } // Example SSL config for some cloud providers, adjust as needed
 };
 
