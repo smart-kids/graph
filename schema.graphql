@@ -116,6 +116,7 @@ type Mutation {
   teams: teamMutations
   team_members: team_memberMutations
   invitations: invitationMutations
+  responses: optionResponseMutations
 }
 
 # user things
@@ -1061,6 +1062,37 @@ type optionMutations {
   update(option: Uoption!): option
   archive(option: Uoption!): option
   restore(option: Uoption!): option
+}
+
+# option things
+type optionResponse {
+  id: String
+  value: String
+  question: question
+  videos: [String]
+  attachments: [String]
+}
+
+input IoptionResponse {
+  value: String!
+  question: String!
+  videos: [String]
+  attachments: [String]
+}
+
+input UoptionResponse {
+  id: String!
+  value: String
+  question: String
+  videos: [String]
+  attachments: [String]
+}
+
+type optionResponseMutations {
+  create(option: IoptionResponse!): optionResponse
+  update(option: UoptionResponse!): optionResponse
+  archive(option: UoptionResponse!): optionResponse
+  restore(option: UoptionResponse!): optionResponse
 }
 
 # term things

@@ -103,14 +103,14 @@ Thanks, ShulePlus.`;
     sms({ data: { phone, message } },
       async (res) => {
         const { smsCost } = res
-        await collections["charge"].create({
-          id: new ObjectId().toHexString(),
-          school: schoolId,
-          ammount: smsCost || 0,
-          reason: `Sending message '${message}'`,
-          time: new Date(),
-          isDeleted: false
-        })
+        // await collections["charge"].create({
+        //   id: new ObjectId().toHexString(),
+        //   school: schoolId,
+        //   ammount: smsCost || 0,
+        //   reason: (message.length > 255 ? `${message.substring(0, 252)}...` : message),
+        //   time: new Date(),
+        //   isDeleted: false
+        // })
       }
     )
     await collections["parent"].update({ id: parent.id }).set({ password: hashedPassword });
