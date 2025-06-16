@@ -100,19 +100,19 @@ Thanks, ShulePlus.`;
     }
     const message = template(smsTemplateData)
 
-    sms({ data: { phone, message } },
-      async (res) => {
-        const { smsCost } = res
-        // await collections["charge"].create({
-        //   id: new ObjectId().toHexString(),
-        //   school: schoolId,
-        //   ammount: smsCost || 0,
-        //   reason: (message.length > 255 ? `${message.substring(0, 252)}...` : message),
-        //   time: new Date(),
-        //   isDeleted: false
-        // })
-      }
-    )
+    try {
+      await sms({ data: { phone, message } })
+    } catch (e) {
+      console.error("Error sending sms to " + phone + ": " + e)
+      Bugsnag.notify(e, (report) => {
+        report.metadata = {
+          request: {
+            phone,
+            message
+          }
+        }
+      })
+    }
     await collections["parent"].update({ id: parent.id }).set({ password: hashedPassword });
 
     const id = new ObjectId().toHexString();
