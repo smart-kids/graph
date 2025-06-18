@@ -1043,17 +1043,20 @@ type answerMutations {
 type option {
   id: String
   value: String
+  correct: Boolean
   question: question
 }
 
 input Ioption {
   value: String!
+  correct: Boolean!
   question: String!
 }
 
 input Uoption {
   id: String!
   value: String
+  correct: Boolean
   question: String
 }
 
