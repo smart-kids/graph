@@ -169,18 +169,18 @@ Phone Number: {{phone_number}}.`;
 
     try {
       // Promisify or use async/await with the sms call if possible
-      await new Promise((resolve, reject) => {
+      console.log(`Sending invitation SMS to ${phone} with message: ${message}`);
+     
         sms({ data: { phone, message } }, (res, err) => {
           if (err) {
             console.error(`SMS sending failed for ${phone}:`, err);
-            return reject(new Error(`Failed to send SMS to ${phone}.`)); // Reject the promise on error
+            throw new UserError(`Failed to send invitation SMS to ${phone}. Please check the number or try again later.`); // Reject the promise on error
           }
           console.log("SMS Send Response:", res);
           smsCost = res?.smsCost || '0.6'; // Get cost from response
           smsSuccessful = true;
-          resolve(res); // Resolve on success
         });
-      });
+      
 
     } catch (smsError) {
       console.error("SMS sending process failed:", smsError);
@@ -189,27 +189,29 @@ Phone Number: {{phone_number}}.`;
       throw new UserError(`Failed to send invitation SMS to ${phone}. Please check the number or try again later.`);
     }
 
+    console.log(`Invitation SMS to ${phone} successful. Cost: ${smsCost}`);
+
     // --- Only proceed if SMS was potentially successful ---
     // (Error is thrown above if sms call explicitly failed via callback 'err' or promise rejection)
 
     // Update admin password in DB *after* trying to send SMS
-    const updateResult = await collections["admin"].updateOne(
-      { id: admin.id },
-      { $set: { password: hashedPassword } }
-    );
+    // const updateResult = await collections["admin"].updateOne(
+    //   { id: admin.id },
+    //   { $set: { password: hashedPassword } }
+    // );
 
-    if (updateResult.modifiedCount !== 1) {
-      console.warn(`Password for admin ${admin.id} might not have been updated.`);
-      // Potentially throw an error here too if update must succeed
-    } else {
-      console.log(`Initial password set for admin ${admin.id}`);
-    }
+    // if (updateResult.modifiedCount !== 1) {
+    //   console.warn(`Password for admin ${admin.id} might not have been updated.`);
+    //   // Potentially throw an error here too if update must succeed
+    // } else {
+    //   console.log(`Initial password set for admin ${admin.id}`);
+    // }
 
     // Create charge record (even if update failed? Or only if successful?)
-    await collections["charge"].insertOne({
+    await collections["charge"].create({
       id: new ObjectId().toHexString(),
       school,
-      amount: parseFloat(smsCost) || 0.6, // Use amount, ensure numeric
+      ammount: parseFloat(smsCost) || 0.6, // Use amount, ensure numeric
       reason: `Sending invitation SMS to admin ${admin.names || adminId} (${phone})`,
       time: new Date(),
       isDeleted: false
@@ -229,7 +231,7 @@ Phone Number: {{phone_number}}.`;
       isDeleted: false
     };
 
-    await collections["invitation"].insertOne(entry);
+    await collections["invitation"].create(entry);
 
     return {
       id: invitationId, // Return invitation ID
