@@ -14,6 +14,7 @@ export default Waterline.Collection.extend({
     videos: { type: "json", defaultsTo: [] },
     attachments: { type: "json", defaultsTo: [] },
     images: { type: "json", defaultsTo: [] },
+    optionsOrder: { type: "json", defaultsTo: [] },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });

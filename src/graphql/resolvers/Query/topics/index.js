@@ -29,6 +29,9 @@ const single = async (root, args, { db: { collections } }) => {
 
 const nested = {
   topic: {
+    subtopicOrder: async (root, args, { db: { collections } }) => {
+      return root.subtopicOrder ? JSON.parse(root.subtopicOrder) : [];
+    },
     async subject(root, args, { db: { collections } }) {
       const entry = await collections["subject"].findOne({
         where: { id: root.subject, isDeleted: false }

@@ -29,13 +29,16 @@ const single = async (root, args, { db: { collections } }) => {
 
 const nested = {
   subtopic: {
-    async topic(root, args, { db: { collections } }) {
+    questionsOrder: async (root, args, { db: { collections } }) => {
+      return root.questionsOrder ? JSON.parse(root.questionsOrder) : [];
+    },
+    topic: async (root, args, { db: { collections } }) => {
       const entry = await collections["topic"].findOne({
         where: { id: root.topic, isDeleted: false }
       });
       return entry;
     },
-    async questions(root, args, { db: { collections } }) {
+    questions: async (root, args, { db: { collections } }) => {
       const entry = await collections["question"].find({
         where: { subtopic: root.id, isDeleted: false }
       });

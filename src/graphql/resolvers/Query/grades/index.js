@@ -29,6 +29,9 @@ const single = async (root, args, { db: { collections } }) => {
 
 const nested = {
   grade:{
+    subjectsOrder: async (root, args, { db: { collections }}) => {
+      return root.subjectsOrder ? JSON.parse(root.subjectsOrder) : [];
+    },
     subjects: async (root, args, { db: { collections }}) => {
       const entries = await collections["subject"].find({ 
         where: { 

@@ -29,6 +29,9 @@ const single = async (root, args, { db: { collections } }) => {
 
 const nested = {
   subject: {
+    topicOrder: async (root, args, { db: { collections } }) => {
+      return root.topicOrder ? JSON.parse(root.topicOrder) : [];
+    },
     async grade(root, args, { db: { collections } }) {
       const entry = await collections["grade"].findOne({
         where: { id: root.grade, isDeleted: false }
@@ -40,9 +43,6 @@ const nested = {
         where: { subject: root.id, isDeleted: false }
       });
       return entry;
-    },
-    async topicOrder(root, args, { db: { collections } }) {
-      return root.topicOrder ? root.topicOrder.split(",") : [];
     },
   }
 }

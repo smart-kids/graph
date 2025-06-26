@@ -867,17 +867,20 @@ type grade {
   name: String
   school: school
   subjects: [subject]
+  subjectsOrder: [String]
 }
 
 input Igrade {
   name: String!
   school: String!
+  subjectsOrder: [String]
 }
 
 input Ugrade {
   id: String!
   name: String
   school: String
+  subjectsOrder: [String]
 }
 
 type gradeMutations {
@@ -922,17 +925,20 @@ type topic {
   name: String
   subject: subject
   subtopics: [subtopic]
+  subtopicOrder: [String]
 }
 
 input Itopic {
   name: String!
   subject: String!
+  subtopicOrder: [String]
 }
 
 input Utopic {
   id: String!
   name: String
   subject: String
+  subtopicOrder: [String]
 }
 
 type topicMutations {
@@ -948,17 +954,20 @@ type subtopic {
   name: String
   topic: topic
   questions: [question]
+  questionsOrder: [String]
 }
 
 input Isubtopic {
   name: String!
   topic: String!
+  questionsOrder: [String]
 }
 
 input Usubtopic {
   id: String!
   name: String
   topic: String
+  questionsOrder: [String]
 }
 
 type subtopicMutations {
@@ -985,6 +994,7 @@ type question {
   images: [String]
   answers: [answer]
   options: [option]
+  optionsOrder: [String]
 }
 
 input Iquestion {
@@ -994,7 +1004,7 @@ input Iquestion {
   videos: [String]
   attachments: [String]
   images: [String]
-  
+  optionsOrder: [String]
 }
 
 input Uquestion {
@@ -1005,6 +1015,7 @@ input Uquestion {
   videos: [String]
   attachments: [String]
   images: [String]
+  optionsOrder: [String]
 }
 
 type questionMutations {

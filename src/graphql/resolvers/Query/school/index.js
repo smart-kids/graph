@@ -170,6 +170,9 @@ const listDeleted = async (root, args, { auth, db: { collections } }) => {
 
 const nested = {
   school: {
+    gradeOrder(root, args, { db: { collections } }) {
+      return root.gradeOrder ? root.gradeOrder.split(",") : [];
+    },
     async financial(root, args, { db: { collections } }) {
       const payments = await collections["payment"].find({
         where: { school: root.id, isDeleted: false }
