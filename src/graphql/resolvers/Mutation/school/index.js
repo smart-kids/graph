@@ -207,20 +207,16 @@ const invite = async (data, { db: { collections } }) => {
     var admin = admins[0]
 
     const inviteSmsText = `
-Hello {{schoolName}} administrator, 
+Hello {{username}}, 
 
-You are being invited to join ShulePlus as an administrator for {{schoolName}} with the email {{username}}.
+You are being invited to join ShulePlus as an administrator for {{schoolName}}.
 
 access your portal here https://cloud.shuleplus.co.ke
 
 and download mobile app here https://play.google.com/store/apps/details?id=com.shule.plusapp
 
-use the following details to login and start enjoying your first free month:
-
-open the app or admin and select "i already have an account", 
-
-phone number: {{phone}}
-password: {{password}}`;
+use the following details to login to the app
+phone number: {{phone}}`
 
     const template = Handlebars.compile(inviteSmsText);
     const password = generatePassword();
@@ -237,7 +233,7 @@ password: {{password}}`;
     console.log("sending message", message)
     sms({ data: { phone, message } },
       async (res) => {
-        const { smsCost } = res
+        const { smsCost = 0 } = res
         await collections["charge"].create({
           id: new ObjectId().toHexString(),
           school: schoolId,
