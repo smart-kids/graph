@@ -9,7 +9,11 @@ export default Waterline.Collection.extend({
   attributes: {
     id: { type: "string", required: true },
     subtopic: { type: "string", required: true },
-    name: { type: "string", required: true },
+    name: {
+      type: "string",
+      required: true,
+      // size: 700
+    },
     type: { type: "string", required: true },
     videos: { type: "json", defaultsTo: [] },
     attachments: { type: "json", defaultsTo: [] },
