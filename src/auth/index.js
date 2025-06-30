@@ -34,7 +34,7 @@ const checkToken = (req, res, next) => {
         if (err) {
             console.error("JWT Verification Error:", err.message);
             // FIX: remove this and add reauth flow here
-            // return res.status(401).send({ success: false, message: 'Failed to authenticate token.' });
+            return res.status(401).send({ success: false, message: 'Failed to authenticate token.' });
         }
 
         // Attach the *entire decoded payload* to req.auth
