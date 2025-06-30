@@ -81,13 +81,9 @@ const invite = async (data, { db: { collections } }) => {
     const inviteSmsText = `
 Hello {{username}}, 
 
-You have been invited to join {{schoolName}} on ShulePlus.
+You have been invited to join {{schoolName}} on ShulePlus, a Parent Teacher School Collaboration App for assignments and revision.
 
-use the following details to login:
-
-phone number: {{phone_number}}
-
-To get started, download the app from https://play.google.com/store/apps/details?id=com.shule.plusapp
+To get started, please login with OTP using this phone number and the following link: https://play.google.com/store/apps/details?id=com.shule.plusapp
 
 Thanks, ShulePlus.`;
 
