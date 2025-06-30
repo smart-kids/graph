@@ -10,6 +10,7 @@ export default Waterline.Collection.extend({
     id: { type: "string", required: true },
     name: { type: "string", required: true },
     subject: { type: "string", required: true },
+    icon: { type: "string", required: false },
     subtopicsOrder: { type: "json", defaultsTo: [] },
     isDeleted: { type: "boolean", defaultsTo: false }
   }

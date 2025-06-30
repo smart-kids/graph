@@ -924,6 +924,7 @@ type topic {
   id: String
   name: String
   subject: subject
+  icon: String
   subtopics: [subtopic]
   subtopicOrder: [String]
 }
@@ -931,6 +932,7 @@ type topic {
 input Itopic {
   name: String!
   subject: String!
+  icon: String
   subtopicOrder: [String]
 }
 
@@ -938,6 +940,7 @@ input Utopic {
   id: String!
   name: String
   subject: String
+  icon: String
   subtopicOrder: [String]
 }
 
