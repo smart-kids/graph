@@ -219,7 +219,7 @@ use the following details to login to the app
 phone number: {{phone}}`
 
     const template = Handlebars.compile(inviteSmsText);
-    const password = generatePassword();
+    const password = generatePassword(); 
     const hashedPassword = await argon2.hash(password);
     const { phone, username } = admin;
 

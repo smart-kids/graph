@@ -10,7 +10,7 @@ export default Waterline.Collection.extend({
     id: { type: "string", required: true },
     value: { type: "string", required: true },
     question: { type: "string", required: true },
-    correct: { type: "boolean", defaultsTo: false },
+    correct: { type: "boolean", defaultsTo: false, allowNull: true },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });

@@ -123,28 +123,20 @@ const invite = async (data, { db: { collections } }) => {
   try {
     const driver = await collections["driver"].findOne({ where: { id: user, isDeleted: false } })
 
-    const inviteSmsText = `
-    Hello {{username}}, 
+    const message = `
+   Hi ${driver.names}, to test the Shule+ app, 
+   please open this link on your phone. It will guide you through joining the test and downloading the app: https://play.google.com/apps/testing/com.shule.plusapp
+   
+   For login, request for OTP using ${driver.phone}`;
 
-You have been invited to ShulePlus.
-    
-access app here: https://play.google.com/store/apps/details?id=com.shule.plusapp
-    
-use the following details to login
-    
-phone number: {{phone_number}}
-password: {{password}}`;
-
-    const template = Handlebars.compile(inviteSmsText)
-    const password = makeid()
-    const hashedPassword = await argon2.hash(password);
+    const template = Handlebars.compile(message)
     const phone = driver.phone;
     const smsTemplateData = {
-      username: driver.username, phone_number: phone, password
+      username: driver.names, phone_number: phone, email: driver.email
     }
-    const message = template(smsTemplateData)
+    const smsMessage = template(smsTemplateData)
 
-    sms({ data: { phone, message } },
+    sms({ data: { phone, message: smsMessage } },
       async (res) => {
         console.log(res)
         const { smsCost="0.6" } = res
@@ -158,14 +150,8 @@ password: {{password}}`;
         })
       }
     )
-    await collections["driver"].update({ id: driver.id }).set({ password: hashedPassword });
-
-    const id = new ObjectId().toHexString();
-    const entry = Object.assign({ id, school, user, message, phone, email: driver.email, isDeleted: false });
-
-    await collections["invitation"].create(entry);
     return {
-      id,
+      id: user,
       message,
       phone
     };
