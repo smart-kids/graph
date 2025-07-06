@@ -58,7 +58,7 @@ export const createMpesaRouter = (collections, io) => {
       const { stkCallback } = req.body.Body;
 
       // 2. Fetch the original payment record from the database using the injected collection.
-      const existingPayment = await PaymentCollection.findOne({ id: txid });
+      const existingPayment = await PaymentCollection.find({ where: { id: txid } });
       if (!existingPayment) {
         logger.error(`[Security] FATAL: Callback received for non-existent payment ID: ${txid}. Ignoring.`);
         return;
@@ -85,7 +85,7 @@ export const createMpesaRouter = (collections, io) => {
             ref: metadata.mpesaReceiptNumber,
             time: moment(String(metadata.transactionDate), 'YYYYMMDDHHmmss').toDate(),
           };
-          await PaymentCollection.updateOne({ id: txid }).set(updatePayload);
+          await PaymentCollection.update(txid, updatePayload);
           // TODO: Trigger an alert for admin review (e.g., via email or a specific socket event).
 
           sms.sendSms({
@@ -103,7 +103,7 @@ export const createMpesaRouter = (collections, io) => {
           errorMessage: null,
         };
         
-        await PaymentCollection.updateOne({ id: txid }).set(updatePayload);
+        await PaymentCollection.update(txid, updatePayload);
         logger.log(`[Callback] Successfully updated payment ${txid} to COMPLETED.`);
 
         // --- Post-payment Success Events ---
@@ -124,7 +124,7 @@ export const createMpesaRouter = (collections, io) => {
           errorCode: String(stkCallback.ResultCode),
           errorMessage: stkCallback.ResultDesc,
         };
-        await PaymentCollection.updateOne({ id: txid }).set(updatePayload);
+        await PaymentCollection.update(txid, updatePayload);
         logger.log(`[Callback] Updated failed payment ${txid}: ${stkCallback.ResultDesc}`);
         
         // --- Post-payment Failure Events ---
