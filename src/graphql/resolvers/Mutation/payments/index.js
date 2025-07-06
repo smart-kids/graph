@@ -85,39 +85,26 @@ const restore = async (data, { db: { collections } }) => {
 };
 
 const confirm = async (data, { db: { collections } }) => {
-  const { id } = data[name];
-  try {
-    const existingPayment = await collections[name].findOne({ id });
-    if (!existingPayment) {
-      throw new UserError(`Payment ${id} not found.`);
-    }
-    if (existingPayment.status !== 'PENDING') {
-      throw new UserError(`Payment ${id} is already in status '${existingPayment.status}'.`);
-    }
-    const { ResultCode, ResultDesc, CallbackMetadata } = data[name];
-    if (ResultCode === 0) {
-      const metadata = parseMetadata(CallbackMetadata?.Item);
-      const receivedAmount = Number(metadata.amount);
-      if (receivedAmount !== existingPayment.amount) {
-        throw new UserError(`Amount mismatch for ${id}. Expected: ${existingPayment.amount}, Received: ${receivedAmount}.`);
-      }
-      await collections[name].updateOne({ id }).set({
-        status: 'COMPLETED',
-        ref: metadata.mpesaReceiptNumber,
-        time: moment(String(metadata.transactionDate), 'YYYYMMDDHHmmss').toDate(),
-        errorMessage: null,
-      });
-    } else {
-      await collections[name].updateOne({ id }).set({
-        status: 'FAILED_ON_CALLBACK',
-        errorCode: String(ResultCode),
-        errorMessage: ResultDesc,
-      });
-    }
-    return { id };
-  } catch (err) {
-    throw new UserError(err.details);
+  const PaymentCollection = collections[name];
+  const { MerchantRequestID, CheckoutRequestID, school } = data;
+
+  // 1. Find the payment record in your database.
+  const payment = await PaymentCollection.find({ MerchantRequestID, CheckoutRequestID, school }).limit(1);
+
+  // 2. If no payment is found, inform the user.
+  if (!payment) {
+    return {
+      success: false,
+      message: `Payment not found.`,
+    };
   }
+
+  // 3. Return the relevant, client-safe data.
+  // The frontend will look at the 'status' field to decide what to display.
+  return {
+    success: payment.status === 'COMPLETED',
+    message: payment.errorMessage || `Payment is in progress. status:${payment.status.toLowerCase()}`,
+  };
 };
 
 export default () => {
