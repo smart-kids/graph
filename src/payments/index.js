@@ -4,7 +4,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import moment from 'moment';
 import sms from '../graphql/resolvers/Mutation/sms';
-import { name } from "./about.js";
+import { name } from "../graphql/resolvers/Mutation/payments/about.js";
 
 /**
  * A helper function to parse the M-Pesa metadata array into a more usable object.
