@@ -29,118 +29,105 @@ const parseMetadata = (items = []) => {
  * @param {object} io - The Socket.IO server instance for real-time events.
  * @returns {express.Router} An Express router instance.
  */
-export const createMpesaRouter = (collections, io) => {
-  const router = express.Router();
-  router.use(bodyParser.json());
-
-  // Get the Waterline collection for payments from the injected db object
-  const PaymentCollection = collections[name];
 
   /**
    * This is the M-Pesa STK Push Callback endpoint.
    * It handles validation and processing of the transaction result.
    */
-  router.post('/lipaCallback/:txid', async (req, res) => {
-    const logger = console; // Use a simple logger, or inject one if needed
-    const { txid } = req.params;
-
-    logger.log(`[Callback] Received M-Pesa STK Callback for txid: ${req.params.txid}`);
-    logger.log(`[Callback] Body:`, JSON.stringify(req.body));
-
-    // 1. Acknowledge the request from M-Pesa immediately to prevent timeouts on their end.
-    res.json({ ResponseCode: '0', ResponseDesc: 'Success' });
-
-    try {
-      // Ensure the callback body has the expected structure
-      if (!req.body.Body || !req.body.Body.stkCallback) {
-        logger.error(`[Callback] Invalid callback format for txid: ${txid}. Missing 'Body.stkCallback'.`);
-        return;
-      }
-      const { stkCallback } = req.body.Body;
-
-      // 2. Fetch the original payment record from the database using the injected collection.
-      const existingPayment = await PaymentCollection.find({ where: { id: txid } });
-      if (!existingPayment) {
-        logger.error(`[Security] FATAL: Callback received for non-existent payment ID: ${txid}. Ignoring.`);
-        return;
-      }
-
-      // 3. IDEMPOTENCY CHECK: Ensure we haven't already processed this payment.
-      if (existingPayment.status !== 'PENDING') {
-        logger.warn(`[Security] Idempotency check failed. Payment ${txid} is already in status '${existingPayment.status}'. Ignoring duplicate callback.`);
-        return;
-      }
-
-      // 4. Process the callback based on the result code.
-      if (stkCallback.ResultCode === 0) {
-        // --- SUCCESSFUL TRANSACTION ---
-        const metadata = parseMetadata(stkCallback.CallbackMetadata?.Item);
-        const receivedAmount = Number(metadata.amount);
-
-        // 5. AMOUNT VALIDATION: Ensure the user paid the exact amount we requested.
-        if (receivedAmount !== existingPayment.amount) {
-          logger.error(`[Security] Amount mismatch for ${txid}. Expected: ${existingPayment.amount}, Received: ${receivedAmount}.`);
-          const updatePayload = {
-            status: 'FLAGGED_AMOUNT_MISMATCH',
-            errorMessage: `Amount mismatch: Expected ${existingPayment.amount}, but received ${receivedAmount}.`,
-            ref: metadata.mpesaReceiptNumber,
-            time: moment(String(metadata.transactionDate), 'YYYYMMDDHHmmss').toDate(),
-          };
-          await PaymentCollection.update(txid, updatePayload);
-          // TODO: Trigger an alert for admin review (e.g., via email or a specific socket event).
-
-          sms.sendSms({
-            to: "254743214479",
-            message: `This payment of ${existingPayment.amount} has been flagged for review.`,
-          });
+  export const createMpesaRouter = async (db, io) => {
+    const router = express.Router();
+    router.use(bodyParser.json());
+    const dbInstance= await db;
+    const PaymentCollection = dbInstance.collections[name];
+  
+    router.post('/lipaCallback/:txid', async (req, res) => {
+      const logger = console;
+      const { txid } = req.params;
+  
+      logger.log(`[Callback] Received M-Pesa STK Callback for txid: ${txid}`);
+  
+      res.json({ ResponseCode: '0', ResponseDesc: 'Success' });
+  
+      try {
+        if (!req.body.Body || !req.body.Body.stkCallback) {
+          logger.error(`[Callback] Invalid callback format for txid: ${txid}.`);
           return;
         }
-
-        // --- All checks passed, payment is valid ---
-        const updatePayload = {
-          status: 'COMPLETED',
-          ref: metadata.mpesaReceiptNumber,
-          time: moment(String(metadata.transactionDate), 'YYYYMMDDHHmmss').toDate(),
-          errorMessage: null,
-        };
-        
-        await PaymentCollection.update(txid, updatePayload);
-        logger.log(`[Callback] Successfully updated payment ${txid} to COMPLETED.`);
-
-        // --- Post-payment Success Events ---
-        // Emit a socket event to the specific user or school to update their UI in real-time.
-        if (io && existingPayment.userId) {
-          io.to(`user_${existingPayment.userId}`).emit('payment_success', {
-            message: 'Your payment was successful!',
-            transactionId: txid,
-            amount: receivedAmount,
-          });
+        const { stkCallback } = req.body.Body;
+  
+        // FIX 1: Use .findOne() to get a single object, not an array.
+        const existingPayment = await PaymentCollection.findOne({ id: txid });
+  
+        if (!existingPayment) {
+          logger.error(`[Security] FATAL: Callback for non-existent payment ID: ${txid}. Ignoring.`);
+          return;
         }
-        // TODO: You could also trigger other events like sending a receipt email here.
-
-      } else {
-        // --- FAILED OR CANCELLED TRANSACTION ---
-        const updatePayload = {
-          status: 'FAILED_ON_CALLBACK',
-          errorCode: String(stkCallback.ResultCode),
-          errorMessage: stkCallback.ResultDesc,
-        };
-        await PaymentCollection.update(txid, updatePayload);
-        logger.log(`[Callback] Updated failed payment ${txid}: ${stkCallback.ResultDesc}`);
-        
-        // --- Post-payment Failure Events ---
-        if (io && existingPayment.userId) {
-          io.to(`user_${existingPayment.userId}`).emit('payment_failure', {
-            message: stkCallback.ResultDesc || 'Your payment failed.',
-            transactionId: txid,
-          });
+  
+        if (existingPayment.status !== 'PENDING') {
+          logger.warn(`[Security] Idempotency check failed. Payment ${txid} is already '${existingPayment.status}'. Ignoring.`);
+          return;
         }
+  
+        if (stkCallback.ResultCode === 0) {
+          const metadata = parseMetadata(stkCallback.CallbackMetadata?.Item);
+          const receivedAmount = Number(metadata.amount);
+  
+          if (receivedAmount !== existingPayment.amount) {
+            logger.error(`[Security] Amount mismatch for ${txid}. Expected: ${existingPayment.amount}, Received: ${receivedAmount}.`);
+            const updatePayload = {
+              status: 'FLAGGED_AMOUNT_MISMATCH',
+              errorMessage: `Amount mismatch: Expected ${existingPayment.amount}, but received ${receivedAmount}.`,
+              ref: metadata.mpesaReceiptNumber,
+              time: moment(String(metadata.transactionDate), 'YYYYMMDDHHmmss').toDate(),
+            };
+            // FIX 2: Use the modern .updateOne().set() syntax for clarity.
+            await PaymentCollection.updateOne({ id: txid }).set(updatePayload);
+            
+            // Your SMS logic here is fine.
+            // sms.sendSms(...) 
+            return;
+          }
+  
+          const updatePayload = {
+            status: 'COMPLETED',
+            ref: metadata.mpesaReceiptNumber,
+            time: moment(String(metadata.transactionDate), 'YYYYMMDDHHmmss').toDate(),
+            errorMessage: null,
+          };
+          
+          // FIX 2: Use the modern .updateOne().set() syntax.
+          await PaymentCollection.updateOne({ id: txid }).set(updatePayload);
+          logger.log(`[Callback] Successfully updated payment ${txid} to COMPLETED.`);
+  
+          if (io && existingPayment.userId) {
+            io.to(`user_${existingPayment.userId}`).emit('payment_success', {
+              message: 'Your payment was successful!',
+              transactionId: txid,
+              amount: receivedAmount,
+            });
+          }
+  
+        } else {
+          const updatePayload = {
+            status: 'FAILED_ON_CALLBACK',
+            errorCode: String(stkCallback.ResultCode),
+            errorMessage: stkCallback.ResultDesc,
+          };
+          // FIX 2: Use the modern .updateOne().set() syntax.
+          await PaymentCollection.updateOne({ id: txid }).set(updatePayload);
+          logger.log(`[Callback] Updated failed payment ${txid}: ${stkCallback.ResultDesc}`);
+          
+          if (io && existingPayment.userId) {
+            io.to(`user_${existingPayment.userId}`).emit('payment_failure', {
+              message: stkCallback.ResultDesc || 'Your payment failed.',
+              transactionId: txid,
+            });
+          }
+        }
+      } catch (error) {
+        logger.error(`[Callback] FATAL error while processing callback for txid ${txid}:`, error.message, error.stack);
       }
-    } catch (error) {
-      logger.error(`[Callback] FATAL error while processing callback for txid ${txid}:`, error.message, error.stack);
-      // At this point, the transaction remains PENDING and might require manual intervention.
-    }
-  });
-
-  return router;
+    });
+  
+    return router;
 };

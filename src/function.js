@@ -43,19 +43,24 @@ app.use(morgan(['development', "test"].includes(NODE_ENV) ? 'tiny' : 'combined')
 Object.assign(app.locals, { db: storage, io })
 
 // Mount the routers
-app.use(["/", "/graph"], dataGraphRouter(storage))
-app.use("/auth", authRouter)
-app.use("/mpesa", createMpesaRouter(storage, io)) // <-- 2. INITIALIZE AND MOUNT THE ROUTER
-app.use("/health", (req, res) => res.json({ status: "ok" }))
+async function attatch() {
+    app.use(["/", "/graph"], dataGraphRouter(storage))
+    app.use("/auth", authRouter)
+    app.use("/mpesa", await createMpesaRouter(storage, io)) // <-- 2. INITIALIZE AND MOUNT THE ROUTER
+    app.use("/health", (req, res) => res.json({ status: "ok" }))
+}
 
-
-if (NODE_ENV !== "test")
-    server.listen(PORT, () =>
-        console.log(`School project running on port ${PORT}! on ${NODE_ENV} mode.`)
-    );
+if (NODE_ENV !== "test"){
+    attatch().then(() => {
+        server.listen(PORT, () =>
+            console.log(`School project running on port ${PORT}! on ${NODE_ENV} mode.`)
+        );  
+    })
+}
 
 // Export the app as a Google Cloud Function
-functions.http('shuleplus-server', (req, res) => {
+functions.http('shuleplus-server', async (req, res) => {
+    await attatch()
     app(req, res);
 });
 
