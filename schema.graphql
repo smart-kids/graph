@@ -132,12 +132,45 @@ type user {
 type payment {
   id: String
   school: String
-  ammount: String
+  amount: String
   type: String
   phone: String
   acc: String
   ref: String
   time: String
+}
+
+# M-Pesa specific types
+scalar MPESA
+
+input mpesaInput {
+  phone: String!
+  amount: String!
+  school: String!
+}
+
+input mpesaCallbackInput {
+  MerchantRequestID: String!
+  CheckoutRequestID: String!
+  ResultCode: Int!
+  ResultDesc: String!
+  Amount: String!
+  MpesaReceiptNumber: String!
+  Balance: String!
+  TransactionDate: String!
+  PhoneNumber: String!
+}
+
+input mpesaStatusInput {
+  MerchantRequestID: String!
+  CheckoutRequestID: String!
+}
+
+enum mpesaStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
 }
 
 input mpesaStartTxInput {

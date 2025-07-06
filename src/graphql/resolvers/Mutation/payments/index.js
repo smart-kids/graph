@@ -1,129 +1,74 @@
+// FILE: api/controllers/payment/actions.js
+
 import { ObjectId } from "mongodb";
-var request = require("request-promise");
-var fetch = require("node-fetch")
+import { UserError } from "graphql-errors";
 
-const { name } = require("./about.js");
+// Assuming mpesaService is a globally available service in your Sails app
+import { createMpesaService } from './mpesa.js'; 
 
-const { UserError } = require("graphql-errors");
+const { name } = require("./about.js"); // Assuming 'name' resolves to 'payment'
 
-const init = async (data, { db: { collections } }) => {
+/**
+ * Initiates an M-Pesa STK Push payment request.
+ */
+const init = async (
+  data,
+  // The context now provides everything we need to inject
+  { auth, db: { collections } }
+) => {
+  console.log({data, auth})
+  const transactionId = new ObjectId().toHexString();
+  const { schoolId="general", id: userId } = auth;
+  const { ammount:amount, phone,}= data[name]
 
-  const { payment: { id, phone, ammount } } = data
-  var jar = request.jar();
-  jar.setCookie(request.cookie("connect.sid=s%253A1GKmr59wh9aH8XfBPuVW0dM9V-I0KDG1.%252BpjFq%252BqzW9yrYcrIA8RuWeszRWN4SN0FvFljnnpOeHI"), "http://localhost:4000/graph");
+  // 1. Create an instance of the M-Pesa service by injecting dependencies.
+  const mpesaService = createMpesaService({
+    collections: collections,                // Pass the database collections
+    logger: console,                       // Pass the sails logger
+  });
 
-  var options = {
-    method: 'POST',
-    url: 'https://benefactor-kenya.herokuapp.com/payment/start',
-    body: { phone, amount: ammount, project: '12345' },
-    json: true
-  };
-
-  const res = await request(options);
-
-  return res.data
-};
-
-
-const confirm = async (data, { db: { collections } }) => {
-  const { payment: { CheckoutRequestID, MerchantRequestID, school } } = data
-
-  var options = {
-    method: 'POST',
-    url: 'https://benefactor-kenya.herokuapp.com/payment/check',
-    body: {
-      CheckoutRequestID,
-      MerchantRequestID
-    },
-    json: true
-  };
-
-  try {
-    const res = await request(options);
-
-    const { success, data: { ResultDesc: message } = {} } = res
-
-    const meta = JSON.parse(res.data.meta).Item
-
-    const datamap = {}
-    meta.map(({ Name, Value }) => {
-      datamap[Name.toLowerCase()] = Value
-    })
-
-    const id = new ObjectId().toHexString();
-
-    const finalData = {
-      school,
-      ammount: datamap.amount,
-      phone: datamap.phonenumber,
-      type: "Mpesa",
-      ref: datamap.mpesareceiptnumber,
-      time: new Date()
-    }
-
-    const entry = Object.assign(finalData, { id, isDeleted: false });
-
-    await collections[name].create(entry);
-
-    return {
-      success,
-      message
-    };
-  } catch (err) {
-    console.log("error", err)
-
-    const { success, data: { ResultDesc: message } = {} } = err.error
-    return {
-      success,
-      message
-    }
+  // 2. Call the method on the service instance.
+  //    The service itself will now handle creating and updating the database records.
+  const result = await mpesaService.initiateSTKPush({
+    amount,
+    phone,
+    schoolId,
+    userId,
+    transactionId,
+  });
+  
+  // 3. Return the result from the service directly to the user.
+  //    If the result indicates failure, throw a UserError.
+  if (!result.success) {
+    // You can choose to throw a generic error to the user for security.
+    throw new UserError(result.message || 'An unexpected error occurred during payment initiation.');
   }
+
+  return result;
 };
 
+/**
+ * Creates a new payment record directly.
+ * Useful for manual entries by an administrator.
+ */
 const create = async (data, { db: { collections } }) => {
-
   const id = new ObjectId().toHexString();
-  const entry = Object.assign(data[name], { id, isDeleted: false });
+  const entry = Object.assign(data[name], { id, isDeleted: false, time: new Date() });
 
   try {
     await collections[name].create(entry);
-
     return entry;
   } catch (err) {
-    console.log(err)
+    console.log(err);
     throw new UserError(err.details);
   }
 };
 
-// const update = async (data, { db: { collections } }) => {
-//   const { id } = data[name];
-//   const entry = data[name];
-
-//   // stringify actions - contains a hbs templates for sms and email
-//   entry.actions = JSON.stringify(entry.actions);
-
-//   try {
-//     delete entry.id;
-
-//     await collections[name].update({ id }).set(entry);
-
-//     return {
-//       id
-//     };
-//   } catch (err) {
-//     throw new UserError(err.details);
-//   }
-// };
-
 const archive = async (data, { db: { collections } }) => {
   const { id } = data[name];
-
   try {
     await collections[name].update({ id }).set({ isDeleted: true });
-
-    return {
-      id
-    };
+    return { id };
   } catch (err) {
     throw new UserError(err.details);
   }
@@ -131,13 +76,9 @@ const archive = async (data, { db: { collections } }) => {
 
 const restore = async (data, { db: { collections } }) => {
   const { id } = data[name];
-
   try {
     await collections[name].update({ id }).set({ isDeleted: false });
-
-    return {
-      id
-    };
+    return { id };
   } catch (err) {
     throw new UserError(err.details);
   }
@@ -146,10 +87,11 @@ const restore = async (data, { db: { collections } }) => {
 export default () => {
   return {
     create,
-    // update,
     archive,
     restore,
     init,
-    confirm
+    // The `confirm` function is removed. The M-Pesa callback is the primary
+    // method of confirmation. If a polling mechanism is needed, a separate
+    // `getPaymentStatus(transactionId)` resolver should be created.
   };
 };

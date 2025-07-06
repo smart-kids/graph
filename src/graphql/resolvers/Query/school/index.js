@@ -54,10 +54,9 @@ const list = async (root, args, { auth, db: { collections } }) => {
       const school = parents[0].school;
       console.log(`[GraphQL School List] Found school ${school} for parent ${userId}.`);
       const entry = await collections[name].findOne({where: {id: school, isDeleted: false}});
-      const openEntry = await collections[name].findOne({where: {id: openSchoolId, isDeleted: false}});
-      console.log({entry, openEntry})
+      console.log({entry})
       console.log(`[GraphQL School List] Found ${entry ? 1 : 0} entries.`);
-      return [entry, openEntry];
+      return [entry];
   } else if (userType === 'driver') {
     // --- Parent: Restricted Access ---
 

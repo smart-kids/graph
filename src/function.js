@@ -1,15 +1,14 @@
+// Your main server file (e.g., index.js or app.js)
+
 import express from "express"
-
 import dataGraphRouter from "./router"
-import { router } from "./auth"
+import { router as authRouter } from "./auth" // Renamed for clarity
 import storage from "./storage"
-
+import { createMpesaRouter } from "./payments" // <-- 1. IMPORT THE FACTORY FUNCTION
 import morgan from "morgan";
-
 import cors from "cors"
 
 const StreamTcp = require('./sockets/stream-tcp')
-
 const tcpSplit = new StreamTcp()
 const functions = require('@google-cloud/functions-framework');
 
@@ -26,14 +25,10 @@ var app = require('express')(),
     }),
     sharedsession = require("express-socket.io-session");
 
-// const attatchRouter = async (app) => {
-// app.use("/health", (req, res) => res.json({ status: "ok" }))
-
 // Attach session
 app.use(session);
 
 // Share session with io sockets
-
 io.use(sharedsession(session));
 
 io.on("connection", require("./sockets/socket-pass"));
@@ -43,21 +38,15 @@ app.use(express.json());
 app.use(cors());
 app.use(morgan(['development', "test"].includes(NODE_ENV) ? 'tiny' : 'combined'))
 
+// You are already assigning storage and io to app.locals, which is great.
+// We'll use these to initialize the router.
 Object.assign(app.locals, { db: storage, io })
 
+// Mount the routers
 app.use(["/", "/graph"], dataGraphRouter(storage))
-
-// app.use("/game-events", game_socket)
-app.use("/auth", router)
+app.use("/auth", authRouter)
+app.use("/mpesa", createMpesaRouter(storage, io)) // <-- 2. INITIALIZE AND MOUNT THE ROUTER
 app.use("/health", (req, res) => res.json({ status: "ok" }))
-
-
-// app.use("*", (req, res) => res.send(`
-//     that url doesnt have a home here, are you lost? 
-
-//     <a url="/">go home </a>
-// `))
-// }
 
 
 if (NODE_ENV !== "test")
@@ -65,11 +54,9 @@ if (NODE_ENV !== "test")
         console.log(`School project running on port ${PORT}! on ${NODE_ENV} mode.`)
     );
 
-// export default app;
 // Export the app as a Google Cloud Function
 functions.http('shuleplus-server', (req, res) => {
-    app(req, res);  // Handle requests with Express
+    app(req, res);
 });
-
 
 export default app;
