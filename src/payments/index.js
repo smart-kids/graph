@@ -4,6 +4,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import moment from 'moment';
 import sms from '../graphql/resolvers/Mutation/sms';
+import { name } from "./about.js";
 
 /**
  * A helper function to parse the M-Pesa metadata array into a more usable object.
@@ -33,7 +34,7 @@ export const createMpesaRouter = (collections, io) => {
   router.use(bodyParser.json());
 
   // Get the Waterline collection for payments from the injected db object
-  const PaymentCollection = collections.payment;
+  const PaymentCollection = collections[name];
 
   /**
    * This is the M-Pesa STK Push Callback endpoint.
