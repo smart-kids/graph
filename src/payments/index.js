@@ -41,6 +41,7 @@ export const createMpesaRouter = (collections, io) => {
    */
   router.post('/lipaCallback/:txid', async (req, res) => {
     const logger = console; // Use a simple logger, or inject one if needed
+    const { txid } = req.params;
 
     logger.log(`[Callback] Received M-Pesa STK Callback for txid: ${req.params.txid}`);
     logger.log(`[Callback] Body:`, JSON.stringify(req.body));
