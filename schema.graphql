@@ -145,7 +145,7 @@ scalar MPESA
 
 input mpesaInput {
   phone: String!
-  amount: String!
+  ammount: String!
   school: String!
 }
 
