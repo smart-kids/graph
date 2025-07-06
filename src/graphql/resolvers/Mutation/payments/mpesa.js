@@ -136,7 +136,7 @@ const createMpesaService = ({ collections, logger = console }) => {
             const formattedPhone = phone.replace(/^0/, '254').replace('+', '');
             const accessToken = await _getAccessToken();
             const { password, timestamp } = _generatePassword();
-            const callbackURL = `${mpesaConfig.callbackURL}`;
+            const callbackURL = `${mpesaConfig.callbackURL}/${transactionId}`;
 
             const body = {
                 BusinessShortCode: mpesaConfig.shortcode,
@@ -170,14 +170,18 @@ const createMpesaService = ({ collections, logger = console }) => {
 
             logger.info(`[MpesaService] STK Push accepted by Safaricom for TxID ${transactionId}`);
 
+            const { MerchantRequestID, CheckoutRequestID } = response.data;
             // 2. On success, update the record with M-Pesa's request IDs.
-            await PaymentCollection.updateOne({ id: transactionId }).set({
-                merchantRequestID: response.data.MerchantRequestID,
-                checkoutRequestID: response.data.CheckoutRequestID,
+            PaymentCollection.updateOne({ id: transactionId }).set({
+                status: 'SUCCESS',
+                MerchantRequestID,
+                CheckoutRequestID,
             });
 
             return {
                 success: true,
+                MerchantRequestID,
+                CheckoutRequestID,
                 message: 'Request sent. Please complete the transaction on your phone.',
                 transactionId,
             };
@@ -188,7 +192,7 @@ const createMpesaService = ({ collections, logger = console }) => {
             logger.error(`[MpesaService] STK Push failed for TxID ${transactionId}: ${errorMessage}`);
 
             // 3. On failure, update the record to a failed state.
-            await PaymentCollection.updateOne({ id: transactionId }).set({
+            PaymentCollection.updateOne({ id: transactionId }).set({
                 status: 'FAILED_ON_INITIATION',
                 errorMessage: errorMessage,
             });

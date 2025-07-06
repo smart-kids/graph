@@ -40,10 +40,9 @@ export const createMpesaRouter = (collections, io) => {
    * It handles validation and processing of the transaction result.
    */
   router.post('/lipaCallback/:txid', async (req, res) => {
-    const { txid } = req.params;
     const logger = console; // Use a simple logger, or inject one if needed
 
-    logger.log(`[Callback] Received M-Pesa STK Callback for txid: ${txid}`);
+    logger.log(`[Callback] Received M-Pesa STK Callback for txid: ${req.params.txid}`);
     logger.log(`[Callback] Body:`, JSON.stringify(req.body));
 
     // 1. Acknowledge the request from M-Pesa immediately to prevent timeouts on their end.
