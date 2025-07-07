@@ -89,7 +89,9 @@ const confirm = async (data, { db: { collections } }) => {
   const { MerchantRequestID, CheckoutRequestID, school } = data;
 
   // 1. Find the payment record in your database.
-  const payment = await PaymentCollection.find({ MerchantRequestID, CheckoutRequestID, school }).limit(1);
+  const [payment] = await PaymentCollection.find({ MerchantRequestID, CheckoutRequestID, school }).limit(1);
+
+  console.log({payment})
 
   // 2. If no payment is found, inform the user.
   if (!payment) {
