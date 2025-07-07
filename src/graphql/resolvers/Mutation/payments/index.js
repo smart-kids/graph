@@ -103,7 +103,7 @@ const confirm = async (data, { db: { collections } }) => {
   // The frontend will look at the 'status' field to decide what to display.
   return {
     success: payment.status === 'COMPLETED',
-    message: payment.errorMessage || `Payment is in progress. status:${payment.status.toLowerCase()}`,
+    message: payment.errorMessage || `Payment is in progress. status:${payment.status}`,
   };
 };
 
