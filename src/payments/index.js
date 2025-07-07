@@ -45,6 +45,7 @@ const parseMetadata = (items = []) => {
       const { txid } = req.params;
   
       logger.log(`[Callback] Received M-Pesa STK Callback for txid: ${txid}`);
+      console.log("[Callback] Body: ", JSON.stringify(req.body));
   
       res.json({ ResponseCode: '0', ResponseDesc: 'Success' });
   
