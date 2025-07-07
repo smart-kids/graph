@@ -170,10 +170,10 @@ const createMpesaService = ({ collections, logger = console }) => {
 
             logger.info(`[MpesaService] STK Push accepted by Safaricom for TxID ${transactionId}`);
 
-            const { MerchantRequestID, CheckoutRequestID } = response.data;
+            const { MerchantRequestID, CheckoutRequestID, id:school } = response.data;
             // 2. On success, update the record with M-Pesa's request IDs.
             PaymentCollection.updateOne({ id: transactionId }).set({
-                status: 'SUCCESS',
+                status: 'PENDING',
                 MerchantRequestID,
                 CheckoutRequestID,
             });

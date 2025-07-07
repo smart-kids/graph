@@ -10,9 +10,12 @@ export default Waterline.Collection.extend({
     id: { type: "string", required: true },
     subtopic: { type: "string", required: true },
     name: {
-      type: "string",
-      required: true,
-      // size: 700
+      type: "string", // Keep the base Waterline type as 'string'
+      required: false,
+      allowNull: true,
+      autoMigrations: { // Or just `columnType: 'text'` directly if not using autoMigrations features
+        columnType: 'text' // This tells the adapter (sails-postgresql) to use TEXT
+      }
     },
     type: { type: "string", required: true },
     videos: { type: "json", defaultsTo: [] },

@@ -36,6 +36,8 @@ const init = async (
     userId,
     transactionId,
   });
+
+  result.id = result.transactionId;
   
   // 3. Return the result from the service directly to the user.
   //    If the result indicates failure, throw a UserError.
@@ -91,8 +93,6 @@ const confirm = async (data, { db: { collections } }) => {
   // 1. Find the payment record in your database.
   const [payment] = await PaymentCollection.find({ MerchantRequestID, CheckoutRequestID, school }).limit(1);
 
-  console.log({payment})
-
   // 2. If no payment is found, inform the user.
   if (!payment) {
     return {
@@ -102,10 +102,18 @@ const confirm = async (data, { db: { collections } }) => {
   }
 
   // 3. Return the relevant, client-safe data.
-  // The frontend will look at the 'status' field to decide what to display.
   return {
-    success: payment.status === 'COMPLETED',
+    success: true,
     message: payment.errorMessage || `Payment is in progress. status:${payment.status}`,
+    id: payment.id,
+    school: payment.school,
+    amount: payment.amount,
+    phone: payment.phone,
+    status: payment.status,
+    merchantRequestID: payment.merchantRequestID,
+    checkoutRequestID: payment.checkoutRequestID,
+    ref: payment.ref,
+    time: payment.time,
   };
 };
 

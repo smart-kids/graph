@@ -167,10 +167,36 @@ input mpesaStatusInput {
 }
 
 enum mpesaStatus {
+  """
+  Initial state. The transaction has been created in our database,
+  but we are awaiting a final result from Safaricom.
+  """
   PENDING
-  SUCCESS
-  FAILED
-  CANCELLED
+
+  """
+  The final success state. The M-Pesa callback was received,
+  the ResultCode was 0, and all our internal checks (like amount) passed.
+  """
+  COMPLETED
+
+  """
+  Failure state. Our server failed to even send the request to Safaricom.
+  This could be due to a bad token, network issue, or invalid initial data.
+  """
+  FAILED_ON_INITIATION
+
+  """
+  Failure state. Safaricom's callback reported a failure. This typically means
+  the user cancelled, entered the wrong PIN, had insufficient funds, or the request timed out.
+  """
+  FAILED_ON_CALLBACK
+
+  """
+  CRITICAL: A special failure state. The callback was successful (ResultCode: 0),
+  but the amount paid by the user does not match the amount we requested.
+  This requires manual review by an admin.
+  """
+  FLAGGED_AMOUNT_MISMATCH
 }
 
 input mpesaStartTxInput {
@@ -180,6 +206,7 @@ input mpesaStartTxInput {
 }
 
 type mpesaStartTxVerification {
+  id: String
   CheckoutRequestID: String
   MerchantRequestID: String
 }
@@ -193,6 +220,15 @@ input mpesaStartTxVerificationInput {
 type mpesaStartTxResult {
   success: Boolean
   message: String
+  id: String
+  school: String
+  amount: String
+  phone: String
+  status: mpesaStatus
+  merchantRequestID: String
+  checkoutRequestID: String
+  ref: String
+  time: String
 }
 
 input Ipayment {

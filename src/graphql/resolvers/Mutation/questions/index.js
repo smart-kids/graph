@@ -12,7 +12,7 @@ const create = async (data, { db: { collections } }) => {
 
     return entry;
   } catch (err) {
-    throw new UserError(err.details);
+    throw new UserError(err);
   }
 };
 
