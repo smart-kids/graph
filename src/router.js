@@ -15,6 +15,10 @@ import { checkToken } from "./auth"
 import resolvers from "./graphql/index";
 import Bugsnag from "@bugsnag/js"
 
+// <<< CHANGED: 1. Import the createLoaders function from your refactored resolver file.
+// Please ensure this path is correct for your project structure.
+import { createLoaders } from "./graphql/resolvers/Query/school"; 
+
 const { BUGSNAG_API_KEY } = process.env
 
 const validator = require('express-joi-validation').createValidator({})
@@ -52,30 +56,33 @@ export default (storage) => {
     authorization: Joi.string().required()
   })
 
-  var storage
+  // This variable is no longer needed here as it's defined inside the 'storage' export
+  // var storage 
 
   router.use(
     "/graph",
-    validator.headers(headerSchema), // Keep validation
-    checkToken, // Use updated middleware
+    validator.headers(headerSchema),
+    checkToken,
     async (req, res, next) => {
-      const db = await storage; // Assuming storage resolves to your DB connection/collections
+      const db = await storage;
 
-      // Pass the validated req.auth object into the context
+      // <<< CHANGED: 2. Create a new set of loaders FOR THIS REQUEST.
+      const loaders = createLoaders(db.collections);
+
       return graphqlHTTP({
         schema,
-        graphiql: true, // Keep for development
+        graphiql: true,
         context: {
-          auth: req.auth, // Pass the decoded token payload here
-          db
+          auth: req.auth,
+          db,
+          // <<< CHANGED: 3. Add the loaders to the context object.
+          loaders,
         },
         customFormatErrorFn: err => {
-          console.error("GraphQL Error:", err); // Log the full error
-          // Optionally notify Bugsnag or other services
+          console.error("GraphQL Error:", err);
           if (notifyErrors) {
-            notifyErrors.formatError(err); // Use original error object
+            notifyErrors.formatError(err);
           }
-          // Return a formatted error to the client
           return formatError(err);
         }
       })(req, res, next);
@@ -84,27 +91,27 @@ export default (storage) => {
 
   router.use(
     "/opengraph",
-    // validator.headers(headerSchema), // Keep validation
-    // checkToken, // Use updated middleware
     async (req, res, next) => {
-      const db = await storage; // Assuming storage resolves to your DB connection/collections
+      const db = await storage;
 
-      // Pass the validated req.auth object into the context
+      // <<< CHANGED: 2. Create loaders for the open endpoint as well.
+      const loaders = createLoaders(db.collections);
+
       return graphqlHTTP({
         schema,
-        graphiql: true, // Keep for development
+        graphiql: true,
         context: {
-          auth: req.auth, // Pass the decoded token payload here
+          auth: req.auth,
           db,
-          open:true
+          open: true,
+          // <<< CHANGED: 3. Add loaders to the context here too.
+          loaders,
         },
         customFormatErrorFn: err => {
-          console.error("GraphQL Error:", err); // Log the full error
-          // Optionally notify Bugsnag or other services
+          console.error("GraphQL Error:", err);
           if (notifyErrors) {
-            notifyErrors.formatError(err); // Use original error object
+            notifyErrors.formatError(err);
           }
-          // Return a formatted error to the client
           return formatError(err);
         }
       })(req, res, next);
@@ -113,4 +120,3 @@ export default (storage) => {
 
   return router
 };
-
