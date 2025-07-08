@@ -17,7 +17,8 @@ import Bugsnag from "@bugsnag/js"
 
 // <<< CHANGED: 1. Import the createLoaders function from your refactored resolver file.
 // Please ensure this path is correct for your project structure.
-import { createLoaders } from "./graphql/resolvers/Query/school"; 
+import { createLoaders as schoolLoaders } from "./graphql/resolvers/Query/school";
+import { createLoaders as studentLoaders } from "./graphql/resolvers/Query/students"
 
 const { BUGSNAG_API_KEY } = process.env
 
@@ -59,64 +60,79 @@ export default (storage) => {
   // This variable is no longer needed here as it's defined inside the 'storage' export
   // var storage 
 
-  router.use(
-    "/graph",
-    validator.headers(headerSchema),
-    checkToken,
-    async (req, res, next) => {
-      const db = await storage;
+  // ... (imports remain the same)
 
-      // <<< CHANGED: 2. Create a new set of loaders FOR THIS REQUEST.
-      const loaders = createLoaders(db.collections);
+router.use(
+  "/graph",
+  validator.headers(headerSchema),
+  checkToken,
+  async (req, res, next) => {
+    const db = await storage;
 
-      return graphqlHTTP({
-        schema,
-        graphiql: true,
-        context: {
-          auth: req.auth,
-          db,
-          // <<< CHANGED: 3. Add the loaders to the context object.
-          loaders,
-        },
-        customFormatErrorFn: err => {
-          console.error("GraphQL Error:", err);
-          if (notifyErrors) {
-            notifyErrors.formatError(err);
-          }
-          return formatError(err);
+    // <<< CORRECTED: 1. Instantiate each set of loaders separately.
+    const schoolLoaderSet = schoolLoaders(db.collections);
+    const studentLoaderSet = studentLoaders(db.collections);
+
+    // <<< CORRECTED: 2. Merge all loader objects into a single 'loaders' object.
+    const allLoaders = {
+      ...schoolLoaderSet,
+      ...studentLoaderSet,
+      // ...add other loader sets here in the future
+    };
+
+    return graphqlHTTP({
+      schema,
+      graphiql: true,
+      context: {
+        auth: req.auth,
+        db,
+        // <<< CORRECTED: 3. Pass the single, merged object to the context.
+        loaders: allLoaders,
+      },
+      customFormatErrorFn: err => {
+        console.error("GraphQL Error:", err);
+        if (notifyErrors) {
+          notifyErrors.formatError(err);
         }
-      })(req, res, next);
-    }
-  );
+        return formatError(err);
+      }
+    })(req, res, next);
+  }
+);
 
-  router.use(
-    "/opengraph",
-    async (req, res, next) => {
-      const db = await storage;
+router.use(
+  "/opengraph",
+  async (req, res, next) => {
+    const db = await storage;
 
-      // <<< CHANGED: 2. Create loaders for the open endpoint as well.
-      const loaders = createLoaders(db.collections);
+    // <<< CORRECTED: Apply the same logic here for the open endpoint.
+    const schoolLoaderSet = schoolLoaders(db.collections);
+    const studentLoaderSet = studentLoaders(db.collections);
 
-      return graphqlHTTP({
-        schema,
-        graphiql: true,
-        context: {
-          auth: req.auth,
-          db,
-          open: true,
-          // <<< CHANGED: 3. Add loaders to the context here too.
-          loaders,
-        },
-        customFormatErrorFn: err => {
-          console.error("GraphQL Error:", err);
-          if (notifyErrors) {
-            notifyErrors.formatError(err);
-          }
-          return formatError(err);
+    const allLoaders = {
+      ...schoolLoaderSet,
+      ...studentLoaderSet,
+    };
+
+    return graphqlHTTP({
+      schema,
+      graphiql: true,
+      context: {
+        auth: req.auth,
+        db,
+        open: true,
+        loaders: allLoaders,
+      },
+      customFormatErrorFn: err => {
+        console.error("GraphQL Error:", err);
+        if (notifyErrors) {
+          notifyErrors.formatError(err);
         }
-      })(req, res, next);
-    }
-  );
+        return formatError(err);
+      }
+    })(req, res, next);
+  }
+);
 
   return router
 };

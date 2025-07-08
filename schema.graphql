@@ -703,25 +703,25 @@ type school {
   themeColor: String
 
   # relations for saas
-  admins: [admin]
-  students: [student]
-  parents: [parent]
-  drivers: [driver]
-  buses: [bus]
-  trips: [trip]
-  routes: [route]
-  schedules: [schedule]
-  events: [event]
-  complaints: [complaint]
-  locReports: [locReport]
-  classes: [class]
-  teachers: [teacher]
-  payments:[payment]
-  charges:[charge]
-  grades:[grade]
-  terms:[term]
-  teams:[team]
-  invitations: [invitation]
+  admins(limit: Int, offset: Int): [admin]
+  students(limit: Int, offset: Int): [student]
+  parents(limit: Int, offset: Int): [parent]
+  drivers(limit: Int, offset: Int): [driver]
+  buses(limit: Int, offset: Int): [bus]
+  trips(limit: Int, offset: Int): [trip]
+  routes(limit: Int, offset: Int): [route]
+  schedules(limit: Int, offset: Int): [schedule]
+  events(limit: Int, offset: Int): [event]
+  complaints(limit: Int, offset: Int): [complaint]
+  locReports(limit: Int, offset: Int): [locReport]
+  classes(limit: Int, offset: Int): [class]
+  teachers(limit: Int, offset: Int): [teacher]
+  payments(limit: Int, offset: Int):[payment]
+  charges(limit: Int, offset: Int):[charge]
+  grades(limit: Int, offset: Int): [grade]
+  terms(limit: Int, offset: Int): [term]
+  teams(limit: Int, offset: Int): [team]
+  invitations(limit: Int, offset: Int): [invitation]
 }
 
 input ISchool {
@@ -935,7 +935,7 @@ type grade {
   id: String
   name: String
   school: school
-  subjects: [subject]
+  subjects(limit: Int, offset: Int): [subject]
   subjectsOrder: [String]
 }
 
@@ -964,7 +964,7 @@ type subject {
   id: String
   name: String
   grade: grade
-  topics: [topic]
+  topics(limit: Int, offset: Int): [topic]
   topicOrder: [String]
 }
 
@@ -994,7 +994,7 @@ type topic {
   name: String
   subject: subject
   icon: String
-  subtopics: [subtopic]
+  subtopics(limit: Int, offset: Int): [subtopic]
   subtopicOrder: [String]
 }
 
@@ -1025,7 +1025,7 @@ type subtopic {
   id: String
   name: String
   topic: topic
-  questions: [question]
+  questions(limit: Int, offset: Int): [question]
   questionsOrder: [String]
 }
 

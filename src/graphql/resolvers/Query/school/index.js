@@ -1,10 +1,14 @@
 /**
  * =======================================================================================
- *  DATALOADER-ENABLED RESOLVER FILE WITH LOGGING
+ *  DATALOADER-ENABLED RESOLVER FILE WITH LOGGING & PAGINATION
  * =======================================================================================
  *
  * This file contains both the GraphQL resolvers for the School type and the
  * DataLoader factory (`createLoaders`) needed to optimize database queries.
+ *
+ * It also includes pagination for nested lists like 'students', 'buses', etc.
+ * Pagination arguments (`limit`, `offset`) can be passed in the GraphQL query.
+ * If not provided, it defaults to returning the first 25 items.
  *
  * HOW TO SEE BATCHING IN ACTION:
  * 1. Run a GraphQL query that fetches multiple schools and a nested field, like 'students'.
@@ -161,74 +165,116 @@ const nested = {
       const balance = subtract(sum(payments.map(p => p.ammount)), sum(charges.map(p => p.ammount)));
       return { balance, balanceFormated: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'KSH' }).format(balance) };
     },
-    students: (root, args, { loaders }) => {
-      // ✅ LOGGING: This log fires for EACH school, queuing the request.
+
+    // ==============================================================================
+    // PAGINATED NESTED RESOLVERS
+    // ==============================================================================
+    // The following resolvers accept `limit` (default: 25) and `offset` (default: 0)
+    // arguments to paginate the results. They use DataLoader to solve the N+1
+    // database query problem, then paginate the full result set in memory.
+    // ==============================================================================
+
+    students: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'students' lookup for School ID: ${root.id}`);
-      return loaders.studentsBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.studentsBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    buses: (root, args, { loaders }) => {
+    buses: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'buses' lookup for School ID: ${root.id}`);
-      return loaders.busesBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.busesBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    charges: (root, args, { loaders }) => {
+    charges: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'charges' lookup for School ID: ${root.id}`);
-      return loaders.chargesBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.chargesBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    payments: (root, args, { loaders }) => {
+    payments: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'payments' lookup for School ID: ${root.id}`);
-      return loaders.paymentsBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.paymentsBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    teachers: (root, args, { loaders }) => {
+    teachers: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'teachers' lookup for School ID: ${root.id}`);
-      return loaders.teachersBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.teachersBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    classes: (root, args, { loaders }) => {
+    classes: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'classes' lookup for School ID: ${root.id}`);
-      return loaders.classesBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.classesBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    complaints: (root, args, { loaders }) => {
+    complaints: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'complaints' lookup for School ID: ${root.id}`);
-      return loaders.complaintsBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.complaintsBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    drivers: (root, args, { loaders }) => {
+    drivers: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'drivers' lookup for School ID: ${root.id}`);
-      return loaders.driversBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.driversBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    admins: (root, args, { loaders }) => {
+    admins: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'admins' lookup for School ID: ${root.id}`);
-      return loaders.adminsBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.adminsBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    parents: (root, args, { loaders }) => {
+    parents: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'parents' lookup for School ID: ${root.id}`);
-      return loaders.parentsBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.parentsBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    routes: (root, args, { loaders }) => {
+    routes: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'routes' lookup for School ID: ${root.id}`);
-      return loaders.routesBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.routesBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    trips: (root, args, { loaders }) => {
+    trips: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'trips' lookup for School ID: ${root.id}`);
-      return loaders.tripsBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.tripsBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    schedules: (root, args, { loaders }) => {
+    schedules: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'schedules' lookup for School ID: ${root.id}`);
-      return loaders.schedulesBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.schedulesBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    grades: (root, args, { loaders }) => {
+    grades: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'grades' lookup for School ID: ${root.id}`);
-      return loaders.gradesBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.gradesBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    terms: (root, args, { loaders }) => {
+    terms: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'terms' lookup for School ID: ${root.id}`);
-      return loaders.termsBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.termsBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    teams: (root, args, { loaders }) => {
+    teams: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'teams' lookup for School ID: ${root.id}`);
-      return loaders.teamsBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.teamsBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
-    invitations: (root, args, { loaders }) => {
+    invitations: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'invitations' lookup for School ID: ${root.id}`);
-      return loaders.invitationsBySchoolId.load(root.id);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.invitationsBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
     },
   }
 };
