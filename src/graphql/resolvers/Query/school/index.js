@@ -107,32 +107,17 @@ export const createLoaders = (collections) => {
 // --- GraphQL Resolvers (Using Loaders) ---
 
 const list = async (root, args, { auth, db: { collections }, loaders }) => {
-  // ... list resolver logic remains the same, it uses loaders for efficiency ...
-  let { userType, schoolId, userId } = auth;
+  let { userType, schoolId } = auth;
 
   if (userType === 'sAdmin') {
       const query = { where: { isDeleted: false } };
       return await collections[name].find(query);
-  } else if (userType === 'admin') {
+  } else {
       if (!schoolId) {
            throw new GraphQLError('Access Denied: User configuration incomplete.', { extensions: { code: 'FORBIDDEN' } });
       }
       const school = await loaders.schoolById.load(schoolId);
       return school ? [school] : [];
-  } else if (userType === 'parent') {
-      const parents = await collections["parent"].find({ where: { id: userId, isDeleted: false } });
-      if (parents.length === 0) throw new GraphQLError('Access Denied: User not found in parents collection.', { extensions: { code: 'FORBIDDEN' } });
-      const parentSchoolId = parents[0].school;
-      const school = await loaders.schoolById.load(parentSchoolId);
-      return school ? [school] : [];
-  } else if (userType === 'driver') {
-    const drivers = await collections["driver"].find({ where: { id: userId, isDeleted: false } });
-    if (drivers.length === 0) throw new GraphQLError('Access Denied: User not found in drivers collection.', { extensions: { code: 'FORBIDDEN' } });
-    const driverSchoolId = drivers[0].school;
-    const school = await loaders.schoolById.load(driverSchoolId);
-    return school ? [school] : [];
-  } else {
-      throw new GraphQLError('Access Denied: User type not supported.', { extensions: { code: 'FORBIDDEN' } });
   }
 };
 // in your resolver file
