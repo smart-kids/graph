@@ -135,15 +135,33 @@ const list = async (root, args, { auth, db: { collections }, loaders }) => {
       throw new GraphQLError('Access Denied: User type not supported.', { extensions: { code: 'FORBIDDEN' } });
   }
 };
+// in your resolver file
+const single = async (root, args, { auth, open,db: { collections }, loaders, params:{params} }) => {
+  // `args` is the second parameter, passed automatically by GraphQL.
+  // It will contain an object like { id: 'some-school-id' } if the query was `school(id: "some-school-id")`.
 
-const single = async (root, args, { auth, open, loaders }) => {
-    // ... single resolver logic remains the same ...
-    console.log({auth, args, root})
-    if(open) return loaders.schoolById.load(openSchoolId);
-    let { userType, school, schoolId } = auth;
-    let userTokenSchoolId = schoolId || school;
-    if (userType !== 'sAdmin' && userTokenSchoolId !== userTokenSchoolId) return null;
-    return loaders.schoolById.load(userTokenSchoolId || args.id);
+  if(open) return loaders.schoolById.load(openSchoolId);
+
+  // If there are no arguments, we can't proceed.
+  if (!params || !params.id) {
+      // Or handle based on whether an ID is always required
+      return null; 
+  }
+
+  let { userType, school, schoolId } = auth;
+  let userTokenSchoolId = schoolId || school;
+
+  // --- LOGIC CORRECTION ---
+  // The original check `userTokenSchoolId !== userTokenSchoolId` was always false.
+  // You likely want to check if the user is authorized to view the requested school ID.
+  if (userType !== 'sAdmin' && userTokenSchoolId !== params.id) {
+      // User is not a super admin and is trying to access a school they don't belong to.
+      console.warn(`Authorization denied: User with school '${userTokenSchoolId}' tried to access school '${params.id}'.`);
+      return null; // or throw new Error("Not Authorized");
+  }
+
+  // Now, confidently use args.id
+  return loaders.schoolById.load(params.id);
 };
 
 const listDeleted = async (root, args, { auth, db: { collections } }) => {
@@ -183,10 +201,12 @@ const nested = {
     // database query problem, then paginate the full result set in memory.
     // ==============================================================================
 
-    students: async (root, args, { loaders }) => {
+    students: async (root, args, { loaders, params:{params} }) => {
       console.log(`[RESOLVER CALL] Queuing 'students' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
+      console.log(`[RESOLVER ARGS] limit: ${params.limit}, offset: ${params.offset}`);
+      const { limit = 25, offset = 0 } = params;
       const allItems = await loaders.studentsBySchoolId.load(root.id);
+      console.log(`[RESOLVER RESULT] Retrieved ${allItems.length} students for School ID: ${root.id}`);
       return allItems.slice(offset, offset + limit);
     },
     buses: async (root, args, { loaders }) => {

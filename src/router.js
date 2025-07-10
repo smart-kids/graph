@@ -62,6 +62,7 @@ export default (storage) => {
 
   // ... (imports remain the same)
 
+// in your main router file
 router.use(
   "/graph",
   validator.headers(headerSchema),
@@ -69,15 +70,12 @@ router.use(
   async (req, res, next) => {
     const db = await storage;
 
-    // <<< CORRECTED: 1. Instantiate each set of loaders separately.
     const schoolLoaderSet = schoolLoaders(db.collections);
     const studentLoaderSet = studentLoaders(db.collections);
 
-    // <<< CORRECTED: 2. Merge all loader objects into a single 'loaders' object.
     const allLoaders = {
       ...schoolLoaderSet,
       ...studentLoaderSet,
-      // ...add other loader sets here in the future
     };
 
     return graphqlHTTP({
@@ -86,9 +84,8 @@ router.use(
       context: {
         auth: req.auth,
         db,
-        // <<< CORRECTED: 3. Pass the single, merged object to the context.
         loaders: allLoaders,
-        args: req.body
+        params: req.body
       },
       customFormatErrorFn: err => {
         console.error("GraphQL Error:", err);
