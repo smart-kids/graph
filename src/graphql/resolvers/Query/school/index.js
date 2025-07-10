@@ -136,32 +136,14 @@ const list = async (root, args, { auth, db: { collections }, loaders }) => {
   }
 };
 // in your resolver file
-const single = async (root, args, { auth, open,db: { collections }, loaders, params:{params}={params:{id:undefined}} }) => {
-  // `args` is the second parameter, passed automatically by GraphQL.
-  // It will contain an object like { id: 'some-school-id' } if the query was `school(id: "some-school-id")`.
+const single = async (root, args, { auth, open, db: { collections }, loaders, params: { params } = { params: { id: undefined } } }) => {
+  console.log(auth)
+  let id = auth?.schoolId || params?.id;
 
-  if(open) return loaders.schoolById.load(openSchoolId);
-
-  // If there are no arguments, we can't proceed.
-  const id = params?.id || auth?.schoolId;
-  if (!id) {
-      // Or handle based on whether an ID is always required
-      return null; 
+  if (open === true && !id) {
+      id = openSchoolId;
   }
 
-  let { userType, school, schoolId } = auth;
-  let userTokenSchoolId = schoolId || school;
-
-  // --- LOGIC CORRECTION ---
-  // The original check `userTokenSchoolId !== userTokenSchoolId` was always false.
-  // You likely want to check if the user is authorized to view the requested school ID.
-  // if (userType !== 'sAdmin' && userTokenSchoolId !== id) {
-  //     // User is not a super admin and is trying to access a school they don't belong to.
-  //     console.warn(`Authorization denied: User with school '${userTokenSchoolId}' tried to access school '${id}'.`);
-  //     return null; // or throw new Error("Not Authorized");
-  // }
-
-  // Now, confidently use args.id
   return loaders.schoolById.load(id);
 };
 
