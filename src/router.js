@@ -88,6 +88,7 @@ router.use(
         db,
         // <<< CORRECTED: 3. Pass the single, merged object to the context.
         loaders: allLoaders,
+        args: req.body
       },
       customFormatErrorFn: err => {
         console.error("GraphQL Error:", err);

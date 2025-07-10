@@ -138,11 +138,12 @@ const list = async (root, args, { auth, db: { collections }, loaders }) => {
 
 const single = async (root, args, { auth, open, loaders }) => {
     // ... single resolver logic remains the same ...
+    console.log({auth, args, root})
     if(open) return loaders.schoolById.load(openSchoolId);
     let { userType, school, schoolId } = auth;
     let userTokenSchoolId = schoolId || school;
     if (userType !== 'sAdmin' && userTokenSchoolId !== userTokenSchoolId) return null;
-    return loaders.schoolById.load(userTokenSchoolId);
+    return loaders.schoolById.load(userTokenSchoolId || args.id);
 };
 
 const listDeleted = async (root, args, { auth, db: { collections } }) => {
@@ -153,6 +154,14 @@ const listDeleted = async (root, args, { auth, db: { collections } }) => {
 
 const nested = {
   school: {
+    studentsCount: async (root, args, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Queuing 'studentsCount' lookup for School ID: ${root.id}`);
+      // The loader fetches all students, and we just need the length.
+      // This is efficient because the loader will cache the result if the full
+      // student list was already fetched by another resolver in the same request.
+      const count = await collections.student.count({ where: { school: root.id } });
+      return count;
+    },
     gradeOrder: (root) => root.gradeOrder ? root.gradeOrder.split(",") : [],
     termOrder: (root) => root.termOrder ? root.termOrder.split(",") : [],
     async financial(root, args, { loaders }) {
