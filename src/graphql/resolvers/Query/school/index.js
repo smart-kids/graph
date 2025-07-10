@@ -169,13 +169,15 @@ const nested = {
     // database query problem, then paginate the full result set in memory.
     // ==============================================================================
 
-    students: async (root, args, { loaders, params:{params} }) => {
+    students: async (root, { limit, offset }, { loaders, params:{params} }) => {
+      const { limit: limitFromParams = 25, offset: offsetFromParams = 0 } = params;
+      const finalLimit = limit || limitFromParams;
+      const finalOffset = offset || offsetFromParams;
       console.log(`[RESOLVER CALL] Queuing 'students' lookup for School ID: ${root.id}`);
-      console.log(`[RESOLVER ARGS] limit: ${params.limit}, offset: ${params.offset}`);
-      const { limit = 25, offset = 0 } = params;
+      console.log(`[RESOLVER ARGS] limit: ${finalLimit}, offset: ${finalOffset}`);
       const allItems = await loaders.studentsBySchoolId.load(root.id);
       console.log(`[RESOLVER RESULT] Retrieved ${allItems.length} students for School ID: ${root.id}`);
-      return allItems.slice(offset, offset + limit);
+      return allItems.slice(finalOffset, finalOffset + finalLimit);
     },
     buses: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'buses' lookup for School ID: ${root.id}`);
