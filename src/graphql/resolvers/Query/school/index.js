@@ -169,7 +169,7 @@ const nested = {
     // database query problem, then paginate the full result set in memory.
     // ==============================================================================
 
-    students: async (root, { limit, offset }, { loaders, params:{params} }) => {
+    students: async (root, { limit, offset }, { loaders, params:{ params }= { params:{limit:25,offset:0 } } }) => {
       const { limit: limitFromParams = 25, offset: offsetFromParams = 0 } = params;
       const finalLimit = limit || limitFromParams;
       const finalOffset = offset || offsetFromParams;
