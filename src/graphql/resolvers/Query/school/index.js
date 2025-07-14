@@ -50,8 +50,8 @@ const groupItemsByKey = (items, keyField) => {
 };
 
 const mapItemsToKeys = (keys, items, keyField = 'id') => {
-    const itemMap = new Map(items.map(item => [String(item[keyField]), item]));
-    return keys.map(key => itemMap.get(String(key)) || null);
+  const itemMap = new Map(items.map(item => [String(item[keyField]), item]));
+  return keys.map(key => itemMap.get(String(key)) || null);
 };
 
 // --- DataLoader Factory with Logging ---
@@ -72,13 +72,13 @@ export const createLoaders = (collections) => {
 
   const createByIdLoader = (collectionName) => {
     return new DataLoader(async (keys) => {
-        // ✅ LOGGING: This log fires ONCE per batch for ID-based lookups.
-        console.log(`\n[DATALOADER BATCH] Firing batch request for collection '${collectionName}' by ID with ${keys.length} keys:`, keys);
+      // ✅ LOGGING: This log fires ONCE per batch for ID-based lookups.
+      console.log(`\n[DATALOADER BATCH] Firing batch request for collection '${collectionName}' by ID with ${keys.length} keys:`, keys);
 
-        const items = await collections[collectionName].find({
-            where: { id: { in: keys }, isDeleted: false }
-        });
-        return mapItemsToKeys(keys, items, 'id');
+      const items = await collections[collectionName].find({
+        where: { id: { in: keys }, isDeleted: false }
+      });
+      return mapItemsToKeys(keys, items, 'id');
     });
   };
 
@@ -106,18 +106,22 @@ export const createLoaders = (collections) => {
 
 // --- GraphQL Resolvers (Using Loaders) ---
 
-const list = async (root, args, { auth={}, db: { collections }, loaders }) => {
+const list = async (root, args, { auth = {}, open, db: { collections }, loaders }) => {
   let { userType, schoolId } = auth;
 
   if (userType === 'sAdmin') {
-      const query = { where: { isDeleted: false } };
-      return await collections[name].find(query);
+    const query = { where: { isDeleted: false } };
+    return await collections[name].find(query);
   } else {
-      if (!schoolId) {
-           throw new GraphQLError('Access Denied: User configuration incomplete.', { extensions: { code: 'FORBIDDEN' } });
-      }
-      const school = await loaders.schoolById.load(schoolId);
-      return school ? [school] : [];
+    if (open === true && !schoolId) {
+      schoolId = openSchoolId;
+    }
+
+    // if (!schoolId) {
+    //   throw new GraphQLError('Access Denied: User configuration incomplete.', { extensions: { code: 'FORBIDDEN' } });
+    // }
+    const school = await loaders.schoolById.load(schoolId);
+    return school ? [school] : [];
   }
 };
 // in your resolver file
@@ -126,7 +130,7 @@ const single = async (root, args, { auth, open, db: { collections }, loaders, pa
   let id = auth?.schoolId || params?.id;
 
   if (open === true && !id) {
-      id = openSchoolId;
+    id = openSchoolId;
   }
 
   return loaders.schoolById.load(id);
