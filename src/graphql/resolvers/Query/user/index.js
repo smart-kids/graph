@@ -1,6 +1,6 @@
 const { name } = require("./about.js")
 
-const single = async (root, args, { auth, db: { collections } }) => {
+const single = async (root, args, { auth={}, db: { collections } }) => {
   return {
     id: auth.id,
     name: auth.names,

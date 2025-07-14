@@ -106,7 +106,7 @@ export const createLoaders = (collections) => {
 
 // --- GraphQL Resolvers (Using Loaders) ---
 
-const list = async (root, args, { auth, db: { collections }, loaders }) => {
+const list = async (root, args, { auth={}, db: { collections }, loaders }) => {
   let { userType, schoolId } = auth;
 
   if (userType === 'sAdmin') {

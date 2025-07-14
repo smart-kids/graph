@@ -5,6 +5,7 @@ import dataGraphRouter from "./router"
 import { router as authRouter } from "./auth" // Renamed for clarity
 import storage from "./storage"
 import { createMpesaRouter } from "./payments" // <-- 1. IMPORT THE FACTORY FUNCTION
+import { router as ai_mlRouter } from "./ai_ml" // <-- 1. IMPORT THE FACTORY FUNCTION
 import morgan from "morgan";
 import cors from "cors"
 
@@ -47,6 +48,7 @@ async function attatch() {
     app.use(["/", "/graph"], dataGraphRouter(storage))
     app.use("/auth", authRouter)
     app.use("/mpesa", await createMpesaRouter(storage, io)) // <-- 2. INITIALIZE AND MOUNT THE ROUTER
+    app.use("/ai_ml", ai_mlRouter) // <-- 2. INITIALIZE AND MOUNT THE ROUTER
     app.use("/health", (req, res) => res.json({ status: "ok" }))
 }
 

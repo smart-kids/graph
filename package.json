@@ -24,6 +24,7 @@
     "@bugsnag/js": "^7.7.0",
     "@bugsnag/plugin-express": "^7.7.0",
     "@google-cloud/functions-framework": "^3.4.2",
+    "@google/generative-ai": "^0.24.1",
     "@hapi/joi": "^16.1.7",
     "argon2": "^0.27.1",
     "axios": "^1.10.0",
@@ -53,6 +54,7 @@
     "moment": "^2.29.1",
     "mongodb": "^6.15.0",
     "morgan": "^1.9.1",
+    "multer": "^2.0.1",
     "node-fetch": "^2.6.1",
     "nodemailer": "^6.4.14",
     "nodemailer-smtp-transport": "^2.7.4",
@@ -67,6 +69,7 @@
     "sails-postgresql": "^5.0.1",
     "socket.io": "^2.3.0",
     "source-map-support": "^0.5.19",
+    "tesseract.js": "^6.0.1",
     "uuidv4": "^4.0.0",
     "waterline": "^0.15.2"
   },
