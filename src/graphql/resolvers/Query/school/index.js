@@ -127,7 +127,7 @@ const list = async (root, args, { auth = {}, open, db: { collections }, loaders 
 // in your resolver file
 const single = async (root, args, { auth, open, db: { collections }, loaders, params: { params } = { params: { id: undefined } } }) => {
   console.log(auth)
-  let id = auth?.schoolId || params?.id;
+  let id = auth?.schoolId || params?.id || args.id;
 
   if (open === true && !id) {
     id = openSchoolId;
@@ -173,11 +173,11 @@ const nested = {
     // database query problem, then paginate the full result set in memory.
     // ==============================================================================
 
-    students: async (root, { limit = 25, offset = 0 }, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'students' lookup for School ID: ${root.id}`);
+    students: async (root, {id, limit = 25, offset = 0 }, { loaders }) => {
+      console.log(`[RESOLVER CALL] Queuing 'students' lookup for School ID: ${id}`);
       console.log(`[RESOLVER ARGS] limit: ${limit}, offset: ${offset}`);
       const allItems = await loaders.studentsBySchoolId.load(root.id);
-      console.log(`[RESOLVER RESULT] Retrieved ${allItems.length} students for School ID: ${root.id}`);
+      console.log(`[RESOLVER RESULT] Retrieved ${allItems.length} students for School ID: ${id}`);
       return allItems.slice(offset, offset + limit);
     },
     buses: async (root, args, { loaders }) => {

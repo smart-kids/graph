@@ -966,20 +966,20 @@ type subject {
   name: String
   grade: grade
   topics(limit: Int, offset: Int): [topic]
-  topicOrder: [String]
+  topicsOrder: [String]
 }
 
 input Isubject {
   name: String!
   grade: String!
-  topicOrder: [String]
+  topicsOrder: [String]
 }
 
 input Usubject {
   id: String!
   name: String
   grade: String
-  topicOrder: [String]
+  topicsOrder: [String]
 }
 
 type subjectMutations {
