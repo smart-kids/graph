@@ -149,7 +149,7 @@ const nested = {
       // The loader fetches all students, and we just need the length.
       // This is efficient because the loader will cache the result if the full
       // student list was already fetched by another resolver in the same request.
-      const count = await collections.student.count({ where: { school: root.id } });
+      const count = await collections.student.count({ where: { school: root.id, isDeleted: false } });
       return count;
     },
     parentsCount: async (root, args, { db: { collections } }) => {
@@ -157,7 +157,7 @@ const nested = {
       // The loader fetches all students, and we just need the length.
       // This is efficient because the loader will cache the result if the full
       // student list was already fetched by another resolver in the same request.
-      const count = await collections.parent.count({ where: { school: root.id } });
+      const count = await collections.parent.count({ where: { school: root.id, isDeleted: false } });
       return count;
     },
     gradeOrder: (root) => root.gradeOrder ? root.gradeOrder.split(",") : [],
