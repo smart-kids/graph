@@ -705,6 +705,7 @@ type school {
   # relations for saas
   admins(limit: Int, offset: Int): [admin]
   studentsCount: Int
+  parentsCount: Int
   students(limit: Int, offset: Int): [student]
   parents(limit: Int, offset: Int): [parent]
   drivers(limit: Int, offset: Int): [driver]

@@ -152,6 +152,14 @@ const nested = {
       const count = await collections.student.count({ where: { school: root.id } });
       return count;
     },
+    parentsCount: async (root, args, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Queuing 'parentsCount' lookup for School ID: ${root.id}`);
+      // The loader fetches all students, and we just need the length.
+      // This is efficient because the loader will cache the result if the full
+      // student list was already fetched by another resolver in the same request.
+      const count = await collections.parent.count({ where: { school: root.id } });
+      return count;
+    },
     gradeOrder: (root) => root.gradeOrder ? root.gradeOrder.split(",") : [],
     termOrder: (root) => root.termOrder ? root.termOrder.split(",") : [],
     async financial(root, args, { loaders }) {
