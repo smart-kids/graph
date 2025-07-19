@@ -89,7 +89,7 @@ async function generateTokenForUser(userId, determinedUserType, collections) {
 
             case 'driver':
                 dbCollectionName = 'driver'; // Use the specific driver collection
-                userRecord = await collections[dbCollectionName].findOne({ where: { id: userId, isDeleted: false } }); // Assuming driver has its own id
+                userRecord = await collections[dbCollectionName].findOne({ where: { id: userId, isDeleted: false } }); // Assuming driver has its own id matching users.id
                 if (!userRecord) throw new Error(`Driver record not found in ${dbCollectionName} for ID: ${userId}`);
                 if (!userRecord.school) {
                     console.error(`Driver user ${userId} has no school assigned.`);
@@ -98,6 +98,36 @@ async function generateTokenForUser(userId, determinedUserType, collections) {
                 payload = {
                     userId: userRecord.id,
                     userType: 'driver',
+                    schoolId: userRecord.school, // Include school ID
+                };
+                break; // Exit switch
+
+            case 'teacher':
+                dbCollectionName = 'teacher'; // Use the specific teacher collection
+                userRecord = await collections[dbCollectionName].findOne({ where: { id: userId, isDeleted: false } }); // Assuming teacher has its own id
+                if (!userRecord) throw new Error(`Teacher record not found in ${dbCollectionName} for ID: ${userId}`);
+                if (!userRecord.school) {
+                    console.error(`Teacher user ${userId} has no school assigned.`);
+                    throw new Error("Teacher account configuration incomplete (missing school).");
+                }
+                payload = {
+                    userId: userRecord.id,
+                    userType: 'teacher',
+                    schoolId: userRecord.school, // Include school ID
+                };
+                break; // Exit switch
+            
+            case 'student':
+                dbCollectionName = 'student'; // Use the specific student collection
+                userRecord = await collections[dbCollectionName].findOne({ where: { id: userId, isDeleted: false } }); // Assuming student has its own id
+                if (!userRecord) throw new Error(`Student record not found in ${dbCollectionName} for ID: ${userId}`);
+                if (!userRecord.school) {
+                    console.error(`Student user ${userId} has no school assigned.`);
+                    throw new Error("Student account configuration incomplete (missing school).");
+                }
+                payload = {
+                    userId: userRecord.id,
+                    userType: 'student',
                     schoolId: userRecord.school, // Include school ID
                 };
                 break; // Exit switch
@@ -1208,6 +1238,7 @@ router.post(
             { type: 'admin', collection: 'admin', field: adminIdentifierField },
             // Others typically use phone or email
             { type: 'teacher', collection: 'teacher', field: identifierField },
+            { type: 'student', collection: 'student', field: identifierField },
             { type: 'parent', collection: 'parent', field: identifierField },
             { type: 'driver', collection: 'driver', field: identifierField },
             // Add 'users' here if it's a fallback or primary source
