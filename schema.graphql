@@ -970,10 +970,17 @@ type subject {
   topicsOrder: [String]
 }
 
+input image {
+  name: String
+  dataUrl: String
+}
+
 input Isubject {
   name: String!
   grade: String!
   topicsOrder: [String]
+  teacher: String
+  topicalImages: [image]
 }
 
 input Usubject {
@@ -981,6 +988,8 @@ input Usubject {
   name: String
   grade: String
   topicsOrder: [String]
+  teacher: String
+  topicalImages: [image]
 }
 
 type subjectMutations {
