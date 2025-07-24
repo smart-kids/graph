@@ -1120,7 +1120,7 @@ router.post(
 
             // The "user" who logs in is the Parent.
             // We'll create a user object for the token that includes their role.
-            const user = { ...Object.assign(parentData, { parentid }), role: 'parent' };
+            const user = { ...Object.assign(parentData, { parentid, school }), role: 'parent' };
             const token = jwt.sign(user, config.secret);
 
 

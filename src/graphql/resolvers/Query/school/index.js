@@ -107,7 +107,7 @@ export const createLoaders = (collections) => {
 // --- GraphQL Resolvers (Using Loaders) ---
 
 const list = async (root, args, { auth = {}, open, db: { collections }, loaders }) => {
-  let { userType, schoolId } = auth;
+  let { userType, school:schoolId } = auth;
 
   if (userType === 'sAdmin') {
     const query = { where: { isDeleted: false } };
