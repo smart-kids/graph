@@ -1147,10 +1147,7 @@ router.post(
                         // school: schoolId,
                         data: { message: `Shule-Plus Code: ${password}.`, phone: parentData.phone }
                     }, ({ code }) => {
-                        res.send({
-                            success: true,
-                            otp: code
-                        })
+                        
                     })
                 })
             }
