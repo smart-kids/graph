@@ -229,23 +229,32 @@ router.post(
         password: Joi.string().required() // OTP code
     })),
     async (req, res) => {
-        const db = await req.app.locals.db; // Get DB instance correctly
+        const db = await req.app.locals.db;
         const { collections } = db;
         const { user, password } = req.body;
 
-        let userInfo;
+        let specificUserRecord = null;
         let determinedUserType = null;
-        let specificUserRecord = null; // To hold admin/driver/parent record if found
 
         try {
-            // --- 1. Find User in Specific Role Collections ---
-            const userSearchingObject = {
-                isDeleted: false,
-                phone: user
+            // --- 1. Find User in Specific Role Collections (Enhanced Logic) ---
+            // Construct a flexible search query that checks both phone and email
+            const userSearchQuery = {
+                where: {
+                    isDeleted: false,
+                    or: [
+                        { phone: user },
+                        { email: user }
+                    ]
+                },
+                limit: 1 // We only expect one user
             };
-            const [adminUser] = await collections["admin"].find({ where: userSearchingObject });
-            const [driverUser] = await collections["driver"].find({ where: userSearchingObject });
-            const [parentUser] = await collections["parent"].find({ where: userSearchingObject });
+
+            // Search across all relevant user types
+            const [adminUser] = await collections["admin"].find(userSearchQuery);
+            const [driverUser] = await collections["driver"].find(userSearchQuery);
+            const [parentUser] = await collections["parent"].find(userSearchQuery);
+
             if (adminUser) {
                 specificUserRecord = adminUser;
                 determinedUserType = 'admin';
@@ -257,21 +266,23 @@ router.post(
                 determinedUserType = 'parent';
             } else {
                 console.log(`User not found for input: ${user}`);
-                return res.status(401).send({ message: 'User not found.' });
+                // Use a more generic message for security to prevent user enumeration
+                return res.status(401).send({ message: 'Invalid credentials or user not found.' });
             }
 
-            // --- 2. Verify OTP ---
-            const [otpData] = await collections["otp"].find({
+            // --- 2. Verify OTP (This part was already correct) ---
+            const otpData = (await collections["otp"].find({
                 where: {
-                    user: specificUserRecord.id, // Use the ID from the found user
-                    password: password, // The OTP code entered by the user
+                    user: specificUserRecord.id, // Use the ID from the found user record
+                    password: password,
                     used: false
-                }
-            });
+                },
+                sort: 'createdAt DESC', // More standard syntax for sorting
+                limit: 1
+            }))[0];
 
             if (!otpData) {
                 console.log(`Invalid or used OTP for user: ${specificUserRecord.id}`);
-                // Optional: Check if OTP exists but is wrong vs not found/used
                 return res.status(401).send({ message: "Invalid or expired OTP." });
             }
 
@@ -282,23 +293,20 @@ router.post(
             console.log(`OTP marked as used: ${otpData.id}`);
 
             // --- 4. Generate Structured Token ---
-            // We use specificUserRecord.id as the canonical user identifier
             const { token, user: safeUserData } = await generateTokenForUser(specificUserRecord.id, determinedUserType, collections);
 
             // Add the determined UserType to the safe user data
             safeUserData.userType = determinedUserType;
 
             // --- 5. Send Response ---
-            return res.send({ token, user: safeUserData }); // Send structured token and sanitized user data
+            return res.send({ token, user: safeUserData });
 
         } catch (error) {
             console.error("Error during SMS verification:", error);
-            // Send a generic error message to the client
-            return res.status(500).send({ message: error.message || "An internal server error occurred during verification." });
+            return res.status(500).send({ message: "An internal server error occurred." });
         }
     }
 );
-
 
 function makeid() {
     var text = "";
@@ -1149,7 +1157,7 @@ router.post(
                         // school: schoolId,
                         data: { message: `Shule-Plus Code: ${password}.`, phone: parentData.phone }
                     }, ({ code }) => {
-                        
+                        console.log("OTP sent successfully.");
                     })
                 })
             }
