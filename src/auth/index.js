@@ -250,9 +250,19 @@ router.post(
                 limit: 1 // We only expect one user
             };
 
+            const driverSearchQuery = {
+                where: {
+                    isDeleted: false,
+                    or: [
+                        { phone: user },
+                    ]
+                },
+                limit: 1 // We only expect one user
+            };
+
             // Search across all relevant user types
             const [adminUser] = await collections["admin"].find(userSearchQuery);
-            const [driverUser] = await collections["driver"].find(userSearchQuery);
+            const [driverUser] = await collections["driver"].find(driverSearchQuery);
             const [parentUser] = await collections["parent"].find(userSearchQuery);
 
             if (adminUser) {
