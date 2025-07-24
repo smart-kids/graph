@@ -20,6 +20,17 @@ const config = {
     secret: ENCRYPTION_TOKEN
 }
 
+// Helper to simulate ObjectId if not available in the environment (e.g. browser mock)
+// In a real Node.js environment with MongoDB driver, `new ObjectId()` is preferred.
+const generateId = () => {
+    if (typeof ObjectId !== 'undefined') {
+        return new ObjectId().toHexString();
+    }
+    // Simple fallback for environments without ObjectId (less robust for uniqueness)
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+};
+
+
 const checkToken = (req, res, next) => {
     const token = req.headers['authorization']; // Or however you get the token
 
@@ -116,7 +127,7 @@ async function generateTokenForUser(userId, determinedUserType, collections) {
                     schoolId: userRecord.school, // Include school ID
                 };
                 break; // Exit switch
-            
+
             case 'student':
                 dbCollectionName = 'student'; // Use the specific student collection
                 userRecord = await collections[dbCollectionName].findOne({ where: { id: userId, isDeleted: false } }); // Assuming student has its own id
@@ -406,15 +417,6 @@ async function seedInitialDataForSchool(orm, schoolId, schoolDetails) {
     const { name: schoolName, email: schoolEmail, phone: schoolPhone } = schoolDetails;
     const collections = orm.collections;
 
-    // Helper to simulate ObjectId if not available in the environment (e.g. browser mock)
-    // In a real Node.js environment with MongoDB driver, `new ObjectId()` is preferred.
-    const generateId = () => {
-        if (typeof ObjectId !== 'undefined') {
-            return new ObjectId().toHexString();
-        }
-        // Simple fallback for environments without ObjectId (less robust for uniqueness)
-        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-    };
 
 
     console.log(`Starting to seed data for schoolId: ${schoolId}`);
@@ -879,7 +881,7 @@ router.post(
             return res.status(500).send({ error: "Server configuration error: ORM not available." });
         }
         const { collections } = orm; // Use ORM collections
-        const { name, phone, email, address, password:adminPassword } = req.body;
+        const { name, phone, email, address, password: adminPassword } = req.body;
 
         try {
             // create a school object
@@ -1057,44 +1059,111 @@ router.get(
     }
 );
 
+// In your router file (e.g., routes/auth.js)
+
 router.post(
     "/register/student",
     validator.body(Joi.object({
         school: Joi.string().required(),
         parent: Joi.object({
             name: Joi.string().required(),
-            phone: Joi.string().required(),
-            email: Joi.string().required(),
+            phone: Joi.string(), //.required().pattern(/^[0-9]{10,15}$/),
+            email: Joi.string().email().required(),
+            national_id: Joi.string().default('-'),
+            gender: Joi.string().default('UNKOWN'),
+            registration: Joi.string().default('-'),
         }).required(),
         student: Joi.object({
             name: Joi.string().required(),
-            class: Joi.string().required(),
-            route: Joi.string().required()
+            class: Joi.string().required(), // This will be the class ID
+            route: Joi.string().required(),
+            gender: Joi.string().default('UNKOWN'),
+            registration: Joi.string().default('-'),
         }).required()
     })),
     async (req, res) => {
-        const db = await req.app.locals.db
-        const { collections } = db
-        const { school, parent, student } = req.body
-
-        const parentData = {
-            ...parent,
-            school
-        };
-        const studentData = {
-            ...student,
-            school,
-            parent: parent.name
-        };
+        const db = await req.app.locals.db;
+        const { collections } = db;
+        const { school, parent, student } = req.body;
 
         try {
-            const [newParent] = await collections.parents.create(parentData).fetch();
-            const [newStudent] = await collections.students.create({ ...studentData, parent: newParent.id }).fetch();
-            const user = { ...newStudent, role: 'student' };
+            // Check if a parent with this phone or email already exists for this school
+            const existingParent = await collections.parent.findOne({
+                or: [{ phone: parent.phone }, { email: parent.email }],
+                school: school
+            });
+
+            if (existingParent) {
+                return res.status(409).send({ error: "A parent with this phone number or email already exists for this school." });
+            }
+
+            // Generate a unique parent ID
+            const parentid = await generateId();
+
+            // Create the parent user
+            const parentData = { ...parent, id: parentid, school };
+            const result = await collections.parent.create(parentData);
+
+            // Generate a unique student ID
+            const studentid = await generateId();
+
+            // Create the student and link them to the newly created parent
+            const studentData = {
+                ...student,
+                id: studentid,
+                school,
+                names: student.name,
+                parent: parentid // Link using the parent's ID
+            };
+            const result2 = await collections.student.create(studentData);
+
+            // The "user" who logs in is the Parent.
+            // We'll create a user object for the token that includes their role.
+            const user = { ...Object.assign(parentData, { parentid }), role: 'parent' };
             const token = jwt.sign(user, config.secret);
+
+
+            // generate OTP, send it and save it
+            const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
+
+            const otpSaveInfo = await collections["otp"].create({
+                id: new ObjectId().toHexString(),
+                user: parentid,
+                password
+            })
+
+            // send sms to phone
+            if (!['development', "test"].includes(NODE_ENV)) {
+                // send welcome message first
+                sms({
+                    // school: schoolId,
+                    data: {
+                        message: `Welcome to Shule-Plus! We're glad you're here. Your child, ${student.name}, has been registered to class ${student.class}.`,
+                        phone: parentData.phone
+                    }
+                }, () => {
+                    // send OTP code
+                    sms({
+                        // school: schoolId,
+                        data: { message: `Shule-Plus Code: ${password}.`, phone: parentData.phone }
+                    }, ({ code }) => {
+                        res.send({
+                            success: true,
+                            otp: code
+                        })
+                    })
+                })
+            }
+
+            // Send back the token and the parent's user object.
             return res.send({ user, token });
+
         } catch (error) {
             console.error("Error during student registration:", error);
+            // Check for waterline validation errors specifically if possible
+            if (error.name === 'AdapterError') {
+                return res.status(400).send({ error: "Invalid data provided. Please check your input." });
+            }
             return res.status(500).send({ error: "An unexpected error occurred during registration." });
         }
     }

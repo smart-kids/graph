@@ -1,4 +1,4 @@
-// src/graphql/resolvers/Mutation/subjects/index.js (or wherever your create function is)
+// src/graphql/resolvers/Mutation/subjects/index.js
 
 import { ObjectId } from "mongodb";
 const { name } = require("./about.js"); // Assuming 'name' refers to the subject collection
@@ -50,317 +50,316 @@ async function retryOperation(operation, maxRetries = 3, delayMs = 1000, operati
 }
 
 
-// --- Helper Function 1: Extract Topics and Lessons (REMOVED - Not used in this flow) ---
-// ... This function is no longer needed as we rely solely on manual JSON input ...
-
-
-// --- Helper Function 2: Generate Questions for a Single Lesson (REMOVED - Not directly called by create resolver) ---
-// This function's PROMPT TEMPLATE is used by the Modal component to help the user generate the prompt.
-// The actual generation is done by the user externally.
-
-
 // --- Modified create function ---
 const create = async (data, { db: { collections } }) => {
-    const subjectCollection = collections[name];
-    const gradeCollection = collections.grade;
-    const topicCollection = collections.topic;
-    const subtopicCollection = collections.subtopic;
-    const questionCollection = collections.question;
-    const optionCollection = collections.option;
-    const answerCollection = collections.answer;
+  console.log("Subject creation started.", data);
+  const subjectCollection = collections[name];
+  const gradeCollection = collections.grade;
+  const topicCollection = collections.topic;
+  const subtopicCollection = collections.subtopic;
+  const questionCollection = collections.question;
+  const optionCollection = collections.option;
+  const answerCollection = collections.answer;
 
-    const generateId = () => new ObjectId().toHexString();
+  const generateId = () => new ObjectId().toHexString();
 
-    const subjectId = generateId();
+  const subjectId = generateId();
 
-    const subjectInputData = data[name];
-    if (!subjectInputData) {
-        throw new UserError(`No subject data provided in the input.`);
-    }
+  const subjectInputData = data[name];
+  if (!subjectInputData) {
+      throw new UserError(`No subject data provided in the input.`);
+  }
 
-    // Determine if manual AI input is provided. Image upload logic is removed.
-    const useManualAiInput = subjectInputData.aiGeneratedCurriculum && typeof subjectInputData.aiGeneratedCurriculum === 'object' && Object.keys(subjectInputData.aiGeneratedCurriculum).length > 0;
+  // --- VALIDATION ---
+  if (!subjectInputData.name) throw new UserError("Subject name is missing.");
+  if (!subjectInputData.grade) throw new UserError("Grade ID is missing.");
+  if (!subjectInputData.teacher) throw new UserError("Teacher ID is missing.");
+  // --- END VALIDATION ---
 
-    let extractedCurriculum = null; // Holds { topics: [...] } from pasted JSON
+  console.log("Subject Input Data received:", JSON.stringify(subjectInputData, null, 2));
 
-    let createdTopicIds = [];
-    let createdSubtopicIds = [];
-    let createdQuestionIds = [];
-    let createdOptionIds = [];
-    let createdAnswerIds = [];
+  let extractedCurriculum = null;
+  const useManualAiInput = typeof subjectInputData.aiGeneratedCurriculum === 'string' && subjectInputData.aiGeneratedCurriculum.trim().length > 0;
 
-    // --- Step 1: Get Curriculum Data from Manual Input ---
-    if (useManualAiInput) {
-        console.log("Manual AI JSON input provided.");
-        // Validate the manual AI input
-        if (typeof subjectInputData.aiGeneratedCurriculum === 'object' && subjectInputData.aiGeneratedCurriculum.topics) {
-            // Perform basic validation on the pasted JSON
-            let allLessonsHaveSufficientQuestions = true;
-            // Check if there are any topics/lessons/questions to validate against
-            if (subjectInputData.aiGeneratedCurriculum.topics.length > 0 && subjectInputData.aiGeneratedCurriculum.topics[0].lessons && subjectInputData.aiGeneratedCurriculum.topics[0].lessons.length > 0) {
-                for (const topic of subjectInputData.aiGeneratedCurriculum.topics) {
-                    for (const lesson of topic.lessons) {
-                        if (!lesson.questions || lesson.questions.length < 4) { // Check for minimum 4 questions
-                            allLessonsHaveSufficientQuestions = false;
-                            break;
-                        }
-                    }
-                    if (!allLessonsHaveSufficientQuestions) break;
-                }
-            }
+  if (useManualAiInput) {
+      try {
+          const parsedCurriculum = JSON.parse(subjectInputData.aiGeneratedCurriculum);
+          if (typeof parsedCurriculum === 'object' && parsedCurriculum.topics && Array.isArray(parsedCurriculum.topics)) {
+              extractedCurriculum = parsedCurriculum;
+              console.log("Manual AI JSON is valid and processed.");
+          } else {
+              throw new UserError("Pasted AI JSON is invalid or missing 'topics' array.");
+          }
+      } catch (parseError) {
+          console.error("Error parsing AI JSON:", parseError);
+          throw new UserError(`Invalid AI JSON format: ${parseError.message}`);
+      }
+  } else {
+      console.log("No AI input provided for curriculum generation. Subject will be created without AI-generated content.");
+  }
 
-            if (!allLessonsHaveSufficientQuestions) {
-                console.warn("Pasted AI JSON does not meet the minimum question count requirement (4 per lesson).");
-                throw new UserError("Pasted AI JSON does not meet the minimum question count requirement (4 per lesson).");
-            }
+  let createdTopicIds = [];
+  let createdSubtopicIds = [];
+  let createdQuestionIds = [];
+  let createdOptionIds = [];
+  let createdAnswerIds = [];
 
-            extractedCurriculum = subjectInputData.aiGeneratedCurriculum; // Use the valid manual input
-            console.log("Pasted AI JSON is valid.");
-        } else {
-            console.warn("Pasted AI JSON is invalid or missing 'topics'. Cannot use manual AI input.");
-            throw new UserError("Pasted AI JSON is invalid or missing 'topics'.");
-        }
-    } else {
-        console.log("No AI input provided for curriculum generation. Subject will be created without AI-generated content.");
-        // If no AI input is provided, the subject will be created, but without topics/lessons/questions from AI.
-        // The 'topicsToCreate' array will remain empty.
-    }
+  // --- Prepare Data for Database Insertion ---
+  const finalSubjectEntry = {
+      id: subjectId,
+      name: subjectInputData.name,
+      grade: subjectInputData.grade,
+      teacher: subjectInputData.teacher,
+      school: subjectInputData.school,
+      topicalImages: undefined,
+      topicsOrder: [],
+  };
 
-    // --- Step 2: Prepare Subject and Process Curriculum Data for Database Insertion ---
-    let finalSubjectEntry;
-    try {
-        finalSubjectEntry = {
-            id: subjectId,
-            name: subjectName,
-            grade: gradeId,
-            teacher: subjectInputData.teacher,
-            school: subjectInputData.school,
-            topicalImages: undefined, // No images used in this flow
-            topicsOrder: [],
-        };
+  const topicsWithChildren = []; // Temporary array to hold topics with their nested children
 
-        let topicsToCreate = [];
+  // --- Step 1: Build the complete nested data structure in memory ---
+  if (extractedCurriculum && extractedCurriculum.topics) {
+      console.log(`Processing ${extractedCurriculum.topics.length} topics from AI data.`);
+      for (const topic of extractedCurriculum.topics) {
+          if (!topic.title) {
+              console.warn("Skipping a topic because it has no title.");
+              continue;
+          }
+          console.log(`Processing topic: "${topic.title}"`);
 
-        // Proceed only if we have curriculum data from manual input
-        if (extractedCurriculum && extractedCurriculum.topics && extractedCurriculum.topics.length > 0) {
-            for (const topic of extractedCurriculum.topics) {
-                // Skip topics that ended up with no lessons or no questions after processing
-                if (!topic.lessons || topic.lessons.length === 0) {
-                    console.log(`Skipping topic "${topic.title}" as it has no lessons.`);
-                    continue;
-                }
+          if (!topic.lessons || !Array.isArray(topic.lessons) || topic.lessons.length === 0) {
+              console.log(`Skipping topic "${topic.title}" as it has no valid 'lessons' array.`);
+              continue;
+          }
+          console.log(`  Topic "${topic.title}" has ${topic.lessons.length} lessons.`);
 
-                const topicId = generateId();
-                createdTopicIds.push(topicId);
-                finalSubjectEntry.topicsOrder.push(topicId);
+          const topicId = generateId();
+          createdTopicIds.push(topicId);
+          finalSubjectEntry.topicsOrder.push(topicId);
 
-                const topicData = {
-                    id: topicId,
-                    name: topic.title,
-                    subject: subjectId,
-                    grade: gradeId,
-                    icon: topic.icon || "file-certificate",
-                    school: subjectInputData.school,
-                    subTopicOrder: [],
-                };
-                topicsToCreate.push(topicData);
-                console.log(`Preparing Topic: "${topic.title}" (ID: ${topicId})`);
+          const topicData = {
+              id: topicId,
+              name: topic.title,
+              subject: subjectId,
+              grade: subjectInputData.grade,
+              icon: topic.icon || "file-certificate",
+              school: subjectInputData.school,
+              subTopicOrder: [],
+          };
+          
+          const subtopicsForThisTopic = [];
+          for (const lesson of topic.lessons) {
+              if (!lesson.title) {
+                  console.warn("Skipping a lesson because it has no title.");
+                  continue;
+              }
+              console.log(`  Processing lesson: "${lesson.title}"`);
 
-                let currentTopicSubtopicOrder = [];
-                for (const lesson of topic.lessons) {
-                    // Get questions for this lesson directly from the pasted JSON
-                    const lessonQuestions = lesson.questions;
+              const lessonQuestions = lesson.questions;
+              if (!lessonQuestions || !Array.isArray(lessonQuestions) || lessonQuestions.length === 0) {
+                  console.log(`    Skipping lesson "${lesson.title}" as its 'questions' array is empty or invalid.`);
+                  continue;
+              }
+              console.log(`    Lesson "${lesson.title}" has ${lessonQuestions.length} questions.`);
 
-                    if (!lessonQuestions || lessonQuestions.length === 0) {
-                        console.log(`  Skipping lesson "${lesson.title}" as no questions were provided in the JSON.`);
-                        continue; // Skip lesson if no questions were provided
-                    }
+              const subtopicId = generateId();
+              createdSubtopicIds.push(subtopicId);
+              topicData.subTopicOrder.push(subtopicId);
 
-                    const subtopicId = generateId();
-                    currentTopicSubtopicOrder.push(subtopicId);
-                    createdSubtopicIds.push(subtopicId);
+              const subtopicData = {
+                  id: subtopicId,
+                  name: lesson.title,
+                  topic: topicId,
+                  duration: lesson.duration || "~ 10 mins",
+                  school: subjectInputData.school,
+              };
 
-                    const subtopicData = {
-                        id: subtopicId,
-                        name: lesson.title,
-                        topic: topicId,
-                        duration: lesson.duration || "~ 10 mins",
-                    };
-                    console.log(`  Preparing Subtopic: "${lesson.title}" (ID: ${subtopicId})`);
+              const questionsForThisSubtopic = [];
+              for (const aiQuestion of lessonQuestions) {
+                  if (!aiQuestion || !aiQuestion.name) {
+                      console.warn("Skipping a question because it's invalid or has no name.");
+                      continue;
+                  }
 
-                    let subtopicQuestions = [];
-                    for (const aiQuestion of lessonQuestions) {
-                        const questionId = generateId();
-                        createdQuestionIds.push(questionId);
-                        const questionData = {
-                            id: questionId,
-                            subtopic: subtopicId,
-                            type: "SINGLECHOICE",
-                            name: aiQuestion.name, // This now holds the HTML content
-                            // content field is not used in the question model
-                            response_type: "single_choice",
-                            school: subjectInputData.school,
-                        };
-                        subtopicQuestions.push(questionData);
+                  const questionId = generateId();
+                  createdQuestionIds.push(questionId);
 
-                        const questionOptionsDb = [];
-                        const questionAnswersDb = [];
+                  const questionData = {
+                      id: questionId,
+                      subtopic: subtopicId,
+                      type: "SINGLECHOICE",
+                      name: aiQuestion.name,
+                      response_type: "single_choice",
+                      school: subjectInputData.school,
+                  };
+                  
+                  const questionOptionsDb = [];
+                  const questionAnswersDb = [];
 
-                        if (aiQuestion.options && aiQuestion.options.length > 0) {
-                            for (const aiOption of aiQuestion.options) {
-                                const optionId = generateId();
-                                createdOptionIds.push(optionId);
-                                questionOptionsDb.push({
-                                    id: optionId,
-                                    value: aiOption.value,
-                                    question: questionId,
-                                    school: subjectInputData.school,
-                                });
-                                if (aiOption.correct) {
-                                    const answerId = generateId();
-                                    createdAnswerIds.push(answerId);
-                                    questionAnswersDb.push({
-                                        id: answerId,
-                                        value: optionId,
-                                        question: questionId,
-                                    });
-                                }
-                            }
-                        }
-                        // Attach prepared options and answers to the question data
-                        subtopicQuestions[subtopicQuestions.length - 1].options = questionOptionsDb;
-                        subtopicQuestions[subtopicQuestions.length - 1].answers = questionAnswersDb;
-                    }
-                    subtopicData.questions = subtopicQuestions;
-                    topicData.subtopics = topicData.subtopics || [];
-                    topicData.subtopics.push(subtopicData);
-                }
-                topicData.subTopicOrder = currentTopicSubtopicOrder;
-            }
-        } else {
-            console.log("No valid AI-generated curriculum structure found. Processing manual subject data.");
-            // If no AI data, fallback to manual topicsOrder if provided in input
-            if (subjectInputData.topicsOrder && subjectInputData.topicsOrder.length > 0) {
-                finalSubjectEntry.topicsOrder = subjectInputData.topicsOrder;
-            } else {
-                finalSubjectEntry.topicsOrder = [];
-            }
-        }
+                  if (aiQuestion.options && Array.isArray(aiQuestion.options)) {
+                      for (const aiOption of aiQuestion.options) {
+                          if (!aiOption || typeof aiOption.value === 'undefined') continue;
+                          
+                          const optionId = generateId();
+                          createdOptionIds.push(optionId);
+                          questionOptionsDb.push({
+                              id: optionId,
+                              value: aiOption.value,
+                              question: questionId,
+                              school: subjectInputData.school,
+                          });
+                          if (aiOption.correct) {
+                              const answerId = generateId();
+                              createdAnswerIds.push(answerId);
+                              questionAnswersDb.push({
+                                  id: answerId,
+                                  value: optionId,
+                                  question: questionId,
+                              });
+                          }
+                      }
+                  }
+                  // Temporarily attach children for flattening later
+                  questionData.options = questionOptionsDb;
+                  questionData.answers = questionAnswersDb;
+                  questionsForThisSubtopic.push(questionData);
+              }
+              
+              // Only add subtopic if it has questions
+              if (questionsForThisSubtopic.length > 0) {
+                  subtopicData.questions = questionsForThisSubtopic;
+                  subtopicsForThisTopic.push(subtopicData);
+              } else {
+                  console.log(`  Skipping subtopic "${lesson.title}" because no valid questions were processed for it.`);
+              }
+          }
+          
+          // Only add topic if it has subtopics
+          if (subtopicsForThisTopic.length > 0) {
+              topicData.subtopics = subtopicsForThisTopic;
+              topicsWithChildren.push(topicData);
+          } else {
+              console.log(`Skipping topic "${topic.title}" because no valid subtopics with questions were processed.`);
+          }
+      }
+  }
 
-        // --- Step 4: Bulk Create Records ---
-        await subjectCollection.create(finalSubjectEntry);
-        console.log(`Created main Subject: "${subjectName}" (ID: ${subjectId}) for Grade ID: ${gradeId}`);
+  // --- Step 2: Flatten the nested structure into separate lists for bulk creation ---
+  const topicsToCreate = [];
+  const allSubtopicsToCreate = [];
+  const allQuestionsToCreate = [];
+  const allOptionsToCreate = [];
+  const allAnswersToCreate = [];
 
-        if (topicsToCreate.length > 0) {
-            await topicCollection.createEach(topicsToCreate);
-            console.log(`Created ${topicsToCreate.length} topics.`);
-        }
+  topicsWithChildren.forEach(topic => {
+      const { subtopics, ...topicForDb } = topic;
+      topicsToCreate.push(topicForDb);
 
-        const allSubtopicsToCreate = [];
-        const allQuestionsToCreate = [];
-        const allOptionsToCreate = [];
-        const allAnswersToCreate = [];
+      if (subtopics) {
+          subtopics.forEach(subtopic => {
+              const { questions, ...subtopicForDb } = subtopic;
+              allSubtopicsToCreate.push(subtopicForDb);
 
-        topicsToCreate.forEach(topic => {
-            if (topic.subtopics) {
-                topic.subtopics.forEach(subtopic => {
-                    allSubtopicsToCreate.push(subtopic);
-                    if (subtopic.questions) {
-                        subtopic.questions.forEach(question => {
-                            allQuestionsToCreate.push(question);
-                            if (question.options) {
-                                allOptionsToCreate.push(...question.options);
-                            }
-                            if (question.answers) {
-                                allAnswersToCreate.push(...question.answers);
-                            }
-                        });
-                    }
-                });
-            }
-        });
+              if (questions) {
+                  questions.forEach(question => {
+                      const { options, answers, ...questionForDb } = question;
+                      allQuestionsToCreate.push(questionForDb);
+                      if (options) allOptionsToCreate.push(...options);
+                      if (answers) allAnswersToCreate.push(...answers);
+                  });
+              }
+          });
+      }
+  });
 
-        if (allSubtopicsToCreate.length > 0) {
-            await subtopicCollection.createEach(allSubtopicsToCreate);
-            console.log(`Created ${allSubtopicsToCreate.length} subtopics.`);
-        }
-        if (allQuestionsToCreate.length > 0) {
-            await questionCollection.createEach(allQuestionsToCreate);
-            console.log(`Created ${allQuestionsToCreate.length} questions.`);
-        }
-        if (allOptionsToCreate.length > 0) {
-            await optionCollection.createEach(allOptionsToCreate);
-            console.log(`Created ${allOptionsToCreate.length} options.`);
-        }
-        if (allAnswersToCreate.length > 0) {
-            await answerCollection.createEach(allAnswersToCreate);
-            console.log(`Created ${allAnswersToCreate.length} answers.`);
-        }
 
-        // --- Step 5: Update Topics with their Subtopic Order ---
-        for (const topic of topicsToCreate) {
-            await topicCollection.update({ id: topic.id }).set({ subTopicOrder: topic.subTopicOrder });
-        }
+  // --- Step 3: Perform all database write operations ---
+  try {
+      console.log(`Attempting to create Subject: "${finalSubjectEntry.name}"`);
+      await subjectCollection.create(finalSubjectEntry);
+      console.log(`Created main Subject: "${finalSubjectEntry.name}" (ID: ${subjectId})`);
 
-        // --- Step 6: Return Created Subject and its Related Entities ---
-        const createdTopics = await topicCollection.find({ subject: subjectId });
-        for (const topic of createdTopics) {
-            const subtopics = await subtopicCollection.find({ topic: topic.id });
-            topic.subtopics = subtopics;
+      if (topicsToCreate.length > 0) {
+          console.log(`Attempting to create ${topicsToCreate.length} topics.`);
+          await topicCollection.createEach(topicsToCreate);
+          console.log(`Successfully created ${topicsToCreate.length} topics.`);
+      }
+      
+      if (allSubtopicsToCreate.length > 0) {
+          console.log(`Attempting to create ${allSubtopicsToCreate.length} subtopics.`);
+          await subtopicCollection.createEach(allSubtopicsToCreate);
+          console.log(`Successfully created ${allSubtopicsToCreate.length} subtopics.`);
+      }
+      
+      if (allQuestionsToCreate.length > 0) {
+          console.log(`Attempting to create ${allQuestionsToCreate.length} questions.`);
+          await questionCollection.createEach(allQuestionsToCreate);
+          console.log(`Successfully created ${allQuestionsToCreate.length} questions.`);
+      }
 
-            for (const subtopic of subtopics) {
-                const questions = await questionCollection.find({ subtopic: subtopic.id });
-                for (const question of questions) {
-                    const options = await optionCollection.find({ question: question.id });
-                    question.options = options;
+      if (allOptionsToCreate.length > 0) {
+          console.log(`Attempting to create ${allOptionsToCreate.length} options.`);
+          await optionCollection.createEach(allOptionsToCreate);
+          console.log(`Successfully created ${allOptionsToCreate.length} options.`);
+      }
 
-                    const answers = await answerCollection.find({ question: question.id });
-                    question.answers = answers;
-                }
-                subtopic.questions = questions;
-            }
-        }
+      if (allAnswersToCreate.length > 0) {
+          console.log(`Attempting to create ${allAnswersToCreate.length} answers.`);
+          await answerCollection.createEach(allAnswersToCreate);
+          console.log(`Successfully created ${allAnswersToCreate.length} answers.`);
+      }
+      
+      // Update Topic `subTopicOrder` after all subtopics are created
+      for (const topic of topicsToCreate) {
+          if (topic.subTopicOrder && topic.subTopicOrder.length > 0) {
+              await topicCollection.update({ id: topic.id }).set({ subTopicOrder: topic.subTopicOrder });
+          }
+      }
+      console.log("Finished updating subTopicOrder for topics.");
 
-        return {
-            ...finalSubjectEntry,
-            topics: createdTopics,
-        };
+      // --- Step 4: Fetch and Return the Created Structure ---
+      console.log(`Fetching created subject and its nested content for ID: ${subjectId}`);
+      const createdSubject = await subjectCollection.findOne({ id: subjectId });
+      if (!createdSubject) {
+          throw new Error("Internal error: Created subject not found after creation.");
+      }
 
-    } catch (err) {
-        console.error("Error during subject creation process:", err);
-        // --- Error Handling and Cleanup ---
-        try {
-            console.log("Attempting cleanup of partially created records...");
-            if (createdTopicIds.length > 0) {
-                await topicCollection.destroy({ id: createdTopicIds });
-                console.log(`Cleaned up ${createdTopicIds.length} topics.`);
-            }
-            if (createdSubtopicIds.length > 0) {
-                await subtopicCollection.destroy({ id: createdSubtopicIds });
-                console.log(`Cleaned up ${createdSubtopicIds.length} subtopics.`);
-            }
-            if (createdQuestionIds.length > 0) {
-                await questionCollection.destroy({ id: createdQuestionIds });
-                console.log(`Cleaned up ${createdQuestionIds.length} questions.`);
-            }
-            if (createdOptionIds.length > 0) {
-                await optionCollection.destroy({ id: createdOptionIds });
-                console.log(`Cleaned up ${createdOptionIds.length} options.`);
-            }
-            if (createdAnswerIds.length > 0) {
-                await answerCollection.destroy({ id: createdAnswerIds });
-                console.log(`Cleaned up ${createdAnswerIds.length} answers.`);
-            }
-            if (subjectId) {
-                 await subjectCollection.destroy({ id: subjectId });
-                 console.log(`Cleaned up main subject: ${subjectId}.`);
-            }
-        } catch (cleanupError) {
-            console.error("Error during cleanup after creation failure:", cleanupError);
-        }
+      const createdTopics = await topicCollection.find({ subject: subjectId });
+      for (const topic of createdTopics) {
+          const subtopics = await subtopicCollection.find({ topic: topic.id });
+          for (const subtopic of subtopics) {
+              const questions = await questionCollection.find({ subtopic: subtopic.id });
+              for (const question of questions) {
+                  question.options = await optionCollection.find({ question: question.id });
+                  question.answers = await answerCollection.find({ question: question.id });
+              }
+              subtopic.questions = questions;
+          }
+          topic.subtopics = subtopics;
+      }
+      createdSubject.topics = createdTopics;
 
-        throw new UserError(`Failed to create subject and its curriculum: ${err.message}`);
-    }
+      console.log(`Successfully prepared response for subject ID: ${subjectId}`);
+      return createdSubject;
+
+  } catch (err) {
+      console.error("Error during subject creation process:", err);
+      // --- Error Handling and Cleanup ---
+      console.log("Attempting cleanup of partially created records...");
+      try {
+          if (createdTopicIds.length > 0) await topicCollection.destroy({ id: createdTopicIds });
+          if (createdSubtopicIds.length > 0) await subtopicCollection.destroy({ id: createdSubtopicIds });
+          if (createdQuestionIds.length > 0) await questionCollection.destroy({ id: createdQuestionIds });
+          if (createdOptionIds.length > 0) await optionCollection.destroy({ id: createdOptionIds });
+          if (createdAnswerIds.length > 0) await answerCollection.destroy({ id: createdAnswerIds });
+          if (subjectId) await subjectCollection.destroy({ id: subjectId });
+          console.log("Cleanup completed.");
+      } catch (cleanupError) {
+          console.error("Error during cleanup after creation failure:", cleanupError);
+      }
+
+      throw new UserError(`Failed to create subject and its curriculum: ${err.message}`);
+  }
 };
 
 
@@ -409,7 +408,7 @@ const restore = async (data, { db: { collections } }) => {
 
     return {
       id
-    };
+      };
   } catch (err) {
     throw new UserError(err.message || "Failed to restore subject.");
   }

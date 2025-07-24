@@ -117,9 +117,14 @@ const list = async (root, args, { auth = {}, open, db: { collections }, loaders 
       schoolId = openSchoolId;
     }
 
-    // if (!schoolId) {
-    //   throw new GraphQLError('Access Denied: User configuration incomplete.', { extensions: { code: 'FORBIDDEN' } });
-    // }
+
+    if (auth.school) {
+      schoolId = openSchoolId;
+    }
+
+    if (!schoolId) {
+      throw new GraphQLError('Access Denied: User configuration incomplete.', { extensions: { code: 'FORBIDDEN' } });
+    }
     const school = await loaders.schoolById.load(schoolId);
     return school ? [school] : [];
   }
