@@ -222,81 +222,52 @@ router.get("/health", async (req, res) => {
 // / Define Superadmin Phone Numbers (move to .env ideally)
 const SUPERADMIN_PHONES = process.env.SUPERADMIN_PHONES ? process.env.SUPERADMIN_PHONES.split(',') : ['0743214470', '0711657108']; // Example: Load from env, comma-separated
 
-router.post(
-    "/verify/sms",
-    validator.body(Joi.object({
-        user: Joi.string().required(), // phone number or email
-        password: Joi.string().required() // OTP code
-    })),
-    async (req, res) => {
-        const db = await req.app.locals.db;
-        const { collections } = db;
-        const { user, password } = req.body;
+router.post("/verify/sms", validator.body(Joi.object({
+    user: Joi.string().required(),
+    password: Joi.string().required()
+})), async (req, res) => {
+    const { collections } = await req.app.locals.db;
+    const { user, password } = req.body;
+    let specificUserRecord, determinedUserType;
 
-        let specificUserRecord = null;
-        let determinedUserType = null;
+    try {
+        [specificUserRecord, determinedUserType] = await Promise.all([
+            collections["admin"].findOne({ where: { phone: user, isDeleted: false } }),
+            collections["driver"].findOne({ where: { phone: user, isDeleted: false } }),
+            collections["parent"].findOne({ where: { phone: user, isDeleted: false } })
+        ]).then(([adminUser, driverUser, parentUser]) => {
+            specificUserRecord = adminUser || driverUser || parentUser;
+            determinedUserType = adminUser ? 'admin' : driverUser ? 'driver' : parentUser ? 'parent' : null;
+        });
 
-        try {
-
-            await Promise.all([
-                collections["admin"].findOne({ where: { phone: user, isDeleted: false } }),
-                collections["driver"].findOne({ where: { phone: user, isDeleted: false } }),
-                collections["parent"].findOne({ where: { phone: user, isDeleted: false } })
-            ]).then(async ([adminUser, driverUser, parentUser]) => {
-                specificUserRecord = adminUser || driverUser || parentUser;
-                determinedUserType = adminUser ? 'admin' : driverUser ? 'driver' : parentUser ? 'parent' : null;
-                console.log({ specificUserRecord })
-                console.log({ determinedUserType })
-
-                if (!specificUserRecord) {
-                    console.log(`User not found for input: ${user}`);
-                    throw { status: 401, message: 'Invalid credentials or user not found.' };
-                }
-
-                // --- 2. Verify OTP (This part was already correct) ---
-                const otpData = (await collections["otp"].find({
-                    where: {
-                        user: specificUserRecord.id, // Use the ID from the found user record
-                        password: password,
-                        used: false
-                    },
-                    // sort: 'createdAt DESC', // More standard syntax for sorting
-                    limit: 1
-                }))[0];
-
-                if (!otpData) {
-                    console.log(`Invalid or used OTP for user: ${specificUserRecord.id}`);
-                    return res.status(401).send({ message: "Invalid or expired OTP." });
-                }
-
-                console.log(`OTP verified successfully for user: ${specificUserRecord.id}`);
-
-                // --- 3. Mark OTP as Used (Important!) ---
-                await collections["otp"].update({ id: otpData.id }).set({ used: true });
-                console.log(`OTP marked as used: ${otpData.id}`);
-
-                // --- 4. Generate Structured Token ---
-                if (!determinedUserType) {
-                    console.log(`Attempting token generation for unknown user type: ${determinedUserType}`);
-                    console.log(`Error fetching record for token generation (userId: ${specificUserRecord.id}, type: ${determinedUserType}):`);
-                    throw new Error(`Failed to retrieve user details for ${determinedUserType}.`);
-                }
-
-                const { token, user: safeUserData } = await generateTokenForUser(specificUserRecord.id, determinedUserType, collections);
-
-                // Add the determined UserType to the safe user data
-                safeUserData.userType = determinedUserType;
-
-                // --- 5. Send Response ---
-                return res.send({ token, user: safeUserData });
-            });
-
-        } catch (error) {
-            console.error("Error during SMS verification:", error);
-            return res.status(500).send({ message: "An internal server error occurred." });
+        if (!specificUserRecord) {
+            throw { status: 401, message: 'Invalid credentials or user not found.' };
         }
+
+        const otpData = (await collections["otp"].find({
+            where: {
+                user: specificUserRecord.id,
+                password,
+                used: false
+            },
+            // sort: 'createdAt DESC',
+            limit: 1
+        }))[0];
+
+        if (!otpData) {
+            return res.status(401).send({ message: "Invalid or expired OTP." });
+        }
+
+        await collections["otp"].update({ id: otpData.id }).set({ used: true });
+        const { token, user: safeUserData } = await generateTokenForUser(specificUserRecord.id, determinedUserType, collections);
+        safeUserData.userType = determinedUserType;
+
+        res.send({ token, user: safeUserData });
+    } catch (error) {
+        console.error("Error during SMS verification:", error);
+        res.status(500).send({ message: "An internal server error occurred." });
     }
-);
+});
 
 function makeid() {
     var text = "";
