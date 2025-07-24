@@ -1088,14 +1088,16 @@ router.post(
 
         try {
             // Check if a parent with this phone or email already exists for this school
-            const existingParent = await collections.parent.findOne({
-                or: [{ phone: parent.phone }, { email: parent.email }],
-                school: school
-            });
+            // const existingParent = await collections.parent.findOne({
+            //     or: [{ phone: parent.phone }, { email: parent.email }],
+            //     school: school
+            // });
 
-            if (existingParent) {
-                return res.status(409).send({ error: "A parent with this phone number or email already exists for this school." });
-            }
+            // console.log(existingParent)
+
+            // if (existingParent) {
+            //     return res.status(409).send({ error: "A parent with this phone number or email already exists for this school." });
+            // }
 
             // Generate a unique parent ID
             const parentid = await generateId();
