@@ -244,7 +244,7 @@ router.post(
                     isDeleted: false,
                     or: [
                         { phone: user },
-                        { email: user }
+                        // { email: user }
                     ]
                 },
                 limit: 1 // We only expect one user
