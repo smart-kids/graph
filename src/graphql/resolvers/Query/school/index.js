@@ -118,8 +118,10 @@ const list = async (root, args, { auth = {}, open, db: { collections }, loaders 
     }
 
 
-    if (auth.school) {
+    if (!auth.schoolId) {
       schoolId = openSchoolId;
+    } else {
+      schoolId = auth.schoolId;
     }
 
     if (!schoolId) {
