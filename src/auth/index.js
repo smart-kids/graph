@@ -1173,89 +1173,86 @@ router.post(
     "/otp/send",
     validator.body(Joi.object({
         user: Joi.string().required(),
-        password: Joi.string()
+        password: Joi.string() // Note: password is sent but not used, is this intended?
     })),
     async (req, res) => {
-        const db = await req.app.locals.db
-        const { collections } = db
-        const { user } = req.body
+        try {
+            const { collections } = await req.app.locals.db;
+            const { user } = req.body;
 
-        let userInfo;
-        let determinedUserType = null;
-        let specificUserRecord = null; // To hold admin/driver/parent record if found
+            // --- REFACTOR 1: More efficient parallel user lookup ---
+            const userSearchCriteria = {
+                isDeleted: false,
+                ...(validateEmail(user) ? { email: user } : { phone: user })
+            };
 
-        const userSearchingObject = {
-            isDeleted: false
-        }
+            const userTypesToSearch = ['admin', 'driver', 'parent'];
+            
+            // Query all collections in parallel, not one-by-one
+            const searchPromises = userTypesToSearch.map(type => 
+                collections[type].findOne(userSearchCriteria).then(record => ({ type, record }))
+            );
 
-        if (validateEmail(user)) {
-            Object.assign(userSearchingObject, { email: user })
-        } else {
-            Object.assign(userSearchingObject, { phone: user })
-        }
+            const searchResults = await Promise.all(searchPromises);
 
-        // Check Admin Collection
-        [specificUserRecord] = await collections["admin"].find(userSearchingObject);
-        if (specificUserRecord) {
-            determinedUserType = 'admin';
-            console.log(`User type determined: admin (phone: ${user}, id: ${specificUserRecord.id})`);
-        } else {
-            // Check Driver Collection
-            [specificUserRecord] = await collections["driver"].find(userSearchingObject);
-            if (specificUserRecord) {
-                determinedUserType = 'driver';
-                console.log(`User type determined: driver (phone: ${user}, id: ${specificUserRecord.id})`);
+            // Find the first successful result
+            const foundUser = searchResults.find(result => result.record);
+
+            let specificUserRecord = null;
+            let determinedUserType = null;
+
+            if (foundUser) {
+                specificUserRecord = foundUser.record;
+                determinedUserType = foundUser.type;
+                console.log(`User type determined: ${determinedUserType} (user: ${user}, id: ${specificUserRecord.id})`);
             } else {
-                // Check Parent Collection
-                [specificUserRecord] = await collections["parent"].find(userSearchingObject);
-                if (specificUserRecord) {
-                    determinedUserType = 'parent';
-                    console.log(`User type determined: parent (phone: ${user}, id: ${specificUserRecord.id})`);
-                } else {
-                    // User exists in 'users' but not in specific role collections
-                    determinedUserType = 'user'; // Assign a default type
-                    specificUserRecord = await collections["users"].findOne(userSearchingObject); // Use base info
-                    console.warn(`User ${user} (phone: ${user}) not found in admin, driver, or parent collections. Assigning default type 'user'.`);
-                    // **Decision Point:** Should default 'user' type be allowed to log in?
-                    // If not, throw an error here:
-                    // return res.status(403).send({ message: "Access Denied: User role not configured for login." });
-                }
+                 // Optional: Fallback to the generic 'users' table if needed
+                 specificUserRecord = await collections["users"].findOne(userSearchCriteria);
+                 if (specificUserRecord) {
+                    determinedUserType = 'user';
+                    console.warn(`User ${user} not found in role collections. Found in generic users table.`);
+                 }
             }
-        }
 
-        if (!specificUserRecord) {
-            return res.status(401).send({
-                success: false,
-            })
-        }
+            if (!specificUserRecord) {
+                return res.status(404).send({ success: false, message: "User not found." });
+            }
 
-        // generate OTP, send it and save it
-        const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
+            // --- OTP Logic remains the same ---
+            const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid();
 
-        const otpSaveInfo = await collections["otp"].create({
-            id: new ObjectId().toHexString(),
-            user: specificUserRecord.id,
-            password
-        })
+            await collections["otp"].create({
+                id: new ObjectId().toHexString(),
+                user: specificUserRecord.id,
+                password
+            }).fetch(); // .fetch() is good practice to get the created record back
 
-        // send sms to phone
-        if (!['development', "test"].includes(NODE_ENV)) {
-            return sms({
-                // school: schoolId,
+            // --- REFACTOR 2: Correctly handle the async sms function ---
+            if (NODE_ENV === 'development' || NODE_ENV === 'test') {
+                return res.send({ success: true, otp: `0000 - for development` });
+            }
+            
+            // This is the production path
+            const smsResult = await sms({
                 data: { message: `Shule-Plus Code: ${password}.`, phone: user }
-            }, ({ code }) => {
-                res.send({
-                    success: true,
-                    otp: code
-                })
-            })
-        }
+            });
 
-        return res.send({
-            success: true,
-            otp: `0000 - for development`
-        })
-    })
+            if (smsResult) {
+                // Assuming the API returns a 'code' or similar identifier for the message
+                return res.send({ success: true, messageId: smsResult.id || 'sent' });
+            } else {
+                // The SMS service failed, but we log the error and inform the client gracefully.
+                return res.status(500).send({
+                    success: false,
+                    message: "The server successfully generated an OTP, but failed to send the SMS. Please try again."
+                });
+            }
+        } catch (error) {
+            console.error("Error in /otp/send route:", error);
+            return res.status(500).send({ success: false, message: "An internal server error occurred." });
+        }
+    }
+);
 
 router.post(
     "/login",

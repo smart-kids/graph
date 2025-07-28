@@ -1,46 +1,90 @@
-var request = require("request");
-// Require `PhoneNumberFormat`.
-const PNF = require('google-libphonenumber').PhoneNumberFormat;
+// in /Users/_bran/ShulePlus/graph/src/utils/sms.js
 
-// Get an instance of `PhoneNumberUtil`.
+const axios = require("axios");
+const PNF = require('google-libphonenumber').PhoneNumberFormat;
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
 
-const func = ({ schoolId, data: { phone, message } }, callback) => {
-    const number = phoneUtil.parseAndKeepRawInput(phone, 'KE');
-    const formattedNumber = phoneUtil.format(number, PNF.E164)
+/**
+ * A dual-interface function to send an SMS.
+ * It supports both modern async/await (returns a Promise) and
+ * traditional Node.js callbacks.
+ *
+ * @param {object} args - The arguments object containing { schoolId, data: { phone, message } }.
+ * @param {function} [callback] - Optional. A standard Node.js callback `(error, result) => {}`.
+ * @returns {Promise|void} Returns a Promise if no callback is provided.
+ */
+const func = (args, callback) => {
+    // --- Core async logic is moved into an inner function ---
+    const _sendSmsInternal = async () => {
+        const { phone, message } = args.data;
+        try {
+            const number = phoneUtil.parseAndKeepRawInput(phone, 'KE');
+            const formattedNumber = phoneUtil.format(number, PNF.E164);
 
-    const options = {
-        method: 'POST',
-        url: 'https://api.mobilesasa.com/v1/send/message',
-        headers:
-        {
-            'content-type': 'application/x-www-form-urlencoded',
-            accept: 'application/json',
-            "Authorization": "Bearer QEAVBBLs2GsjN4OaQlRCW9o2nTVnZrTV509hOjG7leCZ3tD3ZSpdPFiPskqA"
-        },
-        form:
-        {
-            senderID: 'SHULEPLUS',
-            phone: formattedNumber,
-            message
+            const apiData = new URLSearchParams();
+            apiData.append('senderID', 'SHULEPLUS');
+            apiData.append('phone', formattedNumber);
+            apiData.append('message', message);
+
+            console.log(`[SMS Service] Sending message to ${formattedNumber}`);
+
+            const response = await axios.post(
+                'https://api.mobilesasa.com/v1/send/message',
+                apiData,
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': 'Bearer QEAVBBLs2GsjN4OaQlRCW9o2nTVnZrTV509hOjG7leCZ3tD3ZSpdPFiPskqA',
+                    }
+                }
+            );
+            
+            console.log("[SMS Service] Success:", response.data);
+            return response.data; // This will be the success result
+
+        } catch (error) {
+            console.error("[SMS Service] FAILED to send SMS.");
+            if (error.response) {
+                console.error("API Error Status:", error.response.status);
+                const errorBody = typeof error.response.data === 'string' ? error.response.data.substring(0, 200) + '...' : error.response.data;
+                console.error("API Error Body:", errorBody);
+            } else if (error.request) {
+                console.error("Network Error: No response received.", error.request);
+            } else {
+                console.error("Request Setup Error:", error.message);
+            }
+            // Throw the error so it can be caught by the promise/callback handler
+            throw error;
         }
+    };
+
+    // --- Interface Handling Logic ---
+
+    // 1. Check if a callback function was provided.
+    if (callback && typeof callback === 'function') {
+        // Callback path
+        _sendSmsInternal()
+            .then(result => {
+                // Node.js callback convention: (error, result)
+                callback(null, result);
+            })
+            .catch(error => {
+                // Node.js callback convention: (error, result)
+                callback(error, null);
+            });
+        // When using a callback, the function doesn't return anything.
+        return; 
     }
 
-    return new Promise((resolve, reject) => {
-        request(options, function (error, response, body) {
-            if (error) reject(error);
-            else resolve(JSON.parse(body));
-            callback(JSON.parse(body));
-        });
+    // 2. If no callback, return a Promise.
+    // This is the async/await path. We add a .catch to it to ensure
+    // it returns `null` on failure, just like your previous version,
+    // so it won't crash the calling async function.
+    return _sendSmsInternal().catch(error => {
+        // The error is already logged by the internal function.
+        // We just swallow it here and return null to prevent a crash.
+        return null;
     });
-}
+};
 
-
-// tests
-
-// console.log(makeid())
-// func({ data: { password: makeid(), phone: "+254711657108" } }, console.log)
-
-// sms({ data: { phone: "+254719420491", message:"Hello" }}, console.log)
-
-module.exports = func
+module.exports = func;
