@@ -107,7 +107,7 @@ export const createLoaders = (collections) => {
 // --- GraphQL Resolvers (Using Loaders) ---
 
 const list = async (root, args, { auth = {}, open, db: { collections }, loaders }) => {
-  let { userType, school:schoolId } = auth;
+  let { userType, school: schoolId } = auth;
 
   if (userType === 'sAdmin') {
     const query = { where: { isDeleted: false } };
@@ -188,12 +188,27 @@ const nested = {
     // database query problem, then paginate the full result set in memory.
     // ==============================================================================
 
-    students: async (root, {id, limit = 25, offset = 0 }, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'students' lookup for School ID: ${id}`);
+    // in nested.school
+    students: async (root, { limit = 25, offset = 0 }, { db: { collections } }) => {
+      // ✅ FIX: Corrected logging to use root.id
+      console.log(`[RESOLVER CALL] Fetching paginated students for School ID: ${root.id}`);
       console.log(`[RESOLVER ARGS] limit: ${limit}, offset: ${offset}`);
-      const allItems = await loaders.studentsBySchoolId.load(root.id);
-      console.log(`[RESOLVER RESULT] Retrieved ${allItems.length} students for School ID: ${id}`);
-      return allItems.slice(offset, offset + limit);
+
+      // ✅ FIX: Bypass Dataloader and query the database directly with pagination
+      // Waterline's .find() supports `skip` (offset) and `limit`.
+      const paginatedStudents = await collections.student.find({
+        where: {
+          school: root.id,
+          isDeleted: false
+        },
+        skip: offset, // `skip` is the same as `offset`
+        limit: limit,
+        // You might want to add a default sort order for consistent pagination
+        sort: 'createdAt DESC'
+      });
+
+      // No need for .slice() because the database already did the work!
+      return paginatedStudents;
     },
     buses: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'buses' lookup for School ID: ${root.id}`);

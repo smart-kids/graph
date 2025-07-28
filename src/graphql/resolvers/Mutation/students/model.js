@@ -16,6 +16,20 @@ export default Waterline.Collection.extend({
     parent2: { type: "string", required: false },
     registration: { type: "string", required: true },
     class: { type: "string", required: false },
-    isDeleted: { type: "boolean", defaultsTo: false }
+    isDeleted: { type: "boolean", defaultsTo: false },
+    // --- FIX ---
+    // Let Waterline manage the timestamp. It will expect a Date object.
+    createdAt: { 
+      type: 'ref', // 'ref' is for any type that isn't string, number, etc., like a Date object.
+      autoCreatedAt: true, // This tells Waterline this is a "created at" timestamp.
+      autoMigrations: { columnType: 'timestamptz' } // Ensures the DB column is correct.
+    },
+    
+    // You should also add updatedAt for completeness
+    updatedAt: {
+      type: 'ref',
+      autoUpdatedAt: true,
+      autoMigrations: { columnType: 'timestamptz' }
+    }
   }
 });

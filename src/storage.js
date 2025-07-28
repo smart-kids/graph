@@ -52,11 +52,17 @@ if (!DB_URL) {
 const datastoreConfig = {
     adapter: 'postgres',
     url: DB_URL,
-    // 'migrate: alter' is for development. It attempts to auto-migrate schema changes.
-    // WARNING: This can be destructive. Use 'safe' in production and manage migrations manually.
-    migrate: 'safe',
-    poolSize: 5
-    // ssl: { rejectUnauthorized: false } // Example SSL config for some cloud providers, adjust as needed
+    migrate: 'safe', // Good for production.
+    
+    // --- ADD THIS POOL CONFIGURATION ---
+    // The `sails-postgresql` adapter passes these settings down to the `pg` pool.
+    pool: {
+        min: 0,
+        max: 10, // Increased from 5, adjust based on expected load.
+        idleTimeoutMillis: 30000, // Close idle connections after 30 seconds.
+        acquireTimeoutMillis: 30000,
+        reapIntervalMillis: 1000,
+    }
 };
 
 console.log("Waterline Configuration: Using PostgreSQL. DB_URL is set.");

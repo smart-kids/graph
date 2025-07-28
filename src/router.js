@@ -19,6 +19,13 @@ import Bugsnag from "@bugsnag/js"
 // Please ensure this path is correct for your project structure.
 import { createLoaders as schoolLoaders } from "./graphql/resolvers/Query/school";
 import { createLoaders as studentLoaders } from "./graphql/resolvers/Query/students"
+import { createLoaders as gradesLoaders } from "./graphql/resolvers/Query/grades"
+import { createLoaders as subjectsLoaders } from "./graphql/resolvers/Query/subjects"
+import { createLoaders as topicsLoaders } from "./graphql/resolvers/Query/topics"
+import { createLoaders as subtopicsLoaders } from "./graphql/resolvers/Query/subtopics"
+import { createLoaders as questionsLoaders } from "./graphql/resolvers/Query/questions"
+// import { createLoaders as answersLoaders } from "./graphql/resolvers/Query/answers"
+import { createLoaders as optionsLoaders } from "./graphql/resolvers/Query/options"
 
 const { BUGSNAG_API_KEY } = process.env
 
@@ -72,10 +79,22 @@ router.use(
 
     const schoolLoaderSet = schoolLoaders(db.collections);
     const studentLoaderSet = studentLoaders(db.collections);
+    const gradeLoaderSet = gradesLoaders(db.collections);
+    const subjectLoaderSet = subjectsLoaders(db.collections);
+    const topicLoaderSet = topicsLoaders(db.collections);
+    const subtopicLoaderSet = subtopicsLoaders(db.collections);
+    const questionLoaderSet = questionsLoaders(db.collections);
+    const optionLoaderSet = optionsLoaders(db.collections);
 
     const allLoaders = {
       ...schoolLoaderSet,
       ...studentLoaderSet,
+      ...gradeLoaderSet,
+      ...subjectLoaderSet,
+      ...topicLoaderSet,
+      ...subtopicLoaderSet,
+      ...questionLoaderSet,
+      ...optionLoaderSet,
     };
 
     return graphqlHTTP({
@@ -106,10 +125,22 @@ router.use(
     // <<< CORRECTED: Apply the same logic here for the open endpoint.
     const schoolLoaderSet = schoolLoaders(db.collections);
     const studentLoaderSet = studentLoaders(db.collections);
+    const gradeLoaderSet = gradesLoaders(db.collections);
+    const subjectLoaderSet = subjectsLoaders(db.collections);
+    const topicLoaderSet = topicsLoaders(db.collections);
+    const subtopicLoaderSet = subtopicsLoaders(db.collections);
+    const questionLoaderSet = questionsLoaders(db.collections);
+    const optionLoaderSet = optionsLoaders(db.collections);
 
     const allLoaders = {
       ...schoolLoaderSet,
       ...studentLoaderSet,
+      ...gradeLoaderSet,
+      ...subjectLoaderSet,
+      ...topicLoaderSet,
+      ...subtopicLoaderSet,
+      ...questionLoaderSet,
+      ...optionLoaderSet,
     };
 
     return graphqlHTTP({
