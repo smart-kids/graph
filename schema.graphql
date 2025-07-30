@@ -1082,6 +1082,7 @@ type question {
   answers: [answer]
   options: [option]
   optionsOrder: [String]
+  contentOrder: [String]
 }
 
 input Iquestion {

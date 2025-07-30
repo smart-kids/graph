@@ -20,6 +20,7 @@ export default Waterline.Collection.extend({
     type: { type: "string", required: true },
     videos: { type: "json", defaultsTo: [] },
     attachments: { type: "json", defaultsTo: [] },
+    contentOrder: { type: "json", defaultsTo: [] },
     images: { type: "json", defaultsTo: [] },
     optionsOrder: { type: "json", defaultsTo: [] },
     isDeleted: { type: "boolean", defaultsTo: false }
