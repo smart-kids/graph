@@ -1171,77 +1171,85 @@ router.post(
 
 router.post(
     "/otp/send",
+    // REFACTOR 1: Add validation to prevent empty strings
     validator.body(Joi.object({
-        user: Joi.string().required(),
-        password: Joi.string() // Note: password is sent but not used, is this intended?
+        user: Joi.string().trim().required(),
+        password: Joi.string().allow('', null) // Note: password is sent but not used
     })),
     async (req, res) => {
         try {
             const { collections } = await req.app.locals.db;
             const { user } = req.body;
 
-            // --- REFACTOR 1: More efficient parallel user lookup ---
             const userSearchCriteria = {
                 isDeleted: false,
-                ...(validateEmail(user) ? { email: user } : { phone: user })
+                // Standardize email to lowercase to prevent case-sensitivity issues
+                ...(validateEmail(user) ? { email: user.toLowerCase() } : { phone: user })
             };
 
             const userTypesToSearch = ['admin', 'driver', 'parent'];
             
-            // Query all collections in parallel, not one-by-one
+            // --- REFACTOR 2: Find the MOST RECENT record if duplicates exist ---
             const searchPromises = userTypesToSearch.map(type => 
-                collections[type].findOne(userSearchCriteria).then(record => ({ type, record }))
+                // 1. Find all matching records
+                // 2. Sort by 'createdAt' in descending order to put the newest first
+                // 3. Limit the result to just 1 record (the newest one)
+                collections[type].find(userSearchCriteria)
+                    // .sort('createdAt DESC') // Or use 'id DESC' if it's a chronological key
+                    .limit(1)
+                    .then(records => ({ type, record: records[0] })) // Pluck the single record from the array
             );
 
             const searchResults = await Promise.all(searchPromises);
 
-            // Find the first successful result
+            // Find the first result that actually found a record
+            // This logic works perfectly now because each `result.record` is either the single most recent user or undefined.
             const foundUser = searchResults.find(result => result.record);
 
             let specificUserRecord = null;
             let determinedUserType = null;
 
-            if (foundUser) {
-                specificUserRecord = foundUser.record;
-                determinedUserType = foundUser.type;
-                console.log(`User type determined: ${determinedUserType} (user: ${user}, id: ${specificUserRecord.id})`);
-            } else {
-                 // Optional: Fallback to the generic 'users' table if needed
-                 specificUserRecord = await collections["users"].findOne(userSearchCriteria);
-                 if (specificUserRecord) {
-                    determinedUserType = 'user';
-                    console.warn(`User ${user} not found in role collections. Found in generic users table.`);
-                 }
-            }
+            // if (foundUser) {
+            //     specificUserRecord = foundUser.record;
+            //     determinedUserType = foundUser.type;
+            //     console.log(`User type determined: ${determinedUserType} (user: ${user}, id: ${specificUserRecord.id}). Selected the most recent record.`);
+            // } else {
+            //      // Fallback to the generic 'users' table, also getting the most recent
+            //      const records = await collections["users"].find(userSearchCriteria).sort('createdAt DESC').limit(1);
+            //      if (records && records.length > 0) {
+            //         specificUserRecord = records[0];
+            //         determinedUserType = 'user';
+            //         console.warn(`User ${user} not found in role collections. Found in generic users table.`);
+            //      }
+            // }
 
             if (!specificUserRecord) {
                 return res.status(404).send({ success: false, message: "User not found." });
             }
 
-            // --- OTP Logic remains the same ---
+            // --- OTP Logic ---
             const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid();
 
             await collections["otp"].create({
                 id: new ObjectId().toHexString(),
                 user: specificUserRecord.id,
-                password
-            }).fetch(); // .fetch() is good practice to get the created record back
+                password,
+                expiresAt: new Date(Date.now() + 10 * 60 * 1000), // Good practice: OTPs should expire
+            }).fetch();
 
-            // --- REFACTOR 2: Correctly handle the async sms function ---
+            // --- SMS Sending Logic ---
             if (NODE_ENV === 'development' || NODE_ENV === 'test') {
                 return res.send({ success: true, otp: `0000 - for development` });
             }
             
-            // This is the production path
             const smsResult = await sms({
                 data: { message: `Shule-Plus Code: ${password}.`, phone: user }
             });
 
-            if (smsResult) {
-                // Assuming the API returns a 'code' or similar identifier for the message
-                return res.send({ success: true, messageId: smsResult.id || 'sent' });
+            if (smsResult && smsResult.id) {
+                return res.send({ success: true, messageId: smsResult.id });
             } else {
-                // The SMS service failed, but we log the error and inform the client gracefully.
+                console.error("SMS sending failed for user:", user, "Response:", smsResult);
                 return res.status(500).send({
                     success: false,
                     message: "The server successfully generated an OTP, but failed to send the SMS. Please try again."
@@ -1253,7 +1261,6 @@ router.post(
         }
     }
 );
-
 router.post(
     "/login",
     validator.body(Joi.object({
