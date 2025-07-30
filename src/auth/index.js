@@ -1209,11 +1209,13 @@ router.post(
             let specificUserRecord = null;
             let determinedUserType = null;
 
-            // if (foundUser) {
-            //     specificUserRecord = foundUser.record;
-            //     determinedUserType = foundUser.type;
-            //     console.log(`User type determined: ${determinedUserType} (user: ${user}, id: ${specificUserRecord.id}). Selected the most recent record.`);
-            // } else {
+            if (foundUser) {
+                specificUserRecord = foundUser.record;
+                determinedUserType = foundUser.type;
+                console.log(`User type determined: ${determinedUserType} (user: ${user}, id: ${specificUserRecord.id}). Selected the most recent record.`);
+            } 
+            
+            // else {
             //      // Fallback to the generic 'users' table, also getting the most recent
             //      const records = await collections["users"].find(userSearchCriteria).sort('createdAt DESC').limit(1);
             //      if (records && records.length > 0) {
@@ -1246,8 +1248,13 @@ router.post(
                 data: { message: `Shule-Plus Code: ${password}.`, phone: user }
             });
 
-            if (smsResult && smsResult.id) {
-                return res.send({ success: true, messageId: smsResult.id });
+            if (smsResult && smsResult.status && smsResult.responseCode === '0200') {
+                return res.send({
+                    success: true,
+                    messageId: smsResult.messageId,
+                    responseCode: smsResult.responseCode,
+                    message: smsResult.message
+                });
             } else {
                 console.error("SMS sending failed for user:", user, "Response:", smsResult);
                 return res.status(500).send({
