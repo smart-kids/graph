@@ -158,7 +158,7 @@ async function generateTokenForUser(userId, determinedUserType, collections) {
                 payload = {
                     userId: userRecord.id,
                     userType: 'parent',
-                    // schoolId: userRecord.school, // Include if available and needed
+                    schoolId: userRecord.school, // Include if available and needed
                 };
                 break; // Exit switch
 
@@ -1092,10 +1092,40 @@ router.post(
                 isDeleted: false
             });
 
-            console.log(existingParent)
-
             if (existingParent) {
-                return res.status(409).send({ error: "A parent with this phone number already exists for this school." });
+                // send OTP to the existing parent
+                const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
+
+                const otpSaveInfo = await collections["otp"].create({
+                    id: new ObjectId().toHexString(),
+                    user: existingParent.id,
+                    password
+                })
+
+                // send sms to phone
+                if (!['development', "test"].includes(NODE_ENV)) {
+                    // send welcome message first
+                    sms({
+                        // school: schoolId,
+                        data: {
+                            message: `Welcome to Shule-Plus! We're glad you're here. Your child, ${student.name}, has been registered to class ${student.class}.`,
+                            phone: parentData.phone
+                        }
+                    }, () => {
+                        // send OTP code
+                        sms({
+                            // school: schoolId,
+                            data: { message: `Shule-Plus Code: ${password}.`, phone: parentData.phone }
+                        }, ({ code }) => {
+                            console.log("OTP sent successfully.");
+                        })
+                    })
+                }
+
+                // Send back the token and the parent's user object.
+                const user = { ...Object.assign(parentData, { parentid, school }), role: 'parent' };
+                const token = jwt.sign(user, config.secret);
+                return res.send({ user, token });
             }
 
             // Generate a unique parent ID
