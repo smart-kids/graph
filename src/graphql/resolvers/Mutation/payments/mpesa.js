@@ -184,8 +184,8 @@ const createMpesaService = ({ collections, logger = console }) => {
 
             return {
                 success: true,
-                merchantRequestID,
-                checkoutRequestID,
+                merchantRequestID: MerchantRequestID,
+                checkoutRequestID: CheckoutRequestID,
                 message: 'Request sent. Please complete the transaction on your phone.',
                 transactionId,
             };
