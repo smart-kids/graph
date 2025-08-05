@@ -174,14 +174,18 @@ const createMpesaService = ({ collections, logger = console }) => {
             // 2. On success, update the record with M-Pesa's request IDs.
             // In createMpesaService.js
             PaymentCollection.updateOne({ id: transactionId })
-            .set(updateData)
+            .set({
+               merchantRequestID: MerchantRequestID,
+               checkoutRequestID: CheckoutRequestID,
+               status: 'PENDING',
+            })
             .then(() => logger.info('Update successful'))
             .catch(err => logger.error('Update failed:', err));
 
             return {
                 success: true,
-                MerchantRequestID,
-                CheckoutRequestID,
+                merchantRequestID,
+                checkoutRequestID,
                 message: 'Request sent. Please complete the transaction on your phone.',
                 transactionId,
             };
