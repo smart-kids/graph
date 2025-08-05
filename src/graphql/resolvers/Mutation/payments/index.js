@@ -90,10 +90,10 @@ const confirm = async (data, { db: { collections } }) => {
   console.log("confirm payment", data)
   const PaymentCollection = collections[name];
   const { payment } = data;
-  const { CheckoutRequestID: checkoutRequestID, MerchantRequestID: merchantRequestID, school } = payment || {};
+  const { CheckoutRequestID: checkoutRequestID, MerchantRequestID: merchantRequestID } = payment || {};
 
   // 1. Find the payment record in your database.
-  const [paymentRecord] = await PaymentCollection.find({ merchantRequestID, checkoutRequestID, school }).limit(1);
+  const [paymentRecord] = await PaymentCollection.find({ merchantRequestID, checkoutRequestID }).limit(1);
 
   // 2. If no payment is found, inform the user.
   if (!paymentRecord) {
@@ -108,7 +108,6 @@ const confirm = async (data, { db: { collections } }) => {
     success: true,
     message: paymentRecord.errorMessage || `Payment is in progress. status:${paymentRecord.status}`,
     id: paymentRecord.id,
-    school: paymentRecord.school,
     amount: paymentRecord.amount,
     phone: paymentRecord.phone,
     status: paymentRecord.status,
