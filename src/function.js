@@ -176,10 +176,6 @@ const startServer = async () => {
 // Run as a standalone server if not in a test environment.
 if (NODE_ENV !== "test") {
     startServer();
-    app.listen(PORT, () => {
-        console.log(`✅ Server process ${process.pid} started successfully.`);
-        console.log(`🚀 Listening on http://localhost:${PORT} in ${NODE_ENV} mode.`);
-    });
 }
 
 // Export the app as a Google Cloud Function for serverless deployment.
