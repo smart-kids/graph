@@ -39,7 +39,7 @@ const roles = require("../src/graphql/resolvers/Mutation/roles/model.js");
 const user_roles = require("../src/graphql/resolvers/Mutation/user_roles/model.js");
 const google_users = require("../src/graphql/resolvers/Mutation/google_users/model.js");
 const school_creators = require("../src/graphql/resolvers/Mutation/school_creators/model.js");
-
+const analytics_event = require("../src/graphql/resolvers/Mutation/analytics-event/model.js");
 
 dotenv.config();
 
@@ -91,7 +91,7 @@ const modelModules = [
     complaint, locReport, classModel, school, teacher, OTP, payments, charges,
     grades, subjects, topics, subtopics, questions, answers, options, terms,
     teams, team_members, invitations, users, roles, user_roles, google_users,
-    school_creators
+    school_creators, analytics_event
 ];
 
 const defaultIdAttributeDefinition = {
@@ -237,16 +237,29 @@ async function manageSchema(cleanDatabaseFirst = false) {
                 }
                 if (attr.defaultsTo !== undefined) {
                     let defaultValue = attr.defaultsTo;
-                    if (typeof defaultValue === 'string') defaultValue = `'${String(defaultValue).replace(/'/g, "''")}'`;
-                    else if (typeof defaultValue === 'boolean') defaultValue = defaultValue ? 'TRUE' : 'FALSE';
-                    else if (typeof defaultValue === 'function') {
+                    if (typeof defaultValue === 'string') {
+                        defaultValue = `'${String(defaultValue).replace(/'/g, "''")}'`;
+                    } else if (typeof defaultValue === 'boolean') {
+                        defaultValue = defaultValue ? 'TRUE' : 'FALSE';
+                    } else if (typeof defaultValue === 'object' && defaultValue !== null) {
+                        // FIX: Properly serialize object defaults for JSON/JSONB columns.
+                        // The default value must be a string literal (in single quotes) containing valid JSON.
+                        defaultValue = `'${JSON.stringify(defaultValue).replace(/'/g, "''")}'`;
+                    } else if (typeof defaultValue === 'function') {
                         try {
                             const val = defaultValue();
-                            if (typeof val === 'string') defaultValue = `'${String(val).replace(/'/g, "''")}'`;
-                            else if (typeof val === 'boolean') defaultValue = val ? 'TRUE' : 'FALSE';
-                            else if (typeof val === 'number' && Number.isFinite(val)) defaultValue = val;
-                            else if (val instanceof Date) defaultValue = `'${val.toISOString()}'`;
-                            else {
+                            if (typeof val === 'string') {
+                                defaultValue = `'${String(val).replace(/'/g, "''")}'`;
+                            } else if (typeof val === 'boolean') {
+                                defaultValue = val ? 'TRUE' : 'FALSE';
+                            } else if (typeof val === 'number' && Number.isFinite(val)) {
+                                defaultValue = val;
+                            } else if (val instanceof Date) {
+                                defaultValue = `'${val.toISOString()}'`;
+                            } else if (typeof val === 'object' && val !== null) {
+                                // Also apply the fix for defaults returned from a function.
+                                 defaultValue = `'${JSON.stringify(val).replace(/'/g, "''")}'`;
+                            } else {
                                 console.warn(`  Warning: Unsupported dynamic default value for ${tableName}.${attrName}. Omitting DEFAULT.`);
                                 defaultValue = null;
                             }
@@ -255,7 +268,9 @@ async function manageSchema(cleanDatabaseFirst = false) {
                             defaultValue = null;
                         }
                     }
-                    if (defaultValue !== null) columnDef += ` DEFAULT ${defaultValue}`;
+                    if (defaultValue !== null) {
+                        columnDef += ` DEFAULT ${defaultValue}`;
+                    }
                 }
                 if (attr.autoMigrations && attr.autoMigrations.unique) {
                     columnDef += ' UNIQUE';

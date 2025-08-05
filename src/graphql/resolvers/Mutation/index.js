@@ -27,6 +27,7 @@ import teams from "./teams"
 import team_members from "./team_members"
 import invitations from "./invitations"
 import responses from "./responses"
+import analyticsEvent from "./analytics-event";
 
 export default {
   admins,
@@ -58,6 +59,7 @@ export default {
   team_members,
   invitations,
   responses,
+  analyticsEvent,
   hello() {
     return "hello mutation";
   }

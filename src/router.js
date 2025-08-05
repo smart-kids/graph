@@ -64,104 +64,98 @@ export default (storage) => {
     authorization: Joi.string().required()
   })
 
-  // This variable is no longer needed here as it's defined inside the 'storage' export
-  // var storage 
+  router.use(
+    "/graph",
+    validator.headers(headerSchema),
+    checkToken,
+    async (req, res, next) => {
+      const db = await storage;
 
-  // ... (imports remain the same)
+      const schoolLoaderSet = schoolLoaders(db.collections);
+      const studentLoaderSet = studentLoaders(db.collections);
+      const gradeLoaderSet = gradesLoaders(db.collections);
+      const subjectLoaderSet = subjectsLoaders(db.collections);
+      const topicLoaderSet = topicsLoaders(db.collections);
+      const subtopicLoaderSet = subtopicsLoaders(db.collections);
+      const questionLoaderSet = questionsLoaders(db.collections);
+      const optionLoaderSet = optionsLoaders(db.collections);
 
-// in your main router file
-router.use(
-  "/graph",
-  validator.headers(headerSchema),
-  checkToken,
-  async (req, res, next) => {
-    const db = await storage;
+      const allLoaders = {
+        ...schoolLoaderSet,
+        ...studentLoaderSet,
+        ...gradeLoaderSet,
+        ...subjectLoaderSet,
+        ...topicLoaderSet,
+        ...subtopicLoaderSet,
+        ...questionLoaderSet,
+        ...optionLoaderSet,
+      };
 
-    const schoolLoaderSet = schoolLoaders(db.collections);
-    const studentLoaderSet = studentLoaders(db.collections);
-    const gradeLoaderSet = gradesLoaders(db.collections);
-    const subjectLoaderSet = subjectsLoaders(db.collections);
-    const topicLoaderSet = topicsLoaders(db.collections);
-    const subtopicLoaderSet = subtopicsLoaders(db.collections);
-    const questionLoaderSet = questionsLoaders(db.collections);
-    const optionLoaderSet = optionsLoaders(db.collections);
-
-    const allLoaders = {
-      ...schoolLoaderSet,
-      ...studentLoaderSet,
-      ...gradeLoaderSet,
-      ...subjectLoaderSet,
-      ...topicLoaderSet,
-      ...subtopicLoaderSet,
-      ...questionLoaderSet,
-      ...optionLoaderSet,
-    };
-
-    return graphqlHTTP({
-      schema,
-      graphiql: true,
-      context: {
-        auth: req.auth,
-        db,
-        loaders: allLoaders,
-        params: req.body
-      },
-      customFormatErrorFn: err => {
-        console.error("GraphQL Error:", err);
-        if (notifyErrors) {
-          notifyErrors.formatError(err);
+      return graphqlHTTP({
+        schema,
+        graphiql: true,
+        context: {
+          auth: req.auth,
+          db,
+          loaders: allLoaders,
+          params: req.body
+        },
+        customFormatErrorFn: err => {
+          console.error("GraphQL Error:", err);
+          if (notifyErrors) {
+            notifyErrors.formatError(err);
+          }
+          return formatError(err);
         }
-        return formatError(err);
-      }
-    })(req, res, next);
-  }
-);
+      })(req, res, next);
+    }
+  );
 
-router.use(
-  "/opengraph",
-  async (req, res, next) => {
-    const db = await storage;
+  router.use(
+    "/opengraph",
+    async (req, res, next) => {
+      const db = await storage;
 
-    // <<< CORRECTED: Apply the same logic here for the open endpoint.
-    const schoolLoaderSet = schoolLoaders(db.collections);
-    const studentLoaderSet = studentLoaders(db.collections);
-    const gradeLoaderSet = gradesLoaders(db.collections);
-    const subjectLoaderSet = subjectsLoaders(db.collections);
-    const topicLoaderSet = topicsLoaders(db.collections);
-    const subtopicLoaderSet = subtopicsLoaders(db.collections);
-    const questionLoaderSet = questionsLoaders(db.collections);
-    const optionLoaderSet = optionsLoaders(db.collections);
+      // <<< CORRECTED: Apply the same logic here for the open endpoint.
+      const schoolLoaderSet = schoolLoaders(db.collections);
+      const studentLoaderSet = studentLoaders(db.collections);
+      const gradeLoaderSet = gradesLoaders(db.collections);
+      const subjectLoaderSet = subjectsLoaders(db.collections);
+      const topicLoaderSet = topicsLoaders(db.collections);
+      const subtopicLoaderSet = subtopicsLoaders(db.collections);
+      const questionLoaderSet = questionsLoaders(db.collections);
+      const optionLoaderSet = optionsLoaders(db.collections);
 
-    const allLoaders = {
-      ...schoolLoaderSet,
-      ...studentLoaderSet,
-      ...gradeLoaderSet,
-      ...subjectLoaderSet,
-      ...topicLoaderSet,
-      ...subtopicLoaderSet,
-      ...questionLoaderSet,
-      ...optionLoaderSet,
-    };
+      const allLoaders = {
+        ...schoolLoaderSet,
+        ...studentLoaderSet,
+        ...gradeLoaderSet,
+        ...subjectLoaderSet,
+        ...topicLoaderSet,
+        ...subtopicLoaderSet,
+        ...questionLoaderSet,
+        ...optionLoaderSet,
+      };
 
-    return graphqlHTTP({
-      schema,
-      graphiql: true,
-      context: {
-        auth: req.auth,
-        db,
-        open: true,
-        loaders: allLoaders,
-      },
-      customFormatErrorFn: err => {
-        console.error("GraphQL Error:", err);
-        if (notifyErrors) {
-          notifyErrors.formatError(err);
+      return graphqlHTTP({
+        schema,
+        graphiql: true,
+        context: {
+          auth: req.auth,
+          db,
+          open: true,
+          loaders: allLoaders,
+        },
+        customFormatErrorFn: err => {
+          console.error("GraphQL Error:", err);
+          if (notifyErrors) {
+            notifyErrors.formatError(err);
+          }
+          return formatError(err);
         }
-        return formatError(err);
-      }
-    })(req, res, next);
-  }
-);
+      })(req, res, next);
+    }
+  );
 
   return router
 };

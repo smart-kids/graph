@@ -83,6 +83,9 @@ type Query {
 
   invitation: invitation
   invitations: [invitation]
+
+  analyticsEvent: analyticsEvent
+  analyticsEvents: [analyticsEvent]
 }
 
 type Mutation {
@@ -110,6 +113,7 @@ type Mutation {
   topics: topicMutations
   subtopics: subtopicMutations
   questions: questionMutations
+  analyticsEvent: analyticsEventMutations
   answers: answerMutations
   options: optionMutations
   terms: termMutations
@@ -1111,6 +1115,35 @@ type questionMutations {
   update(question: Uquestion!): question
   archive(question: Uquestion!): question
   restore(question: Uquestion!): question
+}
+
+
+
+
+# analytics things
+type analyticsEvent {
+  id: String
+  eventName: String
+  userId: String
+  sessionId: String
+  timestamp: String
+  device: String
+  platform: String
+  properties: String
+}
+
+input IanalyticsEvent {
+  eventName: String!
+  userId: String
+  sessionId: String!
+  timestamp: String!
+  device: String!
+  platform: String!
+  properties: String
+}
+
+type analyticsEventMutations {
+  create(event: IanalyticsEvent!): analyticsEvent
 }
 
 # answer things

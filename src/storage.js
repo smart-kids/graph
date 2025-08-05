@@ -36,6 +36,7 @@ import roles from "./graphql/resolvers/Mutation/roles/model.js";
 import user_roles from "./graphql/resolvers/Mutation/user_roles/model.js";
 import google_users from "./graphql/resolvers/Mutation/google_users/model.js";
 import school_creators from "./graphql/resolvers/Mutation/school_creators/model.js";
+import analytics_event from "./graphql/resolvers/Mutation/analytics-event/model.js";
 
 const {
     NODE_ENV,
@@ -107,6 +108,7 @@ waterlineInstance.registerModel(roles);
 waterlineInstance.registerModel(user_roles);
 waterlineInstance.registerModel(google_users);
 waterlineInstance.registerModel(school_creators);
+waterlineInstance.registerModel(analytics_event);
 
 const config = {
     adapters: {

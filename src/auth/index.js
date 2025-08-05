@@ -1109,13 +1109,13 @@ router.post(
                         // school: schoolId,
                         data: {
                             message: `Welcome to Shule-Plus! We're glad you're here. Your child, ${student.name}, has been registered to class ${student.class}.`,
-                            phone: parentData.phone
+                            phone: parent.phone
                         }
                     }, () => {
                         // send OTP code
                         sms({
                             // school: schoolId,
-                            data: { message: `Shule-Plus Code: ${password}.`, phone: parentData.phone }
+                            data: { message: `Shule-Plus Code: ${password}.`, phone: parent.phone }
                         }, ({ code }) => {
                             console.log("OTP sent successfully.");
                         })
