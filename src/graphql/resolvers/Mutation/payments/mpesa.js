@@ -177,6 +177,7 @@ const createMpesaService = ({ collections, logger = console }) => {
             .set({
                merchantRequestID: MerchantRequestID,
                checkoutRequestID: CheckoutRequestID,
+               school,
                status: 'PENDING',
             })
             .then(() => logger.info('Update successful'))
@@ -184,8 +185,8 @@ const createMpesaService = ({ collections, logger = console }) => {
 
             return {
                 success: true,
-                merchantRequestID: MerchantRequestID,
-                checkoutRequestID: CheckoutRequestID,
+                MerchantRequestID,
+                CheckoutRequestID,
                 message: 'Request sent. Please complete the transaction on your phone.',
                 transactionId,
             };
