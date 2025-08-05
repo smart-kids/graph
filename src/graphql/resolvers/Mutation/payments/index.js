@@ -35,8 +35,9 @@ const init = async (data, { auth, db: { collections } }) => {
   }
 
   return {
-    ...result,
-    id: transactionId, // Ensure consistent ID usage
+    CheckoutRequestID: result.CheckoutRequestID,
+    MerchantRequestID: result.MerchantRequestID,
+    transactionId,
   };
 };
 
