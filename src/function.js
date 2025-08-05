@@ -76,9 +76,11 @@ async function attachFullAppLogic(app, server, orm) {
     });
     app.use(sessionMiddleware);
 
-    const io = new Server(server, { cors: { origin: CORS_ORIGIN } });
-    io.use(sharedsession(sessionMiddleware, { autoSave: true }));
-    io.on("connection", socketPassHandler);
+    const io = null;
+    
+    // = new Server(server, { cors: { origin: CORS_ORIGIN } });
+    // io.use(sharedsession(sessionMiddleware, { autoSave: true }));
+    // io.on("connection", socketPassHandler);
 
     Object.assign(app.locals, { db: orm.collections, io, bugsnag: bugsnagClient });
 
