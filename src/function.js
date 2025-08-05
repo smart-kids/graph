@@ -97,14 +97,7 @@ const sessionMiddleware = session({
 app.use(sessionMiddleware);
 
 // G) Socket.IO setup (Correctly Initialized)
-const io = new Server(server, { cors: { origin: CORS_ORIGIN || '*' } });
-
-// Share session with io sockets using the restored middleware
-io.use(sharedsession(sessionMiddleware, { autoSave: true }));
-
-// Attach the main socket connection handler
-io.on("connection", socketPassHandler);
-
+const io = null
 // H) Router Mounting Function
 // This async function ensures that routers are attached only after the database is ready.
 async function attachRouters() {
