@@ -89,14 +89,14 @@ const restore = async (data, { db: { collections } }) => {
 const confirm = async (data, { db: { collections } }) => {
   console.log("confirm payment", data)
   const PaymentCollection = collections[name];
-  const { merchantRequestID, checkoutRequestID, school } = data;
+  const { payment } = data;
+  const { CheckoutRequestID: checkoutRequestID, MerchantRequestID: merchantRequestID, school } = payment || {};
 
   // 1. Find the payment record in your database.
-  const [payment] = await PaymentCollection.find({ merchantRequestID, checkoutRequestID, school }).limit(1);
-  console.log({merchantRequestID, checkoutRequestID, school})
+  const [paymentRecord] = await PaymentCollection.find({ merchantRequestID, checkoutRequestID, school }).limit(1);
 
   // 2. If no payment is found, inform the user.
-  if (!payment) {
+  if (!paymentRecord) {
     return {
       success: false,
       message: `Payment not found.`,
@@ -106,16 +106,16 @@ const confirm = async (data, { db: { collections } }) => {
   // 3. Return the relevant, client-safe data.
   return {
     success: true,
-    message: payment.errorMessage || `Payment is in progress. status:${payment.status}`,
-    id: payment.id,
-    school: payment.school,
-    amount: payment.amount,
-    phone: payment.phone,
-    status: payment.status,
-    merchantRequestID: payment.merchantRequestID,
-    checkoutRequestID: payment.checkoutRequestID,
-    ref: payment.ref,
-    time: payment.time,
+    message: paymentRecord.errorMessage || `Payment is in progress. status:${paymentRecord.status}`,
+    id: paymentRecord.id,
+    school: paymentRecord.school,
+    amount: paymentRecord.amount,
+    phone: paymentRecord.phone,
+    status: paymentRecord.status,
+    merchantRequestID: paymentRecord.merchantRequestID,
+    checkoutRequestID: paymentRecord.checkoutRequestID,
+    ref: paymentRecord.ref,
+    time: paymentRecord.time,
   };
 };
 

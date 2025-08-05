@@ -1093,7 +1093,6 @@ router.post(
             });
 
             if (existingParent) {
-                // send OTP to the existing parent
                 const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
 
                 const otpSaveInfo = await collections["otp"].create({
@@ -1102,24 +1101,16 @@ router.post(
                     password
                 })
 
-                // send sms to phone
-                if (!['development', "test"].includes(NODE_ENV)) {
-                    // send welcome message first
-                    sms({
-                        // school: schoolId,
-                        data: {
-                            message: `Welcome to Shule-Plus! We're glad you're here. Your child, ${student.name}, has been registered to class ${student.class}.`,
-                            phone: parent.phone
-                        }
-                    }, () => {
-                        // send OTP code
-                        sms({
-                            // school: schoolId,
-                            data: { message: `Shule-Plus Code: ${password}.`, phone: parent.phone }
-                        }, ({ code }) => {
-                            console.log("OTP sent successfully.");
-                        })
-                    })
+                const message = `Welcome to Shule-Plus! We're glad you're here. Your child, ${student.name}, has been registered to class ${student.class}.`;
+                const smsResult = await sms({
+                    // school: schoolId,
+                    data: { message, phone: parent.phone }
+                });
+
+                if (smsResult && smsResult.status && smsResult.responseCode === '0200') {
+                    console.log("OTP sent successfully.");
+                } else {
+                    console.error("SMS sending failed for user:", parent.phone, "Response:", smsResult);
                 }
 
                 // Send back the token and the parent's user object.
