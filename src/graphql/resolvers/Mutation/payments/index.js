@@ -11,42 +11,33 @@ const { name } = require("./about.js"); // Assuming 'name' resolves to 'payment'
 /**
  * Initiates an M-Pesa STK Push payment request.
  */
-const init = async (
-  data,
-  // The context now provides everything we need to inject
-  { auth, db: { collections } }
-) => {
-  console.log({data, auth})
+const init = async (data, { auth, db: { collections } }) => {
   const transactionId = new ObjectId().toHexString();
-  const { schoolId="general", id: userId } = auth;
-  const { ammount:amount, phone,}= data[name]
+  const { schoolId = "general", id: userId } = auth;
+  const { ammount: amount, phone } = data.payment; // Changed from data[name] to data.payment
 
-  // 1. Create an instance of the M-Pesa service by injecting dependencies.
   const mpesaService = createMpesaService({
-    collections: collections,                // Pass the database collections
-    logger: console,                       // Pass the sails logger
+    collections: collections,
+    logger: console,
   });
 
-  // 2. Call the method on the service instance.
-  //    The service itself will now handle creating and updating the database records.
+  // Pass all required parameters including schoolId
   const result = await mpesaService.initiateSTKPush({
     amount,
     phone,
-    schoolId,
+    schoolId, // Make sure this is passed
     userId,
     transactionId,
   });
 
-  result.id = result.transactionId;
-  
-  // 3. Return the result from the service directly to the user.
-  //    If the result indicates failure, throw a UserError.
   if (!result.success) {
-    // You can choose to throw a generic error to the user for security.
-    throw new UserError(result.message || 'An unexpected error occurred during payment initiation.');
+    throw new UserError(result.message || 'Payment initiation failed');
   }
 
-  return result;
+  return {
+    ...result,
+    id: transactionId, // Ensure consistent ID usage
+  };
 };
 
 /**
@@ -86,37 +77,49 @@ const restore = async (data, { db: { collections } }) => {
   }
 };
 
+// In api/controllers/payment/actions.js
 const confirm = async (data, { db: { collections } }) => {
-  console.log("confirm payment", data)
-  const PaymentCollection = collections[name];
+  const PaymentCollection = collections.payment;
   const { payment } = data;
-  const { CheckoutRequestID: checkoutRequestID, MerchantRequestID: merchantRequestID } = payment || {};
+  
+  // Try to find by transaction ID first
+  const paymentRecord = await PaymentCollection.findOne({ 
+    id: payment.CheckoutRequestID || payment.MerchantRequestID 
+  });
 
-  // 1. Find the payment record in your database.
-  const [paymentRecord] = await PaymentCollection.find({ merchantRequestID, checkoutRequestID }).limit(1);
-
-  // 2. If no payment is found, inform the user.
   if (!paymentRecord) {
-    return {
-      success: false,
-      message: `Payment not found.`,
-    };
+    // If not found by ID, try by request IDs
+    const [recordByRequest] = await PaymentCollection.find({
+      merchantRequestID: payment.MerchantRequestID,
+      checkoutRequestID: payment.CheckoutRequestID,
+    }).limit(1);
+
+    if (!recordByRequest) {
+      return {
+        success: false,
+        message: "Payment record not found",
+      };
+    }
+    return formatPaymentResponse(recordByRequest);
   }
 
-  // 3. Return the relevant, client-safe data.
-  return {
-    success: true,
-    message: paymentRecord.errorMessage || `Payment is in progress. status:${paymentRecord.status}`,
-    id: paymentRecord.id,
-    amount: paymentRecord.amount,
-    phone: paymentRecord.phone,
-    status: paymentRecord.status,
-    merchantRequestID: paymentRecord.merchantRequestID,
-    checkoutRequestID: paymentRecord.checkoutRequestID,
-    ref: paymentRecord.ref,
-    time: paymentRecord.time,
-  };
+  return formatPaymentResponse(paymentRecord);
 };
+
+function formatPaymentResponse(record) {
+  return {
+    success: record.status === 'COMPLETED',
+    message: record.errorMessage || record.status,
+    id: record.id,
+    amount: record.amount,
+    phone: record.phone,
+    status: record.status,
+    merchantRequestID: record.merchantRequestID,
+    checkoutRequestID: record.checkoutRequestID,
+    ref: record.ref,
+    time: record.time,
+  };
+}
 
 export default () => {
   return {
