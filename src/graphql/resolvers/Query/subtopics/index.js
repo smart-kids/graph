@@ -159,7 +159,7 @@ const nested = {
     },
 
     // PAGINATED to fetch related questions efficiently.
-    questions: async (root, { limit = 25, offset = 0 }, { loaders }) => {
+    questions: async (root, { limit = 50, offset = 0 }, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'questions' lookup for Subtopic ID: ${root.id}`);
       // The loader will batch fetch all questions for all subtopics in the request.
       const allItems = await loaders.questionsBySubtopicId.load(root.id);
