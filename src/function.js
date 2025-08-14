@@ -118,6 +118,38 @@ async function attachRouters() {
     console.log("Routers have been attached.");
 }
 
+// A new middleware to capture and report 4xx client errors to Bugsnag
+const bugsnagClientErrorHandler = (req, res, next) => {
+    res.on('finish', () => {
+        // We only want to capture 4xx client errors.
+        // 5xx errors are already caught by the main Bugsnag error handler.
+        if (res.statusCode >= 400 && res.statusCode < 500) {
+            const error = new Error(`Client Error: ${req.method} ${req.originalUrl} returned ${res.statusCode}`);
+            
+            bugsnagClient.notify(error, event => {
+                // Group these issues by the specific error type (e.g., "Client Error: 404")
+                event.context = `Client Error: ${res.statusCode}`;
+                // Set the severity to 'warning' since it's not a server crash
+                event.severity = 'warning';
+                // Attach useful request data for debugging
+                event.addMetadata('request', {
+                    url: req.originalUrl,
+                    method: req.method,
+                    ip: req.ip,
+                    statusCode: res.statusCode
+                });
+            });
+        }
+    });
+    next();
+};
+
+// I) Final Error Handling Middleware (must be last)
+
+// IMPORTANT: Place the new client error handler HERE.
+// It must be AFTER the routers but BEFORE the final server error handler.
+app.use(bugsnagClientErrorHandler);
+
 // I) Final Error Handling Middleware (must be last)
 app.use(bugsnagMiddleware.errorHandler);
 app.use((err, req, res, next) => {
