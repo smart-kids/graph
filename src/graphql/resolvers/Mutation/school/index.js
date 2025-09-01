@@ -50,14 +50,14 @@ const create = async (data, { db: { collections } }) => {
 
   const inviteSmsText = `Hello {{username}}, 
 
-You have been invited to join {{team_name}} on ShulePlus.
+  You have been invited to join {{team_name}} on ShulePlus.
 
-access admin here https://cloud.shuleplus.co.ke
+  access admin here https://cloud.shuleplus.co.ke
 
-use 
+  use 
 
-phone number: {{phone_number}}
-password: {{password}}`;
+  phone number: {{phone_number}}
+  password: {{password}}`;
 
   let { gradeOrder, termOrder } = data[modelName]; // gradeOrder and termOrder might be undefined
   gradeOrder = gradeOrder ? gradeOrder.join(",") : "";
