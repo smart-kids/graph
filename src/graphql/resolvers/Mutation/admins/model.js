@@ -9,10 +9,24 @@ export default Waterline.Collection.extend({
   attributes: {
     id: { type: "string", required: true },
     names: { type: "string", required: true },
-    email: { type: "string", required: true },
+    email: { type: "string", required: false },
     phone: { type: "string", required: true },
     password: { type: "string" },
     school: { type: "string" },
-    isDeleted: { type: "boolean", defaultsTo: false }
+    isDeleted: { type: "boolean", defaultsTo: false },
+    // For Handling Sorting in Querys
+    // Let Waterline manage the timestamp. It will expect a Date object.
+    createdAt: { 
+      type: 'ref', // 'ref' is for any type that isn't string, number, etc., like a Date object.
+      autoCreatedAt: true, // This tells Waterline this is a "created at" timestamp.
+      autoMigrations: { columnType: 'timestamptz' } // Ensures the DB column is correct.
+    },
+    
+    // You should also add updatedAt for completeness
+    updatedAt: {
+      type: 'ref',
+      autoUpdatedAt: true,
+      autoMigrations: { columnType: 'timestamptz' }
+    }
   }
 });

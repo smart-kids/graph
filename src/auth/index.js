@@ -233,68 +233,114 @@ router.post(
         const { collections } = db;
         const { user, password } = req.body;
 
-        let specificUserRecord = null;
-        let determinedUserType = null;
+        // --- 1. Find User Across Different Collections ---
+        let userInfo = null;
+        let userType = null;
+        const isEmail = validateEmail(user);
+        const identifierField = isEmail ? 'email' : 'phone';
+        const adminIdentifierField = isEmail ? 'email' : 'phone';
 
-        try {
+        // Define search order and collections
+        const searchOrder = [
+            // Admins might have username or phone
+            { type: 'admin', collection: 'admin', field: adminIdentifierField },
+            // Others typically use phone or email
+            { type: 'teacher', collection: 'teacher', field: identifierField },
+            { type: 'student', collection: 'student', field: identifierField },
+            { type: 'parent', collection: 'parent', field: identifierField },
+            { type: 'driver', collection: 'driver', field: identifierField },
+        ];
 
-           Promise.all([
-                collections["admin"].findOne({ where: { phone: user, isDeleted: false } }),
-                collections["driver"].findOne({ where: { phone: user, isDeleted: false } }),
-                collections["parent"].findOne({ where: { phone: user, isDeleted: false } })
-            ]).then(async ([adminUser, driverUser, parentUser]) => {
-                specificUserRecord = adminUser || driverUser || parentUser;
-                determinedUserType = adminUser ? 'admin' : driverUser ? 'driver' : parentUser ? 'parent' : null;
-                console.log({ specificUserRecord })
-                console.log({ determinedUserType })
+        // --- 2. Search User to Verify OTP SMS ---
+        console.log(`Searching for user by ${identifierField}: ${user}`);
+        for (const { type, collection, field } of searchOrder) {
+            if (collections && !collections[collection]) {
+                console.warn(`Collection "${collection}" not found, skipping search for type "${type}".`);
+                continue;
+            }
+            console.log(`Checking collection: ${collection} using field: ${field}`);
+            const query = { [field]: user, isDeleted: false };
 
-                if (!specificUserRecord) {
-                    console.log(`User not found for input: ${user}`);
-                    throw { status: 401, message: 'Invalid credentials or user not found.' };
-                }
+            let potentialUser;
+            const potentialUsers = await collections[collection].find(query);
+            if (potentialUsers && potentialUsers.length) {
+                potentialUser = potentialUsers[0];
+            }
 
-                // --- 2. Verify OTP (This part was already correct) ---
-                const otpData = (await collections["otp"].find({
-                    where: {
-                        user: specificUserRecord.id, // Use the ID from the found user record
-                        password: password,
-                        used: false
-                    },
-                    // sort: 'createdAt DESC', // More standard syntax for sorting
-                    limit: 1
-                }))[0];
+            if (potentialUser) {
+                userInfo = potentialUser;
+                userType = type;
+                console.log(`User found in collection "${collection}" as type "${type}". ID: ${userInfo.id}`);
+                break; // Stop searching once a user is found
+            }
+        }
 
-                if (!otpData) {
-                    console.log(`Invalid or used OTP for user: ${specificUserRecord.id}`);
-                    return res.status(401).send({ message: "Invalid or expired OTP." });
-                }
+        // --- 3. Handle User Not Found ---
+        if (!userInfo) {
+            console.warn(`User not found for identifier: ${userInput}`);
+            return res.status(401).send({ message: "Invalid credentials." }); // Generic message
+        }
 
-                console.log(`OTP verified successfully for user: ${specificUserRecord.id}`);
-
-                // --- 3. Mark OTP as Used (Important!) ---
-                await collections["otp"].update({ id: otpData.id }).set({ used: true });
-                console.log(`OTP marked as used: ${otpData.id}`);
-
-                // --- 4. Generate Structured Token ---
-                if (!determinedUserType) {
-                    console.log(`Attempting token generation for unknown user type: ${determinedUserType}`);
-                    console.log(`Error fetching record for token generation (userId: ${specificUserRecord.id}, type: ${determinedUserType}):`);
-                    throw new Error(`Failed to retrieve user details for ${determinedUserType}.`);
-                }
-
-                const { token, user: safeUserData } = await generateTokenForUser(specificUserRecord.id, determinedUserType, collections);
-
-                // Add the determined UserType to the safe user data
-                safeUserData.userType = determinedUserType;
-
-                // --- 5. Send Response ---
-                return res.send({ token, user: safeUserData });
+        // --- 4. Verify OTP ---
+        let isAuthenticated;
+        const userId = userInfo.id;
+        if (collections.otp) { // Only check if not already authenticated and OTP collection exists
+            console.log(`Checking OTP for user ID: ${userId} with OTP: ${password}`);
+            const otpRecords = await collections.otp.find({
+                user: userId,
+                password: password,
+                used: false
+                // Optional: Add expiry check: expiryTimestamp: { $gt: new Date() }
             });
+            let otpRecord;
+            if (otpRecords && otpRecords.length) {
+                otpRecord = otpRecords[0];
+            }
 
-        } catch (error) {
-            console.error("Error during SMS verification:", error);
+            if (otpRecord) {
+                console.log("Valid OTP found.");
+                // Mark OTP as used
+                try {
+                    const updateResult = await collections.otp.updateOne({
+                        id: otpRecord.id
+                    }).set({
+                        used: true, // Use OTP record's ID
+                        usedAt: new Date()
+                    });
+                    if (updateResult) {
+                        console.log(`OTP record ${otpRecord.id} marked as used.`);
+                        isAuthenticated = true;
+                    } else {
+                         isAuthenticated = false;
+                        console.warn(`Failed to mark OTP record ${otpRecord.id} as used.`);
+                        // Decide if login should still proceed or fail if OTP can't be marked used
+                        // isAuthenticated = false; // Potentially revert authentication
+                    }
+                } catch (dbError) {
+                    console.error(`Database error marking OTP ${otpRecord.id} as used:`, dbError);
+                    // Decide if login should fail
+                    isAuthenticated = false;
+                }
+            } else {
+                console.log("No valid, unused OTP found matching the provided password.");
+            }
+        }
+
+        // --- 5. Handle Authentication Failure ---
+        if (!isAuthenticated) {
+            console.error("Error during SMS verification");
             return res.status(500).send({ message: "An internal server error occurred." });
         }
+
+        // --- 6. Authentication Successful - Prepare Payload and Token ---
+        console.log(`Authentication successful for user ID: ${userId}, type: ${userType}`);
+        const { token, user: safeUserData } = await generateTokenForUser(userId, userType, collections);
+
+        // Add the determined UserType to the safe user data
+        safeUserData.userType = userType;
+
+        // --- 7. Send Response ---
+        return res.send({ token, user: safeUserData });
     }
 );
 
@@ -1209,9 +1255,9 @@ router.post(
             };
 
             const userTypesToSearch = ['admin', 'driver', 'parent'];
-            
+
             // --- REFACTOR 2: Find the MOST RECENT record if duplicates exist ---
-            const searchPromises = userTypesToSearch.map(type => 
+            const searchPromises = userTypesToSearch.map(type =>
                 // 1. Find all matching records
                 // 2. Sort by 'createdAt' in descending order to put the newest first
                 // 3. Limit the result to just 1 record (the newest one)
@@ -1234,8 +1280,8 @@ router.post(
                 specificUserRecord = foundUser.record;
                 determinedUserType = foundUser.type;
                 console.log(`User type determined: ${determinedUserType} (user: ${user}, id: ${specificUserRecord.id}). Selected the most recent record.`);
-            } 
-            
+            }
+
             // else {
             //      // Fallback to the generic 'users' table, also getting the most recent
             //      const records = await collections["users"].find(userSearchCriteria).sort('createdAt DESC').limit(1);
@@ -1264,7 +1310,7 @@ router.post(
             if (NODE_ENV === 'development' || NODE_ENV === 'test') {
                 return res.send({ success: true, otp: `0000 - for development` });
             }
-            
+
             const smsResult = await sms({
                 data: { message: `Shule-Plus Code: ${password}.`, phone: user }
             });
@@ -1354,13 +1400,16 @@ router.post(
             console.log(`Checking collection: ${collection} using field: ${field}`);
             const query = { [field]: userInput, isDeleted: false };
 
-            // Use findOne for efficiency
-            const potentialUser = await collections[collection].findOne(query);
+            let potentialUser;
+            const potentialUsers = await collections[collection].find(query);
+            if (potentialUsers && potentialUsers.length) {
+                potentialUser = potentialUsers[0];
+            }
 
             if (potentialUser) {
                 userInfo = potentialUser;
                 userType = type;
-                console.log(`User found in collection "${collection}" as type "${type}". ID: ${userInfo.id || userInfo._id}`);
+                console.log(`User found in collection "${collection}" as type "${type}". ID: ${userInfo.id}`);
                 // If using the generic 'users' table, you might need to fetch role separately
                 // if (type === 'user') {
                 //     const userRoleInfo = await collections["user_role"]?.findOne({ user: userInfo.id, isDeleted: false });
@@ -1388,7 +1437,7 @@ router.post(
 
         // --- 4. Verify Password (Permanent or OTP) ---
         let isAuthenticated = false;
-        const userId = userInfo.id || userInfo._id; // Get the user's actual ID (_id or id)
+        const userId = userInfo.id; // Get the user's actual ID (_id or id)
 
         // a) Check Permanent Password (if it exists)
         if (userInfo.password) {
@@ -1413,31 +1462,36 @@ router.post(
         // b) Check OTP (if permanent password failed or doesn't exist)
         if (!isAuthenticated && collections.otp) { // Only check if not already authenticated and OTP collection exists
             console.log(`Checking OTP for user ID: ${userId} with OTP: ${providedPassword}`);
-            const otpRecord = await collections.otp.findOne({
-                user: userId.toString(), // Ensure ID is compared correctly (string vs ObjectId)
+            const otpRecords = await collections.otp.find({
+                user: userId,
                 password: providedPassword,
                 used: false
                 // Optional: Add expiry check: expiryTimestamp: { $gt: new Date() }
             });
+            let otpRecord;
+            if (otpRecords && otpRecords.length) {
+                otpRecord = otpRecords[0];
+            }
 
             if (otpRecord) {
                 console.log("Valid OTP found.");
                 isAuthenticated = true;
                 // Mark OTP as used
                 try {
-                    const updateResult = await collections.otp.updateOne(
-                        { _id: otpRecord._id }, // Use OTP record's ID
-                        { $set: { used: true, usedAt: new Date() } }
-                    );
-                    if (updateResult.modifiedCount === 1) {
-                        console.log(`OTP record ${otpRecord._id} marked as used.`);
+                    const updateResult = await collections.otp.updateOne({
+                        id: otpRecord.id
+                    }).set({
+                        used: true // Use OTP record's ID
+                    });
+                    if (updateResult) {
+                        console.log(`OTP record ${otpRecord.id} marked as used.`);
                     } else {
-                        console.warn(`Failed to mark OTP record ${otpRecord._id} as used.`);
+                        console.warn(`Failed to mark OTP record ${otpRecord.id} as used.`);
                         // Decide if login should still proceed or fail if OTP can't be marked used
                         // isAuthenticated = false; // Potentially revert authentication
                     }
                 } catch (dbError) {
-                    console.error(`Database error marking OTP ${otpRecord._id} as used:`, dbError);
+                    console.error(`Database error marking OTP ${otpRecord.id} as used:`, dbError);
                     // Decide if login should fail
                     // isAuthenticated = false;
                 }

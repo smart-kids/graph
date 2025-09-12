@@ -9,12 +9,12 @@ export default Waterline.Collection.extend({
   attributes: {
     id: { type: "string", required: true },
     school: { type: "string", required: false },
-    national_id: { type: "string", required: true },
+    national_id: { type: "string", required: false },
     name: { type: "string", required: true },
     password: { type: "string", required: false },
     phone: { type: "string", required: true },
-    email: { type: "string", required: true },
-    gender: { type: "string", required: true },
+    email: { type: "string", required: false },
+    gender: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false },
     // --- FIX ---
     // Let Waterline manage the timestamp. It will expect a Date object.
