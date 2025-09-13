@@ -124,21 +124,12 @@ const config = {
         postgres: PostgresAdapter,
     },
     datastores: {
-        default: {
-            adapter: 'postgres',
-            url: DB_URL,
-            pool: {
-                min: 0,
-                max: 10,
-                idleTimeoutMillis: 30000,
-                acquireTimeoutMillis: 30000,
-                reapIntervalMillis: 1000,
-            }
-        }
+        default: datastoreConfig,
     },
     defaultModelSettings: {
-        // ... (rest of your default model settings)
-    }
+        migrate: 'safe',
+    },
+    onInit: initializeDatastore,
 };
 
 export default new Promise((resolve, reject) => {
