@@ -311,7 +311,7 @@ router.post(
                         console.log(`OTP record ${otpRecord.id} marked as used.`);
                         isAuthenticated = true;
                     } else {
-                         isAuthenticated = false;
+                        isAuthenticated = false;
                         console.warn(`Failed to mark OTP record ${otpRecord.id} as used.`);
                         // Decide if login should still proceed or fail if OTP can't be marked used
                         // isAuthenticated = false; // Potentially revert authentication
@@ -1297,8 +1297,9 @@ router.post(
             }
 
             // --- OTP Logic ---
-            const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid();
-
+            //const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid();
+            // Always use real OTP when sending real SMS
+            const password = (NODE_ENV === 'production' || process.env.SEND_SMS_IN_DEV === 'true') ? makeid() : '0000';
             await collections["otp"].create({
                 id: new ObjectId().toHexString(),
                 user: specificUserRecord.id,
@@ -1307,7 +1308,10 @@ router.post(
             }).fetch();
 
             // --- SMS Sending Logic ---
-            if (NODE_ENV === 'development' || NODE_ENV === 'test') {
+            // if (NODE_ENV === 'development' || NODE_ENV === 'test') {
+            //     return res.send({ success: true, otp: `0000 - for development` });
+            // }
+            if ((NODE_ENV === 'development' || NODE_ENV === 'test') && !process.env.SEND_SMS_IN_DEV) {
                 return res.send({ success: true, otp: `0000 - for development` });
             }
 
