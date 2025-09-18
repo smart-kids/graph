@@ -32,7 +32,7 @@ import functions from '@google-cloud/functions-framework';
 // --- 2. ENVIRONMENT VALIDATION ---
 const {
     NODE_ENV = 'development',
-    PORT = 4000,
+    PORT = 4001,
     SESSION_SECRET,
     CORS_ORIGIN // e.g., "http://localhost:3000"
 } = process.env;

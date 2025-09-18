@@ -129,7 +129,6 @@ const config = {
     defaultModelSettings: {
         migrate: 'safe',
     },
-    onInit: initializeDatastore,
 };
 
 export default new Promise((resolve, reject) => {
