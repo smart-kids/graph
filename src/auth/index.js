@@ -245,8 +245,8 @@ router.post(
             // Admins might have username or phone
             { type: 'admin', collection: 'admin', field: adminIdentifierField },
             // Others typically use phone or email
-            { type: 'teacher', collection: 'teacher', field: identifierField },
-            { type: 'student', collection: 'student', field: identifierField },
+            // { type: 'teacher', collection: 'teacher', field: identifierField },
+            // { type: 'student', collection: 'student', field: identifierField },
             { type: 'parent', collection: 'parent', field: identifierField },
             { type: 'driver', collection: 'driver', field: identifierField },
         ];
@@ -264,8 +264,16 @@ router.post(
             dbCollectionName = collection;
             const query = { where: { [field]: user, isDeleted: false } };
 
+            // Skip the `phone` field for the `student` collection
+            if (collection === 'student') {
+                delete query.where.phone;
+            }
+
             try {
-                userRecord = await collections[collection].findOne(query);
+                const records = await collections[collection].find(query).sort('createdAt DESC').limit(1);
+                if (records && records.length > 0) {
+                    userRecord = records[0];
+                }
             } catch (error) {
                 console.error(`Error querying ${collection} for user ${user}:`, error);
                 continue;
@@ -287,6 +295,7 @@ router.post(
 
         // --- 4. Verify OTP ---
         let isAuthenticated;
+        console.log({userInfo})
         const userId = userInfo.id;
         if (collections.otp) { // Only check if not already authenticated and OTP collection exists
             console.log(`Checking OTP for user ID: ${userId} with OTP: ${password}`);
