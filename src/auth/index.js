@@ -233,7 +233,7 @@ router.post(
         const { collections } = db;
         const { user, password } = req.body;
 
-        // --- 1. Find User Across Different Collections (Refactored Logic) ---
+        // --- 1. Find User Across All Collections (REFACTORED LOGIC) ---
         let userInfo = null;
         let userType = null;
 
@@ -248,27 +248,30 @@ router.post(
 
         console.log(`Searching for the most recent user for identifier: ${user}`);
 
-        // Create a search promise for each collection
-        const searchPromises = searchConfig.map(({ type, collection }) => {
-            if (!collections[collection]) {
-                console.warn(`Collection "${collection}" not found, skipping.`);
-                return Promise.resolve(null); // Resolve with null if collection doesn't exist
-            }
-            return collections[collection]
-                .find({ ...identifier, isDeleted: false })
-                .sort('createdAt DESC')
-                .limit(1)
-                .then(records => records.length > 0 ? { ...records[0], userType: type } : null);
-        });
-
         try {
+            // Step A: Create a search promise for each collection to find the most recent user within it.
+            const searchPromises = searchConfig.map(({ type, collection }) => {
+                if (!collections[collection]) {
+                    console.warn(`Collection "${collection}" not found, skipping.`);
+                    return Promise.resolve(null); // Gracefully handle non-existent collections
+                }
+                // Use find().sort().limit(1) to get the newest record from EACH collection
+                return collections[collection]
+                    .find({ ...identifier, isDeleted: { '!=': true } })
+                    .sort('createdAt DESC') // The key change: sort by creation date
+                    .limit(1)
+                    .then(records => records.length > 0 ? { ...records[0], userType: type } : null);
+            });
+
+            // Step B: Execute all searches in parallel.
             const results = await Promise.all(searchPromises);
             
-            // Filter out null results and find the most recent user among all collections
+            // Step C: Filter out nulls and find the single most recent user among all results.
             const validUsers = results.filter(record => record !== null);
 
             if (validUsers.length > 0) {
-                // Sort the users by creation date in descending order to find the absolute newest one
+                // This is the crucial comparison across collections.
+                // We sort the *results* to find the one with the latest createdAt timestamp.
                 validUsers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 
                 const mostRecentUser = validUsers[0];
@@ -288,7 +291,7 @@ router.post(
             return res.status(401).send({ message: "Invalid credentials." });
         }
 
-        // --- 3. Verify OTP ---
+        // --- 3. Verify OTP (This logic can now remain the same) ---
         let isAuthenticated = false;
         const userId = userInfo.id;
 
@@ -298,14 +301,11 @@ router.post(
                 user: userId,
                 password: password,
                 used: false,
-                // It's good practice to check for expiry as well
-                // expiresAt: { '>': new Date() } 
             });
 
             if (otpRecord) {
                 console.log("Valid OTP found.");
                 try {
-                    // Mark OTP as used
                     await collections.otp.updateOne({ id: otpRecord.id }).set({
                         used: true,
                         usedAt: new Date()
@@ -314,7 +314,6 @@ router.post(
                     isAuthenticated = true;
                 } catch (dbError) {
                     console.error(`Database error marking OTP ${otpRecord.id} as used:`, dbError);
-                    // If the DB update fails, authentication should fail to prevent OTP reuse
                     isAuthenticated = false; 
                 }
             } else {
@@ -334,7 +333,6 @@ router.post(
         console.log(`Authentication successful for user ID: ${userId}, type: ${userType}`);
         const { token, user: safeUserData } = await generateTokenForUser(userId, userType, collections);
 
-        // Add the determined UserType to the safe user data
         safeUserData.userType = userType;
 
         // --- 6. Send Response ---
