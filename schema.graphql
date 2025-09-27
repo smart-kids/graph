@@ -702,6 +702,7 @@ type lessonAttempt {
   startedAt: String
   completedAt: String
   status: String
+  school: String
   finalScore: Float
   deviceInfo: String
 }
@@ -1285,6 +1286,7 @@ input IlessonAttempt {
   status: String!
   finalScore: Float!
   deviceInfo: String!
+  school: String!
 }
 
 input UlessonAttempt {
@@ -1296,6 +1298,7 @@ input UlessonAttempt {
   status: String
   finalScore: Float
   deviceInfo: String
+  school: String
 }
 
 type lessonAttemptMutations {
