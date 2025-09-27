@@ -121,6 +121,8 @@ type Mutation {
   team_members: team_memberMutations
   invitations: invitationMutations
   responses: optionResponseMutations
+  lessonAttempts: lessonAttemptMutations
+  attemptEvents: attemptEventMutations
 }
 
 # user things
@@ -693,6 +695,26 @@ type financial {
   balanceFormated: String
 }
 
+type lessonAttempt {
+  id: String
+  lessonId: String
+  userId: String
+  startedAt: String
+  completedAt: String
+  status: String
+  finalScore: Float
+  deviceInfo: String
+}
+
+type attemptEvent {
+  id: String
+  questionId: String
+  eventType: String
+  eventTimestamp: String
+  userAnswer: String
+  isCorrect: Boolean
+}
+
 # school things
 type school {
   id: String
@@ -1228,6 +1250,59 @@ type optionResponseMutations {
   update(option: UoptionResponse!): optionResponse
   archive(option: UoptionResponse!): optionResponse
   restore(option: UoptionResponse!): optionResponse
+}
+
+input IattemptEvent {
+  id: String
+  questionId: String
+  eventType: String
+  eventTimestamp: String
+  userAnswer: String
+  isCorrect: Boolean
+}
+
+input UattemptEvent {
+  id: String!
+  questionId: String
+  eventType: String
+  eventTimestamp: String
+  userAnswer: String
+  isCorrect: Boolean
+}
+
+type attemptEventMutations {
+  create(attemptEvent: IattemptEvent!): attemptEvent
+  update(attemptEvent: UattemptEvent!): attemptEvent
+  archive(attemptEvent: UattemptEvent!): attemptEvent
+  restore(attemptEvent: UattemptEvent!): attemptEvent
+}
+
+input IlessonAttempt {
+  lessonId: String!
+  userId: String!
+  startedAt: String!
+  completedAt: String!
+  status: String!
+  finalScore: Float!
+  deviceInfo: String!
+}
+
+input UlessonAttempt {
+  id: String!
+  lessonId: String
+  userId: String
+  startedAt: String
+  completedAt: String
+  status: String
+  finalScore: Float
+  deviceInfo: String
+}
+
+type lessonAttemptMutations {
+  create(lessonAttempt: IlessonAttempt!): lessonAttempt
+  update(lessonAttempt: UlessonAttempt!): lessonAttempt
+  archive(lessonAttempt: UlessonAttempt!): lessonAttempt
+  restore(lessonAttempt: UlessonAttempt!): lessonAttempt
 }
 
 # term things

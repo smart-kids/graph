@@ -1109,17 +1109,17 @@ router.post(
         school: Joi.string().required(),
         parent: Joi.object({
             name: Joi.string().required(),
-            phone: Joi.string(), //.required().pattern(/^[0-9]{10,15}$/),
-            email: Joi.string().email().required(),
+            phone: Joi.string().required(), // It's better to require this
+            email: Joi.string().email().allow('').optional(), // Email can be optional
             national_id: Joi.string().default('-'),
-            gender: Joi.string().default('UNKOWN'),
+            gender: Joi.string().default('UNKNOWN'),
             registration: Joi.string().default('-'),
         }).required(),
         student: Joi.object({
             name: Joi.string().required(),
             class: Joi.string().required(), // This will be the class ID
-            route: Joi.string().required(),
-            gender: Joi.string().default('UNKOWN'),
+            route: Joi.string().default('-'), // Default if not provided
+            gender: Joi.string().default('UNKNOWN'),
             registration: Joi.string().default('-'),
         }).required()
     })),
@@ -1127,107 +1127,91 @@ router.post(
         const db = await req.app.locals.db;
         const { collections } = db;
         const { school, parent, student } = req.body;
+        const isDevelopment = ['development', "test"].includes(process.env.NODE_ENV);
 
         try {
-            // Check if a parent with this phone or email already exists for this school
+            // Check if a parent with this phone number already exists for this school
             const existingParent = await collections.parent.findOne({
                 phone: parent.phone,
                 school: school,
-                isDeleted: false
+                isDeleted: { '!=': true } // More robust check for not deleted
             });
 
+            // Generate OTP, which will be used whether the user is new or existing
+            const password = isDevelopment ? '0000' : makeid();
+            let parentId;
+
             if (existingParent) {
-                const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
+                // --- THIS BLOCK IS MODIFIED ---
+                // Parent exists, so we'll update their details and their student's details.
+                console.log(`Parent with phone ${parent.phone} exists. Updating details.`);
+                parentId = existingParent.id;
 
-                const otpSaveInfo = await collections["otp"].create({
-                    id: new ObjectId().toHexString(),
-                    user: existingParent.id,
-                    password
-                })
+                // Update parent's information
+                await collections.parent.updateOne({ id: parentId }).set(parent);
 
-                const message = `Welcome to Shule-Plus! We're glad you're here. Your child, ${student.name}, has been registered to class ${student.class}.`;
-                const smsResult = await sms({
-                    // school: schoolId,
-                    data: { message, phone: parent.phone }
+                // Find and update the student linked to this parent.
+                // This assumes one student per parent for this specific registration flow.
+                // If a parent can have multiple students, this logic might need adjustment.
+                await collections.student.updateOne({ parent: parentId }).set({
+                    ...student,
+                    names: student.name // Ensure 'names' field is also updated if used elsewhere
                 });
 
-                if (smsResult && smsResult.status && smsResult.responseCode === '0200') {
-                    console.log("OTP sent successfully.");
-                } else {
-                    console.error("SMS sending failed for user:", parent.phone, "Response:", smsResult);
-                }
+            } else {
+                // --- THIS IS THE NEW USER BLOCK ---
+                // Parent does not exist, so create new parent and student records.
+                console.log(`Registering new parent with phone ${parent.phone}.`);
+                parentId = await generateId();
 
-                // Send back the token and the parent's user object.
-                const user = { ...Object.assign(parentData, { parentid, school }), role: 'parent' };
-                const token = jwt.sign(user, config.secret);
-                return res.send({ user, token });
+                // Create the parent user
+                const parentData = { ...parent, id: parentId, school };
+                await collections.parent.create(parentData);
+
+                // Create the student and link them to the new parent
+                const studentId = await generateId();
+                const studentData = {
+                    ...student,
+                    id: studentId,
+                    school,
+                    names: student.name,
+                    parent: parentId // Link using the new parent's ID
+                };
+                await collections.student.create(studentData);
             }
 
-            // Generate a unique parent ID
-            const parentid = await generateId();
+            // --- COMMON LOGIC FOR BOTH NEW AND EXISTING USERS ---
 
-            // Create the parent user
-            const parentData = { ...parent, id: parentid, school };
-            const result = await collections.parent.create(parentData);
-
-            // Generate a unique student ID
-            const studentid = await generateId();
-
-            // Create the student and link them to the newly created parent
-            const studentData = {
-                ...student,
-                id: studentid,
-                school,
-                names: student.name,
-                parent: parentid // Link using the parent's ID
-            };
-            const result2 = await collections.student.create(studentData);
-
-            // The "user" who logs in is the Parent.
-            // We'll create a user object for the token that includes their role.
-            const user = { ...Object.assign(parentData, { parentid, school }), role: 'parent' };
-            const token = jwt.sign(user, config.secret);
-
-
-            // generate OTP, send it and save it
-            const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid()
-
-            const otpSaveInfo = await collections["otp"].create({
+            // Save the new OTP for verification, linking it to the parent's ID.
+            // Consider updating an existing OTP record if one exists to avoid clutter.
+            await collections["otp"].destroy({ user: parentId }); // Remove old OTPs for this user
+            await collections["otp"].create({
                 id: new ObjectId().toHexString(),
-                user: parentid,
+                user: parentId,
                 password
-            })
+            });
 
-            // send sms to phone
-            if (!['development', "test"].includes(NODE_ENV)) {
-                // send welcome message first
-                sms({
-                    // school: schoolId,
-                    data: {
-                        message: `Welcome to Shule-Plus! We're glad you're here. Your child, ${student.name}, has been registered to class ${student.class}.`,
-                        phone: parentData.phone
-                    }
-                }, () => {
-                    // send OTP code
-                    sms({
-                        // school: schoolId,
-                        data: { message: `Shule-Plus Code: ${password}.`, phone: parentData.phone }
-                    }, ({ code }) => {
-                        console.log("OTP sent successfully.");
-                    })
-                })
+            // Send OTP via SMS
+            const otpMessage = `Your Shule-Plus verification code is: ${password}. Do not share it.`;
+            
+            console.log(`Sending OTP to ${parent.phone}. Code: ${password}`); // Log for dev/testing
+            
+            if (!isDevelopment) {
+                await sms({
+                    data: { message: otpMessage, phone: parent.phone }
+                });
             }
-
-            // Send back the token and the parent's user object.
-            return res.send({ user, token });
+            
+            // Send a success response. The front-end will now proceed to the OTP verification screen.
+            // We do NOT send a token here. The token is sent after successful OTP verification.
+            return res.status(200).send({ message: "OTP sent successfully." });
 
         } catch (error) {
-            console.error("Error during student registration:", error);
-            // Check for waterline validation errors specifically if possible
+            console.error("Error during student registration/update:", error);
             if (error.name === 'AdapterError') {
                 return res.status(400).send({ error: "Invalid data provided. Please check your input." });
             }
-            return res.status(500).send({ error: "An unexpected error occurred during registration." });
+            return res.status(500).send({ error: "An unexpected error occurred." });
         }
     }
 );
