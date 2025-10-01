@@ -1255,8 +1255,10 @@ type optionResponseMutations {
 
 input IattemptEvent {
   id: String
+  lessonAttempt: String
   questionId: String
   eventType: String
+  school: String
   eventTimestamp: String
   userAnswer: String
   isCorrect: Boolean
@@ -1264,8 +1266,10 @@ input IattemptEvent {
 
 input UattemptEvent {
   id: String!
+  lessonAttempt: String
   questionId: String
   eventType: String
+  school: String
   eventTimestamp: String
   userAnswer: String
   isCorrect: Boolean
@@ -1302,10 +1306,10 @@ input UlessonAttempt {
 }
 
 type lessonAttemptMutations {
-  create(lessonAttempt: IlessonAttempt!): lessonAttempt
-  update(lessonAttempt: UlessonAttempt!): lessonAttempt
-  archive(lessonAttempt: UlessonAttempt!): lessonAttempt
-  restore(lessonAttempt: UlessonAttempt!): lessonAttempt
+  create(lessonattempt: IlessonAttempt!): lessonAttempt
+  update(lessonattempt: UlessonAttempt!): lessonAttempt 
+  archive(lessonattempt: UlessonAttempt!): lessonAttempt
+  restore(lessonattempt: UlessonAttempt!): lessonAttempt
 }
 
 # term things

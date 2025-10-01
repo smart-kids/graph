@@ -13,9 +13,7 @@ module.exports = Waterline.Collection.extend({
   attributes: {
     id: {
       type: 'string',
-      columnName: '_id',
-      required: true,
-      // autoIncrement: true,
+      required: true, // Not required from the app, DB will generate it
     },
 
     // --- Core Attributes ---

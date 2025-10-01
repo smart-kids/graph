@@ -61,7 +61,7 @@ module.exports = Waterline.Collection.extend({
     },
 
     // Standard timestamps
-    createdAt: { type: 'number', autoCreatedAt: true },
-    updatedAt: { type: 'number', autoUpdatedAt: true },
+    createdAt: { type: 'ref', autoCreatedAt: true },
+    updatedAt: { type: 'ref', autoUpdatedAt: true },
   }
 });

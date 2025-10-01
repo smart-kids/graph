@@ -12,6 +12,7 @@ const create = async (data, { db: { collections } }) => {
 
     return entry;
   } catch (err) {
+    console.log(err)
     throw new UserError(err.details);
   }
 };
@@ -29,6 +30,7 @@ const update = async (data, { db: { collections } }) => {
       id
     };
   } catch (err) {
+    console.log(err)
     throw new UserError(err.details);
   }
 };
