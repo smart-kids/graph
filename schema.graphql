@@ -1069,6 +1069,7 @@ type subtopic {
   topic: topic
   questions(limit: Int, offset: Int): [question]
   questionsOrder: [String]
+  questionsImages: [String]
 }
 
 input Isubtopic {
@@ -1095,6 +1096,7 @@ enum answerType {
   SINGLECHOICE
   MULTICHOICE
   CAMERA
+  TEXT
 }
 
 # question things
