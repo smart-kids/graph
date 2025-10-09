@@ -23,14 +23,15 @@ module.exports = Waterline.Collection.extend({
       description: 'The ID of the lesson being attempted (e.g., from your content structure).'
     },
     startedAt: {
-      type: 'ref', // 'ref' is flexible, for Postgres use columnType for specificity
+      type: 'string', // 'ref' is flexible, for Postgres use columnType for specificity
       // columnType: 'timestamptz', // Use 'timestamp with time zone' for accuracy
-      required: true,
+      // required: true,
+      allowNull: true
     },
     completedAt: {
-      type: 'ref',
+      type: 'string',
       // columnType: 'timestamptz',
-      // allowNull: true,
+      allowNull: true,
       required: false,
     },
     status: {
@@ -55,15 +56,13 @@ module.exports = Waterline.Collection.extend({
       type: 'string',
       required: true
     },
-    
-    // A LessonAttempt can have many individual events.
-    events: {
-      collection: 'attemptevent',
-      via: 'lessonAttempt'
+    isDeleted: {
+      type: 'boolean',
+      defaultsTo: false
     },
     
     // Standard timestamps
-    createdAt: { type: 'number', autoCreatedAt: true },
-    updatedAt: { type: 'number', autoUpdatedAt: true },
+    createdAt: { type: 'ref', autoCreatedAt: true },
+    updatedAt: { type: 'ref', autoUpdatedAt: true },
   }
 });

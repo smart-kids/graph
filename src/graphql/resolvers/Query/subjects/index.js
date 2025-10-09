@@ -100,6 +100,7 @@ export const createLoaders = (collections) => {
     subjectById: createByIdLoader(name),
     topicsBySubjectId: createRelatedLoader('topic', 'subject'),
     gradeById: createByIdLoader('grade'), // A reusable loader for Grade lookups
+    lessonAttemptsByLessonId: createRelatedLoader('lessonattempt', 'lessonId'),
   };
 };
 
@@ -164,6 +165,41 @@ const nested = {
       // The loader will batch fetch all topics for all subjects in the request.
       const allItems = await loaders.topicsBySubjectId.load(root.id);
       // Pagination is applied in-memory after the batched fetch.
+      return allItems.slice(offset, offset + limit);
+    },
+
+
+    lessonAttempts: async (root, { limit = 25, offset = 0 }, { loaders }) => {
+      console.log(`[RESOLVER CALL] Starting traversal for 'lessonAttempts' from Subject ID: ${root.id}`);
+
+      // Step 1: Get all topics for the current subject.
+      // This uses a loader you already have.
+      const topics = await loaders.topicsBySubjectId.load(root.id);
+      if (!topics || topics.length === 0) {
+        return []; // No topics means no subtopics and no attempts.
+      }
+
+      // Step 2: Get all subtopics for ALL the topics found in Step 1.
+      // We will create a new loader for this. It takes an array of topic IDs.
+      const topicIds = topics.map(topic => topic.id);
+      // `loadMany` will call our batch function with all topic IDs.
+      const subtopicsByTopic = await loaders.subtopicsByTopicId.loadMany(topicIds);
+
+      // Flatten the array of arrays into a single list of all subtopics for this subject.
+      const allSubtopics = subtopicsByTopic.flat();
+      if (!allSubtopics || allSubtopics.length === 0) {
+        return []; // No subtopics means no attempts.
+      }
+
+      // Step 3: Get all lesson attempts for ALL the subtopics found in Step 2.
+      // We will create another new loader for this.
+      const subtopicIds = allSubtopics.map(subtopic => subtopic.id);
+      const lessonAttemptsBySubtopic = await loaders.lessonAttemptsByLessonId.loadMany(subtopicIds);
+
+      // Flatten the final array and apply pagination.
+      const allItems = lessonAttemptsBySubtopic.flat();
+
+      // In-memory pagination is the final step.
       return allItems.slice(offset, offset + limit);
     },
   }

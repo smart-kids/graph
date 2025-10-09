@@ -8,7 +8,7 @@ const create = async (data, { db: { collections } }) => {
   const entry = Object.assign(data[name], { id, isDeleted: false });
 
   try {
-    await collections[name].create(entry);
+    await collections[name.toLowerCase()].create(entry);
 
     return entry;
   } catch (err) {

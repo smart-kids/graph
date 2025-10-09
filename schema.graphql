@@ -705,6 +705,7 @@ type lessonAttempt {
   school: String
   finalScore: Float
   deviceInfo: String
+  attemptEvents:[attemptEvent]
 }
 
 type attemptEvent {
@@ -997,6 +998,7 @@ type subject {
   grade: grade
   topics(limit: Int, offset: Int): [topic]
   topicsOrder: [String]
+  lessonAttempts(limit: Int, offset: Int): [lessonAttempt]
 }
 
 input image {
@@ -1288,7 +1290,7 @@ input IlessonAttempt {
   lessonId: String!
   userId: String!
   startedAt: String!
-  completedAt: String!
+  completedAt: String
   status: String!
   finalScore: Float!
   deviceInfo: String!

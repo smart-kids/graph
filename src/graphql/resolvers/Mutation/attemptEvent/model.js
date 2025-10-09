@@ -14,7 +14,6 @@ module.exports = Waterline.Collection.extend({
   attributes: {
     id: {
       type: 'string',
-      columnName: '_id',
       required: true,
       // autoIncrement: true,
     },
@@ -35,7 +34,7 @@ module.exports = Waterline.Collection.extend({
       // ]
     },
     eventTimestamp: {
-      type: 'ref',
+      type: 'string',
       // columnType: 'timestamptz',
       required: true,
     },
@@ -56,12 +55,12 @@ module.exports = Waterline.Collection.extend({
     // --- Associations ---
     // Each event is part of one LessonAttempt.
     lessonAttempt: {
-      model: 'lessonattempt',
-      required: true
+      type: 'string',
+      required: true,
     },
 
     // Standard timestamps
-    createdAt: { type: 'ref', autoCreatedAt: true },
-    updatedAt: { type: 'ref', autoUpdatedAt: true },
+    // createdAt: { type: 'string', autoCreatedAt: true },
+    // updatedAt: { type: 'string', autoUpdatedAt: true },
   }
 });
