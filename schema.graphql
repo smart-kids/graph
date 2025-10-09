@@ -86,6 +86,12 @@ type Query {
 
   analyticsEvent: analyticsEvent
   analyticsEvents: [analyticsEvent]
+
+  lessonAttempts: [lessonAttempt]
+  lessonAttempt: lessonAttempt
+
+  attemptEvents: [attemptEvent]
+  attemptEvent: attemptEvent
 }
 
 type Mutation {
@@ -705,7 +711,9 @@ type lessonAttempt {
   school: String
   finalScore: Float
   deviceInfo: String
+  user: user
   attemptEvents:[attemptEvent]
+  lesson: subtopic
 }
 
 type attemptEvent {

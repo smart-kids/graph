@@ -26,6 +26,8 @@ import { createLoaders as subtopicsLoaders } from "./graphql/resolvers/Query/sub
 import { createLoaders as questionsLoaders } from "./graphql/resolvers/Query/questions"
 // import { createLoaders as answersLoaders } from "./graphql/resolvers/Query/answers"
 import { createLoaders as optionsLoaders } from "./graphql/resolvers/Query/options"
+import { createLoaders as lessonAttemptsLoaders } from "./graphql/resolvers/Query/lesson-attempt"
+import { createLoaders as attemptEventsLoaders } from "./graphql/resolvers/Query/attempt-event"
 
 const { BUGSNAG_API_KEY } = process.env
 
@@ -79,6 +81,8 @@ export default (storage) => {
       const subtopicLoaderSet = subtopicsLoaders(db.collections);
       const questionLoaderSet = questionsLoaders(db.collections);
       const optionLoaderSet = optionsLoaders(db.collections);
+      const lessonAttemptsLoaderSet = lessonAttemptsLoaders(db.collections);
+      const attemptEventsLoaderSet = attemptEventsLoaders(db.collections);
 
       const allLoaders = {
         ...schoolLoaderSet,
@@ -89,6 +93,8 @@ export default (storage) => {
         ...subtopicLoaderSet,
         ...questionLoaderSet,
         ...optionLoaderSet,
+        ...lessonAttemptsLoaderSet,
+        ...attemptEventsLoaderSet,
       };
 
       return graphqlHTTP({
@@ -125,6 +131,8 @@ export default (storage) => {
       const subtopicLoaderSet = subtopicsLoaders(db.collections);
       const questionLoaderSet = questionsLoaders(db.collections);
       const optionLoaderSet = optionsLoaders(db.collections);
+      const lessonAttemptsLoaderSet = lessonAttemptsLoaders(db.collections);
+      const attemptEventsLoaderSet = attemptEventsLoaders(db.collections);
 
       const allLoaders = {
         ...schoolLoaderSet,
@@ -135,6 +143,8 @@ export default (storage) => {
         ...subtopicLoaderSet,
         ...questionLoaderSet,
         ...optionLoaderSet,
+        ...lessonAttemptsLoaderSet,
+        ...attemptEventsLoaderSet,
       };
 
       return graphqlHTTP({

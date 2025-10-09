@@ -59,6 +59,12 @@ module.exports = Waterline.Collection.extend({
       required: true,
     },
 
+    isDeleted: {
+      type: 'boolean',
+      allowNull: true,
+      defaultsTo: false,
+    },  
+
     // Standard timestamps
     // createdAt: { type: 'string', autoCreatedAt: true },
     // updatedAt: { type: 'string', autoUpdatedAt: true },

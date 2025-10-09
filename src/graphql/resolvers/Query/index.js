@@ -135,6 +135,18 @@ import {
   nested as NanalyticsEvent
 } from "./analytics-events";
 
+import {
+  list as lessonAttempts,
+  single as lessonAttempt,
+  nested as NlessonAttempt
+} from "./lesson-attempt";
+
+import {
+  list as attemptEvents,
+  single as attemptEvent,
+  nested as NattemptEvent
+} from "./attempt-event";
+
 const nested = {};
 
 Object.assign(
@@ -163,7 +175,9 @@ Object.assign(
   Nteam,
   Nteam_member,
   Ninvitation,
-  NanalyticsEvent
+  NanalyticsEvent,
+  NlessonAttempt,
+  NattemptEvent
 );
 
 const Query = {
@@ -253,6 +267,12 @@ const Query = {
 
   analyticsEvents,
   analyticsEvent,
+
+  lessonAttempts,
+  lessonAttempt,
+
+  attemptEvents,
+  attemptEvent,
 
   hello: () => "hey"
 };
