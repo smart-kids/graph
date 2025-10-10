@@ -233,10 +233,7 @@ router.post(
         const { collections } = db;
         const { user, password } = req.body;
 
-        // --- 1. Find User Across All Collections (REFACTORED LOGIC) ---
-        let userInfo = null;
-        let userType = null;
-
+        // --- 1. Find ALL Potential User Accounts ---
         const isEmail = validateEmail(user);
         const identifier = isEmail ? { email: user.toLowerCase() } : { phone: user };
 
@@ -245,97 +242,78 @@ router.post(
             { type: 'parent', collection: 'parent' },
             { type: 'driver', collection: 'driver' },
         ];
+        
+        console.log(`Searching for all potential users for identifier: ${user}`);
+        
+        const searchPromises = searchConfig.map(({ type, collection }) => 
+            collections[collection]
+                .find({ ...identifier, isDeleted: { '!=': true } })
+                .then(records => records.map(r => ({...r, userType: type}))) // Tag each record with its type
+        );
+        
+        const results = await Promise.all(searchPromises);
+        const allMatchingUsers = results.flat(); // Flatten the array of arrays into a single array
 
-        console.log(`Searching for the most recent user for identifier: ${user}`);
-
-        try {
-            // Step A: Create a search promise for each collection to find the most recent user within it.
-            const searchPromises = searchConfig.map(({ type, collection }) => {
-                if (!collections[collection]) {
-                    console.warn(`Collection "${collection}" not found, skipping.`);
-                    return Promise.resolve(null); // Gracefully handle non-existent collections
-                }
-                // Use find().sort().limit(1) to get the newest record from EACH collection
-                return collections[collection]
-                    .find({ ...identifier, isDeleted: { '!=': true } })
-                    .sort('createdAt DESC') // The key change: sort by creation date
-                    .limit(1)
-                    .then(records => records.length > 0 ? { ...records[0], userType: type } : null);
-            });
-
-            // Step B: Execute all searches in parallel.
-            const results = await Promise.all(searchPromises);
-            
-            // Step C: Filter out nulls and find the single most recent user among all results.
-            const validUsers = results.filter(record => record !== null);
-
-            if (validUsers.length > 0) {
-                // This is the crucial comparison across collections.
-                // We sort the *results* to find the one with the latest createdAt timestamp.
-                validUsers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                
-                const mostRecentUser = validUsers[0];
-                userInfo = mostRecentUser;
-                userType = mostRecentUser.userType;
-                
-                console.log(`Most recent user found in collection "${userType}". ID: ${userInfo.id}`);
-            }
-        } catch (error) {
-            console.error("Error searching for user across collections:", error);
-            return res.status(500).send({ message: "An error occurred while searching for the user." });
-        }
-
-        // --- 2. Handle User Not Found ---
-        if (!userInfo) {
-            console.warn(`User not found for identifier: ${user}`);
-            return res.status(401).send({ message: "Invalid credentials." });
-        }
-
-        // --- 3. Verify OTP (This logic can now remain the same) ---
+        // --- 2. Attempt to Authenticate a Registered User ---
         let isAuthenticated = false;
-        const userId = userInfo.id;
+        let authenticatedUser = null;
 
-        if (collections.otp) {
-            console.log(`Checking OTP for user ID: ${userId} with OTP: ${password}`);
-            const otpRecord = await collections.otp.findOne({
-                user: userId,
-                password: password,
-                used: false,
-            });
+        if (allMatchingUsers.length > 0) {
+            console.log(`Found ${allMatchingUsers.length} potential user account(s). Verifying OTP against each.`);
+            // Iterate through every found user to find a matching OTP
+            for (const userInfo of allMatchingUsers) {
+                const otpRecord = await collections.otp.findOne({
+                    user: userInfo.id, // Check using the user's unique ID
+                    password: password,
+                    used: false,
+                });
 
-            if (otpRecord) {
-                console.log("Valid OTP found.");
-                try {
+                if (otpRecord) {
+                    console.log(`Valid OTP found for user ID: ${userInfo.id} in collection: ${userInfo.userType}`);
                     await collections.otp.updateOne({ id: otpRecord.id }).set({
                         used: true,
                         usedAt: new Date()
                     });
-                    console.log(`OTP record ${otpRecord.id} marked as used.`);
                     isAuthenticated = true;
-                } catch (dbError) {
-                    console.error(`Database error marking OTP ${otpRecord.id} as used:`, dbError);
-                    isAuthenticated = false; 
+                    authenticatedUser = userInfo;
+                    break; // Exit loop on first success
                 }
-            } else {
-                console.log("No valid, unused OTP found matching the provided code.");
             }
-        } else {
-            console.warn("OTP collection not found. Cannot verify OTP.");
         }
 
-        // --- 4. Handle Authentication Failure ---
+        // --- 3. If Registered User Authentication Fails, Attempt Guest Authentication ---
         if (!isAuthenticated) {
-            console.warn(`Authentication failed for user: ${user}`);
+            console.log(`No registered user authenticated. Checking for a guest OTP.`);
+            const guestOtpRecord = await collections.otp.findOne({
+                user: user, // Check using the phone/email string directly
+                password: password,
+                used: false,
+            });
+
+            if (guestOtpRecord) {
+                console.log("Valid GUEST OTP found.");
+                await collections.otp.updateOne({ id: guestOtpRecord.id }).set({ used: true, usedAt: new Date() });
+
+                // --- GUEST AUTHENTICATION SUCCESS ---
+                const guestPayload = { guestIdentifier: user, userType: 'guest' };
+                const token = jwt.sign(guestPayload, config.secret, { expiresIn: '1d' });
+                return res.send({ token, user: { userType: 'guest', phone: user } });
+            }
+        }
+
+        // --- 4. Handle Final Authentication Status ---
+        if (!isAuthenticated) {
+            console.warn(`Authentication failed for user: ${user}. No valid OTP found.`);
             return res.status(401).send({ message: "Invalid OTP or it has expired." });
         }
 
-        // --- 5. Authentication Successful - Prepare Payload and Token ---
+        // --- 5. Registered User Authentication Success - Generate Token ---
+        const { userType, id: userId } = authenticatedUser;
         console.log(`Authentication successful for user ID: ${userId}, type: ${userType}`);
+        
         const { token, user: safeUserData } = await generateTokenForUser(userId, userType, collections);
-
         safeUserData.userType = userType;
 
-        // --- 6. Send Response ---
         return res.send({ token, user: safeUserData });
     }
 );
@@ -1218,10 +1196,9 @@ router.post(
 
 router.post(
     "/otp/send",
-    // REFACTOR 1: Add validation to prevent empty strings
     validator.body(Joi.object({
         user: Joi.string().trim().required(),
-        password: Joi.string().allow('', null) // Note: password is sent but not used
+        password: Joi.string().allow('', null)
     })),
     async (req, res) => {
         try {
@@ -1230,13 +1207,10 @@ router.post(
 
             const userSearchCriteria = {
                 isDeleted: false,
-                // Standardize email to lowercase to prevent case-sensitivity issues
                 ...(validateEmail(user) ? { email: user.toLowerCase() } : { phone: user })
             };
 
             const userTypesToSearch = ['admin', 'driver', 'parent'];
-
-            // --- REFACTOR 2: Find the MOST RECENT record if duplicates exist ---
             const searchPromises = userTypesToSearch.map(type =>
                 collections[type].find(userSearchCriteria)
                     .sort('createdAt DESC')
@@ -1245,51 +1219,38 @@ router.post(
             );
 
             const searchResults = await Promise.all(searchPromises);
-
-            console.log({searchResults})
-
-            // Find the first result that actually found a record
-            // This logic works perfectly now because each `result.record` is either the single most recent user or undefined.
             const foundUser = searchResults.find(result => result.record);
 
-            let specificUserRecord = null;
-            let determinedUserType = null;
-
-            if (foundUser) {
-                specificUserRecord = foundUser.record;
-                determinedUserType = foundUser.type;
-                console.log(`User type determined: ${determinedUserType} (user: ${user}, id: ${specificUserRecord.id}). Selected the most recent record.`);
-            }
-
-            // else {
-            //      // Fallback to the generic 'users' table, also getting the most recent
-            //      const records = await collections["users"].find(userSearchCriteria).sort('createdAt DESC').limit(1);
-            //      if (records && records.length > 0) {
-            //         specificUserRecord = records[0];
-            //         determinedUserType = 'user';
-            //         console.warn(`User ${user} not found in role collections. Found in generic users table.`);
-            //      }
-            // }
-
-            if (!specificUserRecord) {
-                return res.status(404).send({ success: false, message: "User not found." });
-            }
-
-            // --- OTP Logic ---
             const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid();
-
-            console.log({specificUserRecord})
-
-            await collections["otp"].create({
+            const otpPayload = {
                 id: new ObjectId().toHexString(),
-                user: specificUserRecord.id,
                 password,
-                expiresAt: new Date(Date.now() + 10 * 60 * 1000), // Good practice: OTPs should expire
-            }).fetch();
+                expiresAt: new Date(Date.now() + 10 * 60 * 1000), // OTP expires in 10 minutes
+            };
+
+            if (!foundUser) {
+                // --- GUEST USER FLOW ---
+                console.log(`User ${user} not found. Proceeding with guest OTP flow.`);
+                // For a guest, the 'user' field will store the phone number or email directly.
+                otpPayload.user = user;
+                // Optional: You could add a flag like isGuest: true if your model supports it.
+
+            } else {
+                // --- EXISTING USER FLOW ---
+                const specificUserRecord = foundUser.record;
+                const determinedUserType = foundUser.type;
+                console.log(`User type determined: ${determinedUserType} (user: ${user}, id: ${specificUserRecord.id}).`);
+                // For an existing user, the 'user' field stores their unique ID.
+                otpPayload.user = specificUserRecord.id;
+            }
+
+            // Clean up old OTPs for this user/guest and create the new one
+            await collections["otp"].destroy({ user: otpPayload.user });
+            await collections["otp"].create(otpPayload).fetch();
 
             // --- SMS Sending Logic ---
             if (NODE_ENV === 'development' || NODE_ENV === 'test') {
-                return res.send({ success: true, otp: `0000 - for development` });
+                return res.send({ success: true, otp: `${password} - for development` });
             }
 
             const smsResult = await sms({
@@ -1299,15 +1260,13 @@ router.post(
             if (smsResult && smsResult.status && smsResult.responseCode === '0200') {
                 return res.send({
                     success: true,
-                    messageId: smsResult.messageId,
-                    responseCode: smsResult.responseCode,
-                    message: smsResult.message
+                    message: "OTP sent successfully."
                 });
             } else {
                 console.error("SMS sending failed for user:", user, "Response:", smsResult);
                 return res.status(500).send({
                     success: false,
-                    message: "The server successfully generated an OTP, but failed to send the SMS. Please try again."
+                    message: "Failed to send the SMS. Please try again."
                 });
             }
         } catch (error) {
