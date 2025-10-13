@@ -239,6 +239,7 @@ router.post(
 
         const searchConfig = [
             { type: 'admin', collection: 'admin' },
+            { type: 'teacher', collection: 'teacher' },
             { type: 'parent', collection: 'parent' },
             { type: 'driver', collection: 'driver' },
         ];
@@ -1210,7 +1211,7 @@ router.post(
                 ...(validateEmail(user) ? { email: user.toLowerCase() } : { phone: user })
             };
 
-            const userTypesToSearch = ['admin', 'driver', 'parent'];
+            const userTypesToSearch = ['admin', 'driver', 'parent', 'teacher'];
             const searchPromises = userTypesToSearch.map(type =>
                 collections[type].find(userSearchCriteria)
                     .sort('createdAt DESC')
