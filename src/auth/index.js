@@ -282,26 +282,6 @@ router.post(
             }
         }
 
-        // --- 3. If Registered User Authentication Fails, Attempt Guest Authentication ---
-        if (!isAuthenticated) {
-            console.log(`No registered user authenticated. Checking for a guest OTP.`);
-            const guestOtpRecord = await collections.otp.findOne({
-                user: user, // Check using the phone/email string directly
-                password: password,
-                used: false,
-            });
-
-            if (guestOtpRecord) {
-                console.log("Valid GUEST OTP found.");
-                await collections.otp.updateOne({ id: guestOtpRecord.id }).set({ used: true, usedAt: new Date() });
-
-                // --- GUEST AUTHENTICATION SUCCESS ---
-                const guestPayload = { guestIdentifier: user, userType: 'guest' };
-                const token = jwt.sign(guestPayload, config.secret, { expiresIn: '1d' });
-                return res.send({ token, user: { userType: 'guest', phone: user } });
-            }
-        }
-
         // --- 4. Handle Final Authentication Status ---
         if (!isAuthenticated) {
             console.warn(`Authentication failed for user: ${user}. No valid OTP found.`);
@@ -1194,7 +1174,6 @@ router.post(
 );
 
 
-
 router.post(
     "/otp/send",
     validator.body(Joi.object({
@@ -1222,34 +1201,34 @@ router.post(
             const searchResults = await Promise.all(searchPromises);
             const foundUser = searchResults.find(result => result.record);
 
+            if (!foundUser) {
+                // --- MODIFIED: USER NOT FOUND FLOW ---
+                console.log(`User ${user} not found. Prompting for registration.`);
+                return res.status(404).send({
+                    success: false,
+                    message: "User not registered. Please create an account to proceed.",
+                    action: "register" // Custom field to guide the frontend
+                });
+            }
+
+            // --- EXISTING USER FLOW (Unchanged) ---
+            const specificUserRecord = foundUser.record;
+            const determinedUserType = foundUser.type;
+            console.log(`User type determined: ${determinedUserType} (user: ${user}, id: ${specificUserRecord.id}).`);
+            
             const password = ['development', "test"].includes(NODE_ENV) ? '0000' : makeid();
             const otpPayload = {
                 id: new ObjectId().toHexString(),
                 password,
                 expiresAt: new Date(Date.now() + 10 * 60 * 1000), // OTP expires in 10 minutes
+                user: specificUserRecord.id
             };
 
-            if (!foundUser) {
-                // --- GUEST USER FLOW ---
-                console.log(`User ${user} not found. Proceeding with guest OTP flow.`);
-                // For a guest, the 'user' field will store the phone number or email directly.
-                otpPayload.user = user;
-                // Optional: You could add a flag like isGuest: true if your model supports it.
-
-            } else {
-                // --- EXISTING USER FLOW ---
-                const specificUserRecord = foundUser.record;
-                const determinedUserType = foundUser.type;
-                console.log(`User type determined: ${determinedUserType} (user: ${user}, id: ${specificUserRecord.id}).`);
-                // For an existing user, the 'user' field stores their unique ID.
-                otpPayload.user = specificUserRecord.id;
-            }
-
-            // Clean up old OTPs for this user/guest and create the new one
+            // Clean up old OTPs for this user and create the new one
             await collections["otp"].destroy({ user: otpPayload.user });
             await collections["otp"].create(otpPayload).fetch();
 
-            // --- SMS Sending Logic ---
+            // --- SMS Sending Logic (Unchanged) ---
             if (NODE_ENV === 'development' || NODE_ENV === 'test') {
                 return res.send({ success: true, otp: `${password} - for development` });
             }
