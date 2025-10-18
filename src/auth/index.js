@@ -1016,7 +1016,7 @@ router.get(
     async (req, res) => {
         console.log("finding school")
         const db = await req.app.locals.db
-        const schoolId = req.query.schoolId
+        const schoolId = req.query.school
         if (!schoolId) {
             return res.status(400).send({ error: 'schoolId is required' })
         }
@@ -1042,14 +1042,14 @@ router.get(
     async (req, res) => {
         const db = await req.app.locals.db
         const { collections } = db
-        const { schoolid } = req.query
+        const { school } = req.query
 
-        if (!schoolid) {
-            return res.status(400).send({ error: 'schoolid is required' })
+        if (!school) {
+            return res.status(400).send({ error: 'school is required' })
         }
 
         try {
-            const classes = await collections.class.find({ school: schoolid, isDeleted: false }).sort({ name: 1 });
+            const classes = await collections.class.find({ school, isDeleted: false }).sort({ name: 1 });
             return res.send(classes);
         } catch (error) {
             console.error("Error fetching classes:", error);
@@ -1090,7 +1090,7 @@ router.post(
             // Check if a parent with this phone number already exists for this school
             const existingParent = await collections.parent.findOne({
                 phone: parent.phone,
-                school: school,
+                school,
                 isDeleted: { '!=': true } // More robust check for not deleted
             });
 
