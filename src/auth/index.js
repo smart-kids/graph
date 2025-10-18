@@ -1010,26 +1010,28 @@ const validateEmail = (email) => {
             /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
         );
 };
-
 router.get(
     "/meta",
     async (req, res) => {
         const db = await req.app.locals.db
         const schoolId = req.query.schoolId
+        console.log("Fetching school meta for:", schoolId)
         if (!schoolId) {
+            console.error("SchoolId not provided:", req.query)
             return res.status(400).send({ error: 'schoolId must be provided as a query string parameter' })
         }
 
         try {
             const school = await db.collections.school.findOne({ id: schoolId })
             if (!school) {
-                console.error("School not found:", schoolId);
+                console.error("School not found:", schoolId)
                 return res.status(404).send({ error: 'School not found' })
             }
             const { name, logo, themeColor } = school
+            console.log("Fetched school:", schoolId, name)
             return res.send({ name, logo, themeColor })
         } catch (error) {
-            console.error("Error fetching school:", error);
+            console.error("Error fetching school:", error)
             return res.status(500).send({ error: "An unexpected error occurred during fetching school." });
         }
     }
@@ -1041,15 +1043,18 @@ router.get(
         const db = await req.app.locals.db
         const { collections } = db
         const school = req.query.school
+        console.log("Fetching classes for:", school)
         if (!school) {
+            console.error("School not provided:", req.query)
             return res.status(400).send({ error: 'school must be provided as a query string parameter' })
         }
 
         try {
             const classes = await collections.class.find({ school: school, isDeleted: false }).sort({ name: 1 });
+            console.log("Fetched classes:", school, classes.length)
             return res.send(classes);
         } catch (error) {
-            console.error("Error fetching classes:", error);
+            console.error("Error fetching classes:", error)
             return res.status(500).send({ error: "An unexpected error occurred during fetching classes." });
         }
     }
