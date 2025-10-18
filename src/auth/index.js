@@ -1016,6 +1016,7 @@ router.get(
     async (req, res) => {
         console.log("finding school")
         const db = await req.app.locals.db
+        console.log(req.query)
         const schoolId = req.query.schoolId
         if (!schoolId) {
             return res.status(400).send({ error: 'schoolId is required' })
@@ -1042,6 +1043,7 @@ router.get(
     async (req, res) => {
         const db = await req.app.locals.db
         const { collections } = db
+        console.log(req.query)
         const { school } = req.query
 
         if (!school) {
