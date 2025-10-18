@@ -1014,15 +1014,12 @@ const validateEmail = (email) => {
 router.get(
     "/meta",
     async (req, res) => {
-        console.log("finding school")
         const db = await req.app.locals.db
-        console.log(req.query)
         const schoolId = req.query.schoolId
         if (!schoolId) {
-            return res.status(400).send({ error: 'schoolId is required' })
+            return res.status(400).send({ error: 'schoolId must be provided as a query string parameter' })
         }
 
-        console.log({ schoolId })
         try {
             const school = await db.collections.school.findOne({ id: schoolId })
             if (!school) {
@@ -1043,11 +1040,9 @@ router.get(
     async (req, res) => {
         const db = await req.app.locals.db
         const { collections } = db
-        console.log(req.query)
-        const { school } = req.query
-
+        const school = req.query.school
         if (!school) {
-            return res.status(400).send({ error: 'school is required' })
+            return res.status(400).send({ error: 'school must be provided as a query string parameter' })
         }
 
         try {
