@@ -677,21 +677,21 @@ type class {
   students: [student]
 }
 
-input IClass {
+input Iclass {
   name: String
   teacher: String
   school: String!
 }
 
-input UClass {
+input Uclass {
   id: String!
   name: String
   teacher: String
 }
 
 type classMutations {
-  create(class: IClass!): class
-  update(class: UClass!): class
+  create(class: Iclass!): class
+  update(class: Uclass!): class
   archive(class: UClass!): class
   restore(class: UClass!): class
 }
