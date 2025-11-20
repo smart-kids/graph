@@ -692,8 +692,8 @@ input Uclass {
 type classMutations {
   create(class: Iclass!): class
   update(class: Uclass!): class
-  archive(class: UClass!): class
-  restore(class: UClass!): class
+  archive(class: Uclass!): class
+  restore(class: Uclass!): class
 }
 
 type financial {
