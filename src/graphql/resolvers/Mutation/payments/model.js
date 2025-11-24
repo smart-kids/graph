@@ -1,6 +1,7 @@
 // FILE: api/models/Payment.js
 const { name: identity } = require("./about.js");
 const Waterline = require("waterline");
+const moment = require("moment");
 
 module.exports = Waterline.Collection.extend({
   identity,
@@ -21,8 +22,8 @@ module.exports = Waterline.Collection.extend({
       type: "string",
     },
     amount: {
-      type: "number",
-      defaultsTo: 0,
+      type: "string",
+      defaultsTo: "-",
       allowNull: true,
     },
     phone: {
@@ -81,19 +82,6 @@ module.exports = Waterline.Collection.extend({
     },
 
     // --- Timestamps ---
-    createdAt: {
-      type: "string",
-      // defaultsTo: () => new Date().toISOString()
-    },
-    updatedAt: {
-      type: "string",
-      // defaultsTo: () => new Date().toISOString()
-    },
-    processedAt: {
-      type: "string",
-      allowNull: true
-    },
-
     // --- Backward Compatibility ---
     ref: {
       type: "string",

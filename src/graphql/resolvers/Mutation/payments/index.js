@@ -14,7 +14,7 @@ const { name } = require("./about.js"); // Assuming 'name' resolves to 'payment'
 const init = async (data, { auth, db: { collections } }) => {
   const transactionId = new ObjectId().toHexString();
   const { schoolId = "general", id: userId } = auth;
-  const { ammount: amount, phone } = data.payment; // Changed from data[name] to data.payment
+  const { ammount: amount, phone } = data.payment;
 
   const mpesaService = createMpesaService({
     collections: collections,
@@ -25,7 +25,7 @@ const init = async (data, { auth, db: { collections } }) => {
   const result = await mpesaService.initiateSTKPush({
     amount,
     phone,
-    schoolId, // Make sure this is passed
+    schoolId,
     userId,
     transactionId,
   });
@@ -34,10 +34,22 @@ const init = async (data, { auth, db: { collections } }) => {
     throw new UserError(result.message || 'Payment initiation failed');
   }
 
+  // Fetch the complete payment record
+  const paymentRecord = await collections.payment.findOne({ id: transactionId });
+  
+  if (!paymentRecord) {
+    throw new UserError('Payment record not found after creation');
+  }
+
+  // Return the expected fields in the correct format
   return {
-    CheckoutRequestID: result.CheckoutRequestID,
-    MerchantRequestID: result.MerchantRequestID,
-    transactionId,
+    id: paymentRecord.id,
+    CheckoutRequestID: paymentRecord.checkoutRequestID || result.CheckoutRequestID,
+    MerchantRequestID: paymentRecord.merchantRequestID || result.MerchantRequestID,
+    status: paymentRecord.status,
+    amount: paymentRecord.amount,
+    phone: paymentRecord.phone,
+    // Add any other fields your frontend expects
   };
 };
 
