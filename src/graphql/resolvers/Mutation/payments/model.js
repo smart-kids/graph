@@ -1,91 +1,184 @@
 // FILE: api/models/Payment.js
-const { name: identity } = require("./about.js")
-var Waterline = require("waterline");
-/**
- * The Payment model acts as a simple data store and state machine for all M-Pesa transactions.
- * It is the single source of truth for a payment's status.
- *
-//  * All business logic, validation, and side effects have been moved to the
- * GraphQL resolvers (for initiation) and the Express callback router (for processing).
- * This keeps the model lean and focused solely on data structure.
- */
+const { name: identity } = require("./about.js");
+const Waterline = require("waterline");
+
 module.exports = Waterline.Collection.extend({
   identity,
   datastore: "default",
   primaryKey: "id",
-
-
 
   attributes: {
     // --- Core Transaction Details ---
     id: {
       type: "string",
       required: true,
-      // Our internal transaction ID, used to securely identify the transaction in the callback URL.
     },
     school: {
       type: "string",
       required: true,
-      // Our internal transaction ID, used to securely identify the transaction in the callback URL.
     },
     user: {
       type: "string",
-      // Indexed for fast lookups of a user's payment history.
     },
     amount: {
       type: "number",
-      // required: true,
       defaultsTo: 0,
       allowNull: true,
-      // description: 'The amount we requested the user to pay.',
     },
     phone: {
       type: "string",
       required: true
     },
-
-    // --- State Machine ---
-    status: {
+    description: {
       type: "string",
-      // required: true,
-      // isIn: ['PENDING', 'COMPLETED', 'FAILED_ON_CALLBACK', 'FAILED_ON_INITIATION', 'FLAGGED_AMOUNT_MISMATCH'],
-      defaultsTo: 'PENDING',
-      // description: 'Tracks the lifecycle of the transaction.',
-      // Indexed to easily find pending or flagged transactions.
+      allowNull: true
     },
 
-    // --- M-Pesa Request Details (from our initiation) ---
+    // --- M-Pesa Transaction Details ---
+    mpesaReceiptNumber: {
+      type: "string",
+      allowNull: true
+    },
+    transactionDate: {
+      type: "string",
+      allowNull: true
+    },
+    resultCode: {
+      type: "string",
+      allowNull: true
+    },
+    resultDesc: {
+      type: "string",
+      allowNull: true
+    },
     merchantRequestID: {
       type: "string",
-      allowNull: true,
-      // description: 'From Safaricom, used for reconciliation.',
+      allowNull: true
     },
     checkoutRequestID: {
       type: "string",
-      allowNull: true,
-      // description: 'From Safaricom, used for reconciliation.',
+      allowNull: true
+    },
+    accountReference: {
+      type: "string",
+      allowNull: true
     },
 
-    // --- M-Pesa Callback Details (from their server) ---
+    // --- Status & Metadata ---
+    status: {
+      type: "string",
+      defaultsTo: 'PENDING',
+      allowNull: true
+    },
+    errorMessage: {
+      type: "string",
+      allowNull: true
+    },
+    metadata: {
+      type: "json",
+      // columnType: "json",
+      defaultsTo: {},
+    },
+
+    // --- Timestamps ---
+    createdAt: {
+      type: "string",
+      // defaultsTo: () => new Date().toISOString()
+    },
+    updatedAt: {
+      type: "string",
+      // defaultsTo: () => new Date().toISOString()
+    },
+    processedAt: {
+      type: "string",
+      allowNull: true
+    },
+
+    // --- Backward Compatibility ---
     ref: {
       type: "string",
-      // description: 'The final MpesaReceiptNumber from a successful transaction.',
-      // Indexed for customer support lookups.
+      allowNull: true
     },
     time: {
-      type: "string", 
-      // columnType: "timestamptz",
-      // description: 'The official transaction timestamp from M-Pesa.',
+      type: "string",
+      allowNull: true
     },
-
-    // --- Error & Debugging Details ---
-    errorCode: { type: 'string' },
-    errorMessage: { type: "string", allowNull: true },
-
-    // Standard attributes
-    isDeleted: { type: "boolean", defaultsTo: false },
+    errorCode: {
+      type: "string",
+      allowNull: true
+    },
+    isDeleted: {
+      type: "boolean",
+      defaultsTo: false
+    }
+  },
+  // Add these lifecycle callbacks
+  beforeCreate: function(values, proceed) {
+    values.createdAt = values.createdAt || moment().toISOString();
+    values.updatedAt = values.updatedAt || moment().toISOString();
+    return proceed();
   },
 
-  // NO lifecycle callbacks.
-  // NO customToJSON. The GraphQL layer will handle field exposure.
+  beforeUpdate: function(values, proceed) {
+    values.updatedAt = moment().toISOString();
+    return proceed();
+  },
+
+  // Virtual getter for backward compatibility
+  getMpesaData: function() {
+    return {
+      mpesaReceiptNumber: this.mpesaReceiptNumber || this.ref,
+      transactionDate: this.transactionDate || this.time,
+      resultCode: this.resultCode || this.errorCode,
+      resultDesc: this.resultDesc || this.errorMessage,
+      ...(this.metadata || {})
+    };
+  },
+
+  // Method to update payment with M-Pesa response
+  updateWithMpesaResponse: async function(response) {
+    const updates = {
+      status: this._determineStatus(response.ResultCode),
+      resultCode: response.ResultCode,
+      resultDesc: response.ResultDesc,
+      updatedAt: new Date().toISOString(),
+      // Backward compatibility
+      errorCode: response.ResultCode,
+      errorMessage: response.ResultDesc
+    };
+
+    // Extract data from CallbackMetadata if available
+    if (response.CallbackMetadata && response.CallbackMetadata.Item) {
+      response.CallbackMetadata.Item.forEach(item => {
+        if (item.Name === 'Amount') updates.amount = item.Value;
+        if (item.Name === 'MpesaReceiptNumber') {
+          updates.mpesaReceiptNumber = item.Value;
+          updates.ref = item.Value; // For backward compatibility
+        }
+        if (item.Name === 'TransactionDate') {
+          updates.transactionDate = item.Value;
+          updates.time = item.Value; // For backward compatibility
+        }
+        if (item.Name === 'PhoneNumber') {
+          updates.phone = item.Value;
+        }
+      });
+    }
+
+    // Store raw response in metadata
+    updates.metadata = {
+      ...(this.metadata || {}),
+      rawResponse: response
+    };
+
+    // Update the record
+    return await this.update(updates).fetch();
+  },
+
+  // Helper method to determine status from M-Pesa result code
+  _determineStatus: function(resultCode) {
+    if (resultCode === '0') return 'COMPLETED';
+    if (['1032', '1037'].includes(resultCode)) return 'CANCELLED';
+    return 'FAILED';
+  }
 });

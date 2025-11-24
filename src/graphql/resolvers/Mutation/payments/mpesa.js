@@ -58,6 +58,14 @@ function pad2(n) {
  * @returns {object} An M-Pesa service instance with an `initiateSTKPush` method.
  */
 const createMpesaService = ({ collections, logger = console }) => {
+    // Constants for payment statuses
+    const PAYMENT_STATUS = {
+        PENDING: 'PENDING',
+        COMPLETED: 'COMPLETED',
+        FAILED: 'FAILED',
+        CANCELLED: 'CANCELLED',
+        FAILED_ON_INITIATION: 'FAILED_ON_INITIATION'
+    };
     console.log({ mpesaConfig })
     // Get the specific Waterline collection model once.
     const PaymentCollection = collections.payment;
@@ -125,87 +133,291 @@ const createMpesaService = ({ collections, logger = console }) => {
      * This is the main public method exposed by the factory.
      */
     const initiateSTKPush = async (initData) => {
-        console.log({ initData })
-        const { amount, phone, transactionId, userId, schoolId: school } = initData;
-        // 1. Create the PENDING payment record immediately using the injected collection.
-        const paymentData = { id: transactionId, userId, school, phone, amount, status: 'PENDING' };
-        await PaymentCollection.create(paymentData);
-        logger.info(`[MpesaService] Created PENDING payment record: ${transactionId}`);
+        const { amount, phone, transactionId, userId, schoolId: school, description, accountReference } = initData;
+        
+        // Format phone number to standard format (254XXXXXXXXX)
+        const formattedPhone = phone.replace(/^0/, '254').replace(/\+/, '');
+        
+        // 1. Create the PENDING payment record immediately
+        const paymentData = {
+            id: transactionId,
+            user: userId,
+            school,
+            phone: formattedPhone,
+            amount: Number(amount),
+            status: 'PENDING',
+            description: description || `Payment for ${mpesaConfig.accountReference}`,
+            accountReference: accountReference || mpesaConfig.accountReference,
+            createdAt: moment().toISOString(),
+            updatedAt: moment().toISOString(),
+            metadata: {
+                initiatedAt: new Date().toISOString(),
+                ...(initData.metadata || {})
+            }
+        };
 
         try {
-            const formattedPhone = phone.replace(/^0/, '254').replace('+', '');
+            // Create the payment record
+            await PaymentCollection.create(paymentData);
+            logger.info(`[MpesaService] Created PENDING payment record: ${transactionId}`);
+
+            // 2. Initiate STK Push
             const accessToken = await _getAccessToken();
             const { password, timestamp } = _generatePassword();
             const callbackURL = `${mpesaConfig.callbackURL}/${transactionId}`;
 
-            const body = {
+            const requestBody = {
                 BusinessShortCode: mpesaConfig.shortcode,
                 Password: password,
                 Timestamp: timestamp,
                 TransactionType: mpesaConfig.transactionType,
-                Amount: String(amount),
+                Amount: String(Math.ceil(amount)), // Ensure amount is a whole number
                 PartyA: formattedPhone,
                 PartyB: mpesaConfig.shortcode,
                 PhoneNumber: formattedPhone,
                 CallBackURL: callbackURL,
-                AccountReference: mpesaConfig.accountReference,
-                TransactionDesc: `Payment for ${mpesaConfig.accountReference} #${transactionId}`,
+                AccountReference: accountReference || mpesaConfig.accountReference,
+                TransactionDesc: `Payment for ${accountReference || mpesaConfig.accountReference} #${transactionId}`,
             };
-            console.log(body)
 
-            console.log("[MpesaService] attempting to use accessToken", accessToken)
+            logger.info(`[MpesaService] Initiating STK Push for TxID ${transactionId} to ${formattedPhone}`, {
+                amount,
+                accountReference: accountReference || mpesaConfig.accountReference
+            });
 
-            logger.info(`[MpesaService] Initiating STK Push for TxID ${transactionId} to ${formattedPhone}`);
             const response = await axios.post(
                 `${mpesaConfig.baseURL}/mpesa/stkpush/v1/processrequest`,
-                body,
-                { headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' } }
+                requestBody,
+                { 
+                    headers: { 
+                        'Authorization': 'Bearer ' + accessToken, 
+                        'Content-Type': 'application/json' 
+                    },
+                    timeout: 30000 // 30 seconds timeout
+                }
             );
 
-            console.log("[MpesaService] STK Push response:", response.data)
+            logger.info(`[MpesaService] STK Push response for ${transactionId}:`, response.data);
 
             if (response.data.ResponseCode !== '0') {
-                throw new Error(response.data.ResponseDescription || 'M-Pesa rejected the STK push request.');
+                throw new Error(response.data.errorMessage || response.data.ResponseDescription || 'M-Pesa rejected the STK push request.');
             }
 
-            logger.info(`[MpesaService] STK Push accepted by Safaricom for TxID ${transactionId}`);
+            const { MerchantRequestID, CheckoutRequestID } = response.data;
+            
+            // 3. Update the payment record with M-Pesa's request IDs
+            const updateData = {
+                merchantRequestID: MerchantRequestID,
+                checkoutRequestID: CheckoutRequestID,
+                status: 'PENDING',
+                updatedAt: new Date().toISOString(),
+                metadata: {
+                    ...(paymentData.metadata || {}),
+                    stkPushRequest: requestBody,
+                    stkPushResponse: response.data,
+                    updatedAt: new Date().toISOString()
+                }
+            };
 
-            const { MerchantRequestID, CheckoutRequestID, id:school } = response.data;
-            // 2. On success, update the record with M-Pesa's request IDs.
-            // In createMpesaService.js
-            PaymentCollection.updateOne({ id: transactionId })
-            .set({
-               merchantRequestID: MerchantRequestID,
-               checkoutRequestID: CheckoutRequestID,
-               school,
-               status: 'PENDING',
-            })
-            .then(() => logger.info('Update successful'))
-            .catch(err => logger.error('Update failed:', err));
+            await PaymentCollection.updateOne({ id: transactionId }).set(updateData);
+            logger.info(`[MpesaService] Updated payment ${transactionId} with M-Pesa request IDs`);
 
             return {
                 success: true,
                 MerchantRequestID,
                 CheckoutRequestID,
-                message: 'Request sent. Please complete the transaction on your phone.',
                 transactionId,
+                message: 'Payment request sent. Please check your phone to complete the transaction.',
+                timestamp: new Date().toISOString()
             };
 
         } catch (error) {
-            console.log("[MpesaService] STK Push failed for TxID", transactionId, error)
-            const errorMessage = error.response?.data?.errorMessage || error.message;
-            logger.error(`[MpesaService] STK Push failed for TxID ${transactionId}: ${errorMessage}`);
-
-            // 3. On failure, update the record to a failed state.
-            PaymentCollection.updateOne({ id: transactionId }).set({
-                status: 'FAILED_ON_INITIATION',
-                errorMessage: errorMessage,
+            const errorMessage = error.response?.data?.errorMessage || 
+                              error.response?.data?.ResponseDescription || 
+                              error.message;
+            
+            logger.error(`[MpesaService] STK Push failed for TxID ${transactionId}:`, {
+                error: errorMessage,
+                stack: error.stack,
+                response: error.response?.data
             });
+
+            // Update the payment record with error details
+            const updateData = {
+                status: 'FAILED_ON_INITIATION',
+                resultCode: error.response?.data?.ResponseCode || 'ERROR',
+                resultDesc: errorMessage,
+                errorMessage: errorMessage,
+                errorCode: error.response?.data?.ResponseCode || 'ERROR',
+                updatedAt: new Date().toISOString(),
+                metadata: {
+                    ...(paymentData.metadata || {}),
+                    error: {
+                        message: errorMessage,
+                        code: error.response?.data?.ResponseCode,
+                        stack: error.stack,
+                        response: error.response?.data
+                    },
+                    updatedAt: new Date().toISOString()
+                }
+            };
+
+            try {
+                await PaymentCollection.updateOne({ id: transactionId }).set(updateData);
+                logger.error(`[MpesaService] Updated payment ${transactionId} with error state`);
+            } catch (updateError) {
+                logger.error(`[MpesaService] Failed to update payment ${transactionId} with error state:`, updateError);
+            }
 
             return {
                 success: false,
-                message: 'Could not initiate payment. Please try again later.',
-                transactionId: null,
+                transactionId,
+                error: errorMessage,
+                errorCode: error.response?.data?.ResponseCode || 'ERROR',
+                message: 'Could not initiate payment. ' + (errorMessage || 'Please try again later.')
+            };
+        }
+    };
+
+    /**
+     * Verifies a transaction using the CheckoutRequestID
+     * @param {string} checkoutRequestID - The checkout request ID from M-Pesa
+     * @returns {Promise<object>} The transaction status and details
+     */
+    const verifyTransaction = async (checkoutRequestID) => {
+        try {
+            const accessToken = await _getAccessToken();
+            const { password, timestamp } = _generatePassword();
+            
+            const response = await axios.get(
+                `${mpesaConfig.baseURL}/mpesa/stkpushquery/v1/query`,
+                {
+                    headers: { 
+                        'Authorization': 'Bearer ' + accessToken, 
+                        'Content-Type': 'application/json' 
+                    },
+                    params: {
+                        BusinessShortCode: mpesaConfig.shortcode,
+                        Password: password,
+                        Timestamp: timestamp,
+                        CheckoutRequestID: checkoutRequestID
+                    }
+                }
+            );
+
+            const { ResultCode, ResultDesc, ResultData } = response.data;
+            
+            // Parse the result data if it exists
+            let parsedData = {};
+            if (ResultData) {
+                try {
+                    parsedData = JSON.parse(ResultData);
+                } catch (e) {
+                    logger.warn(`[MpesaService] Could not parse ResultData: ${e.message}`);
+                }
+            }
+
+            return {
+                success: ResultCode === '0',
+                resultCode: ResultCode,
+                resultDesc: ResultDesc,
+                ...parsedData
+            };
+        } catch (error) {
+            logger.error(`[MpesaService] Error verifying transaction: ${error.message}`);
+            return {
+                success: false,
+                error: error.message,
+                resultCode: 'ERROR',
+                resultDesc: 'Error verifying transaction'
+            };
+        }
+    };
+
+    /**
+     * Handles M-Pesa callback and updates the payment status
+     * @param {object} callbackData - The callback data from M-Pesa
+     * @returns {Promise<object>} The result of the operation
+     */
+    const handleMpesaCallback = async (callbackData) => {
+        const { 
+            Body: { 
+                stkCallback: {
+                    ResultCode,
+                    ResultDesc,
+                    CallbackMetadata,
+                    MerchantRequestID,
+                    CheckoutRequestID
+                } = {} 
+            } = {} 
+        } = callbackData;
+
+        if (!CheckoutRequestID) {
+            logger.error('[MpesaService] No CheckoutRequestID in callback data');
+            return { success: false, error: 'Invalid callback data' };
+        }
+
+        try {
+            // Find the payment record
+            const payment = await PaymentCollection.findOne({ checkoutRequestID: CheckoutRequestID });
+            
+            if (!payment) {
+                logger.error(`[MpesaService] Payment not found for CheckoutRequestID: ${CheckoutRequestID}`);
+                return { success: false, error: 'Payment not found' };
+            }
+
+            // Parse the callback metadata if available
+            let amount = payment.amount;
+            let mpesaReceiptNumber = null;
+            let transactionDate = null;
+            let phoneNumber = null;
+
+            if (CallbackMetadata && CallbackMetadata.Item) {
+                CallbackMetadata.Item.forEach(item => {
+                    if (item.Name === 'Amount') amount = item.Value;
+                    if (item.Name === 'MpesaReceiptNumber') mpesaReceiptNumber = item.Value;
+                    if (item.Name === 'TransactionDate') transactionDate = item.Value;
+                    if (item.Name === 'PhoneNumber') phoneNumber = item.Value;
+                });
+            }
+
+            // Determine the status based on the result code
+            let status;
+            if (ResultCode === '0') {
+                status = PAYMENT_STATUS.COMPLETED;
+            } else if (['1032', '1037'].includes(ResultCode)) {
+                status = PAYMENT_STATUS.CANCELLED;
+            } else {
+                status = PAYMENT_STATUS.FAILED;
+            }
+
+            // Update the payment record
+            const updateData = {
+                status,
+                resultCode: ResultCode,
+                resultDesc: ResultDesc,
+                ...(mpesaReceiptNumber && { mpesaReceiptNumber }),
+                ...(transactionDate && { transactionDate }),
+                ...(phoneNumber && { phone: phoneNumber }),
+                processedAt: new Date().toISOString()
+            };
+
+            await PaymentCollection.updateOne({ id: payment.id }).set(updateData);
+            
+            logger.info(`[MpesaService] Updated payment ${payment.id} status to ${status}`);
+            
+            return {
+                success: true,
+                paymentId: payment.id,
+                status,
+                mpesaReceiptNumber,
+                message: ResultDesc
+            };
+        } catch (error) {
+            logger.error(`[MpesaService] Error processing M-Pesa callback: ${error.message}`);
+            return {
+                success: false,
+                error: error.message
             };
         }
     };
@@ -213,6 +425,8 @@ const createMpesaService = ({ collections, logger = console }) => {
     // Return the public API for the service instance.
     return {
         initiateSTKPush,
+        verifyTransaction,
+        handleMpesaCallback
     };
 };
 

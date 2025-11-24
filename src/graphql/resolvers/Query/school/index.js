@@ -177,7 +177,11 @@ const nested = {
         loaders.chargesBySchoolId.load(root.id)
       ]);
       const balance = subtract(sum(payments.map(p => p.ammount)), sum(charges.map(p => p.ammount)));
-      return { balance, balanceFormated: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'KSH' }).format(balance) };
+      return { 
+        balance, 
+        balanceFormated: `${(balance / 2)} SMS's left`
+        // balanceFormated: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'KSH' }).format(balance) 
+      };
     },
 
     // ==============================================================================

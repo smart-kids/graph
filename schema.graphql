@@ -214,6 +214,7 @@ enum mpesaStatus {
 input mpesaStartTxInput {
   id: String
   phone: String
+  school: String
   ammount: String
 }
 
