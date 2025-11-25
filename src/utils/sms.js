@@ -43,18 +43,29 @@ const func = (args, callback) => {
             return response.data; // This will be the success result
 
         } catch (error) {
-            console.error("[SMS Service] FAILED to send SMS.");
+            let errorMessage = 'Failed to send SMS';
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+                console.error("[SMS Service] FAILED to send SMS:", errorMessage);
+            } else if (error.message) {
+                errorMessage = error.message;
+                console.error("[SMS Service] ERROR:", errorMessage);
+            }
+            
             if (error.response) {
                 console.error("API Error Status:", error.response.status);
-                const errorBody = typeof error.response.data === 'string' ? error.response.data.substring(0, 200) + '...' : error.response.data;
+                const errorBody = typeof error.response.data === 'string' 
+                    ? error.response.data.substring(0, 200) + '...' 
+                    : error.response.data;
                 console.error("API Error Body:", errorBody);
             } else if (error.request) {
                 console.error("Network Error: No response received.", error.request);
-            } else {
-                console.error("Request Setup Error:", error.message);
             }
-            // Throw the error so it can be caught by the promise/callback handler
-            throw error;
+            
+            // Create a new error with the proper message and include the response
+            const smsError = new Error(errorMessage);
+            smsError.response = error.response;
+            throw smsError;
         }
     };
 

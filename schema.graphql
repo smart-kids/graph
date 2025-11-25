@@ -214,7 +214,7 @@ enum mpesaStatus {
 input mpesaStartTxInput {
   id: String
   phone: String
-  school: String
+  schoolId: String
   ammount: String
 }
 
@@ -227,7 +227,7 @@ type mpesaStartTxVerification {
 input mpesaStartTxVerificationInput {
   CheckoutRequestID: String
   MerchantRequestID: String,
-  school:String
+  schoolId:String
 }
 
 type mpesaStartTxResult {
@@ -967,8 +967,28 @@ input Isms {
   parents: [String!]!
 }
 
+type SMSResult {
+  success: Boolean!
+  message: String!
+  sentCount: Int!
+  failedCount: Int!
+  successfulSends: [SMSSuccess!]!
+  failedSends: [SMSFailure!]!
+}
+
+type SMSSuccess {
+  parentId: String!
+  phone: String!
+}
+
+type SMSFailure {
+  parentId: String!
+  phone: String!
+  error: String!
+}
+
 type smsMutations {
-  send(sms: Isms!): String
+  send(sms: Isms!): SMSResult
 }
 
 # grade things

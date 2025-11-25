@@ -12,15 +12,16 @@ const { name } = require("./about.js"); // Assuming 'name' resolves to 'payment'
  * Initiates an M-Pesa STK Push payment request.
  */
 const init = async (data, { auth, db: { collections } }) => {
-  const transactionId = new ObjectId().toHexString();
-  const { schoolId = "general", id: userId } = auth;
+ const transactionId = new ObjectId().toHexString();
+  const { id: userId } = auth;
+  // Get schoolId from payment data first, then fall back to auth, then to "general"
+  const schoolId = data.payment.schoolId || auth.schoolId || "general";
   const { ammount: amount, phone } = data.payment;
 
   const mpesaService = createMpesaService({
     collections: collections,
     logger: console,
   });
-
   // Pass all required parameters including schoolId
   const result = await mpesaService.initiateSTKPush({
     amount,
