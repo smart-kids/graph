@@ -92,12 +92,14 @@ const createMpesaService = ({ collections, logger = console }) => {
             const callbackURL = `${mpesaConfig.callbackURL}/${transactionId}`;
 
             // 3. Prepare STK push request
+            // Format amount with exactly 2 decimal places as required by M-Pesa
+            const amountValue = Number(amount);
             const requestBody = {
                 BusinessShortCode: mpesaConfig.shortcode,
                 Password: password,
                 Timestamp: timestamp,
                 TransactionType: mpesaConfig.transactionType,
-                Amount: String(Math.ceil(amount)),
+                Amount: amountValue,
                 PartyA: formattedPhone,
                 PartyB: mpesaConfig.shortcode,
                 PhoneNumber: formattedPhone,
@@ -200,10 +202,10 @@ const createMpesaService = ({ collections, logger = console }) => {
         }
     };
 
-    // Handle M-Pesa callback
+// Handle M-Pesa callback
     const handleMpesaCallback = async (callbackData) => {
         try {
-            // Parse the callback data
+            // 1. Safely extract data from the callback structure
             const { 
                 Body: { 
                     stkCallback: {
@@ -220,56 +222,79 @@ const createMpesaService = ({ collections, logger = console }) => {
                 throw new Error('No CheckoutRequestID in callback data');
             }
 
-            logger.info(`[MpesaService] Processing callback for CheckoutRequestID: ${CheckoutRequestID}`, {
-                ResultCode,
-                MerchantRequestID
-            });
+            logger.info(`[MpesaService] Processing callback for CheckoutRequestID: ${CheckoutRequestID}`);
 
-            // Find the payment record
+            // 2. Find the payment record using the unique CheckoutRequestID
             const payment = await PaymentCollection.findOne({ checkoutRequestID: CheckoutRequestID });
+            
             if (!payment) {
-                throw new Error(`Payment not found for CheckoutRequestID: ${CheckoutRequestID}`);
+                logger.error(`[MpesaService] Payment record not found for CheckoutRequestID: ${CheckoutRequestID}`);
+                return { success: false, error: 'Payment record not found' };
             }
 
-            // Process callback metadata
+            // 3. Prepare the update object
             const updateData = {
-                resultCode: ResultCode,
+                resultCode: String(ResultCode), // Ensure it's a string
                 resultDesc: ResultDesc,
                 merchantRequestID: MerchantRequestID,
-                updatedAt: new Date().toISOString()
+                updatedAt: new Date().toISOString(),
+                // Store the raw callback in metadata for auditing/debugging
+                metadata: {
+                    ...(payment.metadata || {}),
+                    callback: callbackData,
+                    callbackReceivedAt: new Date().toISOString()
+                }
             };
 
-            // Extract data from CallbackMetadata if available
+            // 4. Extract specific metadata items if the transaction was successful
+            // We overwrite the local data with the CONFIRMED data from M-Pesa
             if (CallbackMetadata?.Item?.length) {
                 CallbackMetadata.Item.forEach(item => {
-                    if (item.Name === 'Amount') updateData.amount = item.Value;
-                    if (item.Name === 'MpesaReceiptNumber') {
-                        updateData.mpesaReceiptNumber = item.Value;
-                        updateData.ref = item.Value; // For backward compatibility
-                    }
-                    if (item.Name === 'TransactionDate') {
-                        updateData.transactionDate = item.Value;
-                        updateData.time = item.Value; // For backward compatibility
-                    }
-                    if (item.Name === 'PhoneNumber') {
-                        updateData.phone = item.Value;
+                    const value = String(item.Value);
+                    
+                    switch (item.Name) {
+                        case 'Amount':
+                            // We blindly accept M-Pesa's value because STK Push amounts are locked.
+                            // This fixes the "1.00" vs "1" mismatch bug.
+                            updateData.amount = value; 
+                            break;
+                        case 'MpesaReceiptNumber':
+                            updateData.mpesaReceiptNumber = value;
+                            updateData.ref = value; // Backward compatibility for UI
+                            break;
+                        case 'TransactionDate':
+                            updateData.transactionDate = value;
+                            // Format: YYYYMMDDHHmmss -> ISO String if you want, or keep raw
+                            updateData.time = value; // Backward compatibility for UI
+                            break;
+                        case 'PhoneNumber':
+                            updateData.phone = value;
+                            break;
                     }
                 });
             }
 
-            // Determine status based on result code
-            if (ResultCode === '0') {
+            // 5. Determine Final Status based on ResultCode
+            const code = String(ResultCode);
+            
+            if (code === '0') {
                 updateData.status = 'COMPLETED';
                 updateData.processedAt = new Date().toISOString();
-            } else if (['1032', '1037'].includes(ResultCode)) {
+            } 
+            // 1032: Cancelled by user | 1037: Timeout | 2001: Wrong PIN
+            else if (['1032', '1037', '2001'].includes(code)) {
                 updateData.status = 'CANCELLED';
-            } else {
+                updateData.errorMessage = ResultDesc; // Useful for UI display
+            } 
+            else {
                 updateData.status = 'FAILED';
+                updateData.errorMessage = ResultDesc;
             }
 
-            // Update the payment record
+            // 6. Update the database
             await PaymentCollection.updateOne({ id: payment.id }).set(updateData);
-            logger.info(`[MpesaService] Updated payment ${payment.id} with status: ${updateData.status}`);
+            
+            logger.info(`[MpesaService] Payment ${payment.id} updated to status: ${updateData.status}`);
 
             return {
                 success: true,

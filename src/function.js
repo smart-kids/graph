@@ -69,10 +69,22 @@ if (NODE_ENV === 'production') {
     app.use(hpp()); // Protect against HTTP Parameter Pollution attacks
     app.use(compression()); // Compress responses
     app.use(rateLimit({
-        windowMs: 15 * 60 * 1000, // 15 minutes
-        max: 200, // Limit each IP to 200 requests per window
+        windowMs: 60 * 60 * 1000, // 1 hour
+        max: 1000, // Limit each IP to 500 requests per hour
+        message: {
+            success: false,
+            error: 'Your request limit has been exceeded, please refresh and retry'
+        },
         standardHeaders: true,
         legacyHeaders: false,
+        skipFailedRequests: true, // Don't count failed requests
+        handler: (req, res) => {
+            res.status(429).json({
+                success: false,
+                error: 'Too many requests from this IP, please try again after some time',
+                code: 'RATE_LIMIT_EXCEEDED'
+            });
+        }
     }));
 }
 

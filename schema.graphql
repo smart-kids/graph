@@ -203,11 +203,7 @@ enum mpesaStatus {
   """
   FAILED_ON_CALLBACK
 
-  """
-  CRITICAL: A special failure state. The callback was successful (ResultCode: 0),
-  but the amount paid by the user does not match the amount we requested.
-  This requires manual review by an admin.
-  """
+
   FLAGGED_AMOUNT_MISMATCH
 }
 

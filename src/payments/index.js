@@ -73,22 +73,6 @@ const parseMetadata = (items = []) => {
           const metadata = parseMetadata(stkCallback.CallbackMetadata?.Item);
           const receivedAmount = Number(metadata.amount);
   
-          if (receivedAmount !== existingPayment.amount) {
-            logger.error(`[Security] Amount mismatch for ${txid}. Expected: ${existingPayment.amount}, Received: ${receivedAmount}.`);
-            const updatePayload = {
-              status: 'FLAGGED_AMOUNT_MISMATCH',
-              errorMessage: `Amount mismatch: Expected ${existingPayment.amount}, but received ${receivedAmount}.`,
-              ref: metadata.mpesaReceiptNumber,
-              time: moment(String(metadata.transactionDate), 'YYYYMMDDHHmmss').toDate(),
-            };
-            // FIX 2: Use the modern .updateOne().set() syntax for clarity.
-            await PaymentCollection.updateOne({ id: txid }).set(updatePayload);
-            
-            // Your SMS logic here is fine.
-            // sms.sendSms(...) 
-            return;
-          }
-  
           const updatePayload = {
             status: 'COMPLETED',
             ref: metadata.mpesaReceiptNumber,
