@@ -141,15 +141,49 @@ type user {
 }
 
 # payment things
+# 1. Define a JSON scalar if you haven't already, 
+# or just return metadata as a Stringified JSON.
+scalar JSON
+
 type payment {
+  # --- Identity ---
   id: String
   school: String
+  user: String
+  
+  # --- Financials ---
   amount: String
-  type: String
   phone: String
-  acc: String
+  description: String
+  accountReference: String
+  
+  # --- Status & Lifecycle (CRITICAL for the UI) ---
+  status: String         # Needed for the Color Coded Border & Badge
+  errorMessage: String   # Needed for the Red Alert box in Timeline
+  
+  # --- M-Pesa Technicals (CRITICAL for Audit Trail) ---
+  mpesaReceiptNumber: String
+  merchantRequestID: String  # Shown in "Technical Details"
+  checkoutRequestID: String  # Shown in "Technical Details"
+  resultCode: String         # Used to determine success/failure logic
+  resultDesc: String         # Shown in Timeline failure state
+  
+  # --- Timestamps (CRITICAL for Timeline sorting) ---
+  transactionDate: String
+  createdAt: String      # Needed for "Request Initiated" time
+  updatedAt: String      # Needed for "Callback Received" time
+  
+  # --- Advanced ---
+  # This contains the raw M-Pesa callback. 
+  # If your server doesn't support JSON scalar, change type to String 
+  # and JSON.stringify() it in the resolver.
+  metadata: JSON         
+  
+  # --- Backward Compatibility ---
   ref: String
   time: String
+
+  type: String
 }
 
 # M-Pesa specific types
@@ -234,6 +268,8 @@ type mpesaStartTxResult {
   amount: String
   phone: String
   status: mpesaStatus
+  mpesaReceiptNumber: String
+  resultDesc: String
   merchantRequestID: String
   checkoutRequestID: String
   ref: String
