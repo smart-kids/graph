@@ -170,17 +170,41 @@ const nested = {
     gradeOrder: (root) => root.gradeOrder ? root.gradeOrder.split(",") : [],
     termOrder: (root) => root.termOrder ? root.termOrder.split(",") : [],
     async financial(root, args, { loaders }) {
-      // ✅ LOGGING: The individual batch logs for payments/charges will show this is efficient.
       console.log(`[RESOLVER CALL] Queuing 'financial' data for School ID: ${root.id}`);
-      const [payments, charges] = await Promise.all([
+
+      const [allPayments, allCharges] = await Promise.all([
         loaders.paymentsBySchoolId.load(root.id),
         loaders.chargesBySchoolId.load(root.id)
       ]);
-      const balance = subtract(sum(payments.map(p => p.ammount)), sum(charges.map(p => p.ammount)));
-      return { 
-        balance, 
-        balanceFormated: `${(balance / 2)} SMS's left`
-        // balanceFormated: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'KSH' }).format(balance) 
+
+      // 1. Calculate Income: Only sum 'COMPLETED' payments
+      const totalIncome = allPayments.reduce((total, p) => {
+        // Only count successful transactions
+        if (p.status !== 'COMPLETED') return total;
+
+        // Handle "amount" (new) vs "ammount" (legacy) and parse String to Float
+        const val = parseFloat(p.amount || p.ammount || 0);
+        return total + (isNaN(val) ? 0 : val);
+      }, 0);
+
+      // 2. Calculate Expenses: Sum all charges
+      const totalExpenses = allCharges.reduce((total, c) => {
+        // Handle "amount" vs "ammount"
+        const val = parseFloat(c.amount || c.ammount || 0);
+        return total + (isNaN(val) ? 0 : val);
+      }, 0);
+
+      // 3. Final Balance
+      const balance = totalIncome - totalExpenses;
+
+      // Assuming 1 SMS costs 2 units (KES/Currency)
+      const smsCost = 2;
+      const smsCount = Math.floor(balance / smsCost);
+
+      return {
+        balance: balance,
+        // Ensure we don't show negative SMS counts
+        balanceFormated: `${Math.max(0, smsCount)} SMS's left`
       };
     },
 
