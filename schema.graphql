@@ -758,6 +758,28 @@ type attemptEvent {
   isCorrect: Boolean
 }
 
+type smsEvent {
+    id: String
+    messageTemplate: String
+    createdAt: String
+    status: String
+    recipientCount: Int
+    successCount: Int
+    failureCount: Int 
+    providerResponse: String
+    logs: [smsLog]
+}
+
+type smsLog {
+    id: String
+    smsEventId: String
+    recipientName: String
+    recipientPhone: String
+    status: String
+    error: String
+    providerResponse: String # The raw JSON
+}
+
 # school things
 type school {
   id: String
@@ -795,6 +817,8 @@ type school {
   terms(limit: Int, offset: Int): [term]
   teams(limit: Int, offset: Int): [team]
   invitations(limit: Int, offset: Int): [invitation]
+  smsLogs(limit: Int, offset: Int): [smsLog]
+  smsEvents(limit: Int, offset: Int): [smsEvent]
 }
 
 input ISchool {

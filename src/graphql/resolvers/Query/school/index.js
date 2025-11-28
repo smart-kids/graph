@@ -101,6 +101,8 @@ export const createLoaders = (collections) => {
     termsBySchoolId: createRelatedLoader('term', 'school'),
     teamsBySchoolId: createRelatedLoader('team', 'school'),
     invitationsBySchoolId: createRelatedLoader('invitation', 'school'),
+    smsEventsBySchoolId: createRelatedLoader('smsevent', 'school'),
+    smsLogsByEventId: createRelatedLoader('smslog', 'event'),
   };
 };
 
@@ -150,6 +152,18 @@ const listDeleted = async (root, args, { auth, db: { collections } }) => {
 };
 
 const nested = {
+  // --- ADD THIS NEW TYPE RESOLVER (Sibling to school) ---
+  smsEvent: {
+    logs: async (root, args, { loaders }) => {
+      // This solves N+1. If you request 10 events, this runs 1 batch query for all their logs.
+      console.log(`[RESOLVER CALL] Queuing 'logs' lookup for SmsEvent ID: ${root.id}`);
+      
+      // Return all logs for this event
+      return await loaders.smsLogsByEventId.load(root.id);
+    },
+    // Ensure the raw JSON object is passed through correctly
+    providerResponse: (root) => root.providerResponse
+  },
   school: {
     studentsCount: async (root, args, { db: { collections } }) => {
       console.log(`[RESOLVER CALL] Queuing 'studentsCount' lookup for School ID: ${root.id}`);
@@ -332,6 +346,18 @@ const nested = {
       console.log(`[RESOLVER CALL] Queuing 'invitations' lookup for School ID: ${root.id}`);
       const { limit = 25, offset = 0 } = args;
       const allItems = await loaders.invitationsBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
+    },
+    smsEvents: async (root, args, { loaders }) => {
+      console.log(`[RESOLVER CALL] Queuing 'smsEvents' lookup for School ID: ${root.id}`);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.smsEventsBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
+    },
+    smsLogs: async (root, args, { loaders }) => {
+      console.log(`[RESOLVER CALL] Queuing 'smsLogs' lookup for School ID: ${root.id}`);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.smsLogsBySchoolId.load(root.id);
       return allItems.slice(offset, offset + limit);
     },
   }
