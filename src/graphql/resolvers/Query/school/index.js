@@ -152,6 +152,21 @@ const listDeleted = async (root, args, { auth, db: { collections } }) => {
 };
 
 const nested = {
+  // Resolver for the 'smsLog' type (Optional, but good for safety)
+  smsLog: {
+    providerResponse: (root) => {
+      // If root.providerResponse is a string (legacy data), try to parse it
+      if (typeof root.providerResponse === 'string') {
+        try {
+          return JSON.parse(root.providerResponse);
+        } catch (e) {
+          return null;
+        }
+      }
+      // If it's already an object (new data), return as is
+      return root.providerResponse;
+    }
+  },
   // --- ADD THIS NEW TYPE RESOLVER (Sibling to school) ---
   smsEvent: {
     logs: async (root, args, { loaders }) => {
