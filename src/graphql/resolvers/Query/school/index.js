@@ -199,41 +199,68 @@ const nested = {
     gradeOrder: (root) => root.gradeOrder ? root.gradeOrder.split(",") : [],
     termOrder: (root) => root.termOrder ? root.termOrder.split(",") : [],
     async financial(root, args, { loaders }) {
-      console.log(`[RESOLVER CALL] Queuing 'financial' data for School ID: ${root.id}`);
+      console.log(`[RESOLVER CALL] Calculating finances for School ID: ${root.id}`);
 
-      const [allPayments, allCharges] = await Promise.all([
+      // Constants for billing
+      const COST_PER_SMS = 2.0; 
+      const CHARS_PER_SMS = 160;
+
+      // 1. Fetch all financial data sources in parallel
+      const [allPayments, allCharges, allSmsEvents] = await Promise.all([
         loaders.paymentsBySchoolId.load(root.id),
-        loaders.chargesBySchoolId.load(root.id)
+        loaders.chargesBySchoolId.load(root.id),
+        loaders.smsEventsBySchoolId.load(root.id) // Fetch SMS history to calculate usage
       ]);
 
-      // 1. Calculate Income: Only sum 'COMPLETED' payments
+      // 2. Calculate Total Income (Deposits)
       const totalIncome = allPayments.reduce((total, p) => {
-        // Only count successful transactions
+        // Only count COMPLETED transactions
         if (p.status !== 'COMPLETED') return total;
-
-        // Handle "amount" (new) vs "ammount" (legacy) and parse String to Float
+        
         const val = parseFloat(p.amount || p.ammount || 0);
         return total + (isNaN(val) ? 0 : val);
       }, 0);
 
-      // 2. Calculate Expenses: Sum all charges
-      const totalExpenses = allCharges.reduce((total, c) => {
-        // Handle "amount" vs "ammount"
+      // 3. Calculate Expenses from Manual Charges (Legacy/Admin fees)
+      const manualExpenses = allCharges.reduce((total, c) => {
         const val = parseFloat(c.amount || c.ammount || 0);
         return total + (isNaN(val) ? 0 : val);
       }, 0);
 
-      // 3. Final Balance
+      // 4. Calculate Expenses from SMS Usage
+      const smsExpenses = allSmsEvents.reduce((total, event) => {
+        const successCount = event.successCount || 0;
+        
+        // If no messages were sent successfully, no charge.
+        if (successCount === 0) return total;
+
+        // Calculate Message Segments (Concatenated SMS logic)
+        // Length 0-160 = 1 credit
+        // Length 161-320 = 2 credits
+        const content = event.messageTemplate || "";
+        const length = content.length;
+        const segments = length > 0 ? Math.ceil(length / CHARS_PER_SMS) : 1;
+
+        // Cost = Segments * People * Price
+        const eventCost = segments * successCount * COST_PER_SMS;
+
+        return total + eventCost;
+      }, 0);
+
+      // 5. Final Calculation
+      const totalExpenses = manualExpenses + smsExpenses;
       const balance = totalIncome - totalExpenses;
 
-      // Assuming 1 SMS costs 2 units (KES/Currency)
-      const smsCost = 2;
-      const smsCount = Math.floor(balance / smsCost);
+      // Calculate how many standard (1-segment) SMS they can send with remaining balance
+      const smsRemaining = Math.floor(balance / COST_PER_SMS);
 
-      return {
-        balance: balance,
-        // Ensure we don't show negative SMS counts
-        balanceFormated: `${Math.max(0, smsCount)} SMS's left`
+      // Debug log to help you verify calculations in server console
+      console.log(`[Financial] School ${root.id}: Income=${totalIncome}, ManualExp=${manualExpenses}, SmsExp=${smsExpenses}, Bal=${balance}`);
+
+      return { 
+        balance: balance, 
+        // Ensure we don't show negative numbers for UI niceness
+        balanceFormated: `${Math.max(0, smsRemaining)} SMS's left`
       };
     },
 
