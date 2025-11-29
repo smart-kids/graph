@@ -260,7 +260,7 @@ const nested = {
       return { 
         balance: balance, 
         // Ensure we don't show negative numbers for UI niceness
-        balanceFormated: `${Math.max(0, smsRemaining)} SMS's left`
+        balanceFormated: `${Math.max(0, smsRemaining)} SMS's`
       };
     },
 
