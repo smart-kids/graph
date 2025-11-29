@@ -32,16 +32,33 @@ const sanitizeError = (err) => {
 
 const send = async (data, { db: { collections } }) => {
   const { message: rawTemplate, parents: parentIds, school: inputSchoolId } = data[name];
-  
+
   let schoolId = inputSchoolId;
   if (!schoolId && parentIds.length > 0) {
     const p = await collections["parent"].findOne({ where: { id: parentIds[0] }, select: ['school'] });
     if (p) schoolId = p.school;
   }
 
+  // 1. Determine School ID & Fetch School Details
+
+  let schoolData = { name: "Our School" }; // Default fallback
+
+  // If school ID isn't passed, try to find it from the first parent
+  if (!schoolId && parentIds.length > 0) {
+    const p = await collections["parent"].findOne({ where: { id: parentIds[0] }, select: ['school'] });
+    if (p) schoolId = p.school;
+  }
+
+  // FETCH SCHOOL NAME
+  if (schoolId) {
+    const s = await collections["school"].findOne({ where: { id: schoolId } });
+    if (s) schoolData = s;
+  }
+
+
   const eventId = uuidv4();
   let smsEvent;
-  
+
   if (schoolId) {
     try {
       smsEvent = await collections["smsevent"].create({
@@ -85,19 +102,19 @@ const send = async (data, { db: { collections } }) => {
         }
 
         const firstStudent = (parent.students && parent.students.length > 0) ? parent.students[0] : {};
-        const context = { recipient: parent, parent: parent, student: firstStudent };
+        const context = { recipient: parent, parent: parent, student: firstStudent, school: schoolData };
         let compiledMessage = "";
         try {
-            const template = Handlebars.compile(rawTemplate);
-            compiledMessage = template(context);
+          const template = Handlebars.compile(rawTemplate);
+          compiledMessage = template(context);
         } catch (tplErr) {
-            compiledMessage = rawTemplate;
+          compiledMessage = rawTemplate;
         }
 
         const p = new Promise((resolve, reject) => {
           // Log specific parent phone for debug
           console.log(`[SMS Service] Sending message to ${parent.phone}`);
-          
+
           sms({ data: { phone: parent.phone, message: compiledMessage } }, (error, response) => {
             if (error) {
               reject({
@@ -138,17 +155,17 @@ const send = async (data, { db: { collections } }) => {
       batchResults.forEach((result) => {
         const logId = uuidv4();
         const commonLogData = {
-            id: logId,
-            event: eventId,
-            school: schoolId,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+          id: logId,
+          event: eventId,
+          school: schoolId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         };
 
         if (result.status === 'fulfilled') {
           const val = result.value;
           successfulSends.push({ parentId: val.parentId, phone: val.phone });
-          
+
           if (smsEvent) {
             logsToCreate.push({
               ...commonLogData,
@@ -157,14 +174,14 @@ const send = async (data, { db: { collections } }) => {
               compiledMessage: val.compiledMessage,
               status: 'DELIVERED',
               // --- FIX IS HERE: Use empty string instead of null ---
-              error: "", 
+              error: "",
               providerResponse: val.raw
             });
           }
         } else {
           const errData = result.reason;
           failedSends.push({ parentId: errData.parentId, phone: errData.phone, error: errData.error });
-          
+
           if (smsEvent) {
             logsToCreate.push({
               ...commonLogData,
@@ -173,7 +190,7 @@ const send = async (data, { db: { collections } }) => {
               compiledMessage: errData.compiledMessage || "",
               status: 'FAILED',
               // Ensure we don't pass null here either just in case
-              error: errData.error || "Unknown Error", 
+              error: errData.error || "Unknown Error",
               providerResponse: errData.raw
             });
           }
@@ -205,7 +222,7 @@ const send = async (data, { db: { collections } }) => {
         recipientCount: successfulSends.length + failedSends.length,
         updatedAt: new Date().toISOString()
       });
-      
+
       console.log(`[SMS Service] Event ${eventId} updated. Status: ${overallStatus}`);
     } catch (updateError) {
       console.error("[SMS Service] Failed to update event status:", updateError);
