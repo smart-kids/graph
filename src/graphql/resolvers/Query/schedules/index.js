@@ -58,7 +58,7 @@ const nested = {
       return entry;
     },
     async days(root, args, { db: { collections } }) {
-      if (root.days) return root.days.split(",");
+      if (root.days) return root.days
     }
   }
 };
