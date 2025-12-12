@@ -41,7 +41,9 @@ const create = async (data, { db: { collections } }) => {
     id:userId,
     names,
     email,
-    phone
+    phone,
+    createdAt: new Date(),
+    updatedAt: new Date()
   }
 
   try {
@@ -65,6 +67,8 @@ const update = async (data, { db: { collections } }) => {
       const hashedPassword = await argon2.hash(entry.password);
       entry.password = hashedPassword
     }
+
+    entry.updatedAt = new Date();
 
     await collections[name].update({ id }).set(entry);
 
