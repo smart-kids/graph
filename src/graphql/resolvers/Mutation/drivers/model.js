@@ -16,8 +16,6 @@ export default Waterline.Collection.extend({
     licence_number: { type: "string", required: false },
     home: { type: "string", required: false },
     experience: { type: "string", required: false },
-    createdAt: { type: "string", required: true },
-    updatedAt: { type: "string", required: true },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });
