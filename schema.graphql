@@ -913,7 +913,7 @@ input Ischedule {
   school: String!
   route: String
   type: scheduleType
-  days: String
+  days: [day]
   bus: String
   driver: String
   actions: Iaction
@@ -926,7 +926,7 @@ input Uschedule {
   time: String
   end_time: String
   type: scheduleType
-  days: String
+  days: [day]
   route: String
   bus: String
   driver: String
