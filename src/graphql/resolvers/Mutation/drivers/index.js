@@ -42,9 +42,12 @@ const create = async (data, { db: { collections } }) => {
     names,
     email,
     phone,
-    createdAt: new Date(),
-    updatedAt: new Date()
+    createdAt: new Date().toDateString(),
+    updatedAt: new Date().toDateString()
   }
+
+  entry.createdAt = new Date().toDateString();
+  entry.updatedAt = new Date().toDateString();
 
   try {
     await collections[name].create(entry);
