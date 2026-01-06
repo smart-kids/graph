@@ -90,7 +90,8 @@ import {
 import {
   list as questions,
   single as question,
-  nested as Nquestion
+  nested as Nquestion,
+  images as questionImages
 } from "./questions";
 
 import {
@@ -245,7 +246,9 @@ const Query = {
   subtopics,
 
   question,
+  question,
   questions,
+  questionImages,
 
   answer,
   answers,

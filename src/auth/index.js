@@ -188,7 +188,7 @@ async function generateTokenForUser(userId, determinedUserType, collections) {
         console.error("JWT Signing Error: Secret key is missing in environment variables.");
         throw new Error("Authentication configuration error.");
     }
-    const token = jwt.sign(payload, ENCRYPTION_TOKEN, { expiresIn: '1d' }); // Standard expiry
+    const token = jwt.sign(payload, ENCRYPTION_TOKEN, { expiresIn: '7d' }); // Extended expiry to 7 days
 
     // --- Prepare Safe User Data ---
     // Return the specific record found (admin, driver, etc.) after sanitizing

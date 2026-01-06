@@ -97,6 +97,8 @@ type Query {
 
   attemptEvents: [attemptEvent]
   attemptEvent: attemptEvent
+
+  questionImages(id: String): [String]
 }
 
 type Mutation {

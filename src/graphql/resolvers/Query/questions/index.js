@@ -179,6 +179,22 @@ const nested = {
   }
 };
 
+// Resolver for fetching just the images of a question (to solve scalability issues)
+const images = async (root, args, { db: { collections } }) => {
+  const { id } = args;
+  if (!id) {
+    throw new GraphQLError("An ID must be provided.", { extensions: { code: 'BAD_USER_INPUT' } });
+  }
+
+  const entry = await collections[name].findOne({
+    where: { id }
+  });
+
+  return entry && entry.images ? entry.images : [];
+};
+
+export { images };
+
 // Note: The original file exported `list`, `single`, `listDeleted`, and `nested`.
 // The new pattern exports `createLoaders` as well.
 // We keep the old exports for compatibility.
