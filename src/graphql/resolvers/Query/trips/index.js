@@ -1,10 +1,9 @@
 const { name } = require("./about.js");
 
 const list = async (root, args, { db: { collections } }) => {
+  const where = Object.assign({}, args.where || {}, { isDeleted: false });
   const entries = await collections[name].find({
-    where: {
-      isDeleted: false
-    }
+    where
   });
   return entries;
 };
