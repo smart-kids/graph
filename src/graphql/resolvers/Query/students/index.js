@@ -168,6 +168,19 @@ const nested = {
       // Then, we paginate the result set in memory.
       return allEvents.slice(offset, offset + limit);
     },
+    async feeStatus(root, args, { loaders }) {
+        if (!root.class) return { balance: 0, balanceFormated: "0.00" };
+        const classData = await loaders.classById.load(root.class);
+        if (!classData) return { balance: 0, balanceFormated: "0.00" };
+        
+        const feeAmount = classData.feeAmount || 0;
+        const paidFees = root.paidFees || 0;
+        const balance = feeAmount - paidFees;
+        return {
+            balance,
+            balanceFormated: balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        };
+    }
   }
 };
 

@@ -102,6 +102,8 @@ type Query {
   books: [book]
 
   questionImages(id: String): [String]
+  assessment(id: String): assessment
+  assessments(where: JSON): [assessment]
 }
 
 type Mutation {
@@ -140,6 +142,7 @@ type Mutation {
   lessonAttempts: lessonAttemptMutations
   attemptEvents: attemptEventMutations
   books: bookMutations
+  assessments: assessmentMutations
 }
 
 # user things
@@ -645,6 +648,7 @@ type student {
   parent2: parent
   class: class
   events: [event]
+  feeStatus: financial
 }
 
 input Istudent {
@@ -656,6 +660,7 @@ input Istudent {
   school: String!
   parent2: String
   class: String
+  paidFees: Float
 }
 
 input Ustudent {
@@ -667,6 +672,7 @@ input Ustudent {
   parent: String
   parent2: String
   class: String
+  paidFees: Float
 }
 
 type studentMutations {
@@ -716,18 +722,21 @@ type class {
   school: school
   teacher: teacher
   students: [student]
+  feeAmount: Float
 }
 
 input Iclass {
   name: String
   teacher: String
   school: String!
+  feeAmount: Float
 }
 
 input Uclass {
   id: String!
   name: String
   teacher: String
+  feeAmount: Float
 }
 
 type classMutations {
@@ -1415,17 +1424,23 @@ type term {
   id: String
   name: String
   school: school
+  startDate: String
+  endDate: String
 }
 
 input Iterm {
   name: String!
   school: String!
+  startDate: String
+  endDate: String
 }
 
 input Uterm {
   id: String!
   name: String
   school: String
+  startDate: String
+  endDate: String
 }
 
 type termMutations {
@@ -1567,6 +1582,50 @@ input Ubook {
 }
 
 type bookMutations {
+  create(book: Ibook!): book
+  update(book: Ubook!): book
+  archive(book: Ubook!): book
+  restore(book: Ubook!): book
+}
+
+# assessment things
+type assessment {
+  id: String
+  student: student
+  term: term
+  subject: subject
+  score: Float
+  outOf: Float
+  teacher: teacher
+  school: school
+  remarks: String
+}
+
+input Iassessment {
+  student: String!
+  term: String!
+  subject: String!
+  score: Float!
+  outOf: Float
+  teacher: String
+  school: String!
+  remarks: String
+}
+
+input Uassessment {
+  id: String!
+  score: Float
+  remarks: String
+}
+
+type assessmentMutations {
+  create(assessment: Iassessment!): assessment
+  update(assessment: Uassessment!): assessment
+  archive(assessment: Uassessment!): assessment
+  restore(assessment: Uassessment!): assessment
+}
+
+type oldBookMutations {
   create(book: Ibook!): book
   update(book: Ubook!): book
   archive(book: Ubook!): book

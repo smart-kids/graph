@@ -31,6 +31,7 @@ import analyticsEvent from "./analytics-event";
 import lessonAttempts from "./lessonAttempt";
 import attemptEvents from "./attemptEvent";
 import books from "./library";
+import assessments from "./assessments";
 
 export default {
   admins,
@@ -66,6 +67,7 @@ export default {
   lessonAttempts,
   attemptEvents,
   books,
+  assessments,
   hello() {
     return "hello mutation";
   }
