@@ -148,6 +148,12 @@ import {
   nested as NattemptEvent
 } from "./attempt-event";
 
+import {
+  list as books,
+  single as book,
+  nested as Nbooks
+} from "./library";
+
 const nested = {};
 
 Object.assign(
@@ -178,7 +184,8 @@ Object.assign(
   Ninvitation,
   NanalyticsEvent,
   NlessonAttempt,
-  NattemptEvent
+  NattemptEvent,
+  Nbooks
 );
 
 const Query = {
@@ -276,6 +283,9 @@ const Query = {
 
   attemptEvents,
   attemptEvent,
+
+  books,
+  book,
 
   hello: () => "hey"
 };

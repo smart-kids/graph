@@ -98,6 +98,9 @@ type Query {
   attemptEvents: [attemptEvent]
   attemptEvent: attemptEvent
 
+  book: book
+  books: [book]
+
   questionImages(id: String): [String]
 }
 
@@ -136,6 +139,7 @@ type Mutation {
   responses: optionResponseMutations
   lessonAttempts: lessonAttemptMutations
   attemptEvents: attemptEventMutations
+  books: bookMutations
 }
 
 # user things
@@ -823,6 +827,7 @@ type school {
   invitations(limit: Int, offset: Int): [invitation]
   smsLogs(limit: Int, offset: Int): [smsLog]
   smsEvents(limit: Int, offset: Int): [smsEvent]
+  books(limit: Int, offset: Int): [book]
 }
 
 input ISchool {
@@ -1525,4 +1530,45 @@ type invitationMutations {
   update(invitation: Uinvitation!): invitation
   archive(invitation: Uinvitation!): invitation
   restore(invitation: Uinvitation!): invitation
+}
+
+# book things
+type book {
+  id: String
+  title: String
+  author: String
+  category: String
+  coverUrl: String
+  pdfUrl: String
+  description: String
+  school: school
+  isDeleted: Boolean
+}
+
+input Ibook {
+  title: String!
+  author: String!
+  category: String!
+  coverUrl: String
+  pdfUrl: String!
+  description: String
+  school: String!
+}
+
+input Ubook {
+  id: String!
+  title: String
+  author: String
+  category: String
+  coverUrl: String
+  pdfUrl: String
+  description: String
+  school: String
+}
+
+type bookMutations {
+  create(book: Ibook!): book
+  update(book: Ubook!): book
+  archive(book: Ubook!): book
+  restore(book: Ubook!): book
 }
