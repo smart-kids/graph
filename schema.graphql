@@ -195,6 +195,12 @@ type payment {
   time: String
 
   type: String
+  
+  # --- Fee Payment Specific ---
+  student: student       # Link to student for fee payments
+  paymentType: String    # FEE_PAYMENT, OTHER, etc.
+  purpose: String        # e.g., "Term 1 School Fees", "Exam Fees"
+  term: term             # Link to academic term
 }
 
 # M-Pesa specific types
@@ -294,6 +300,10 @@ input Ipayment {
   type: String
   ref: String
   time: String
+  student: String
+  paymentType: String
+  purpose: String
+  term: String
 }
 
 input Upayment {
@@ -304,6 +314,10 @@ input Upayment {
   type: String
   ref: String
   time: String
+  student: String
+  paymentType: String
+  purpose: String
+  term: String
 }
 
 type paymentMutations {
