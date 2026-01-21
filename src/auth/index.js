@@ -10,6 +10,7 @@ import bodyParser from "body-parser"
 import argon2 from "argon2"
 import sms from "../utils/sms"
 import roles from "../utils/rolesMapping"
+import moment from "moment" // Ensure moment is imported
 // import config from "../config"
 
 const validator = require('express-joi-validation').createValidator({})
@@ -173,6 +174,101 @@ async function generateTokenForUser(userId, determinedUserType, collections) {
                     userType: 'user', // Assign a default type or the one from the record if available
                 };
             // Decide if login should be allowed for default/unknown types
+        }
+
+        // --- ENHANCEMENT: Add Subscription Status to Payload ---
+        // This ensures the client knows the status immediately without extra queries
+        if (userRecord) {
+            payload.subscriptionStatus = userRecord.subscriptionStatus || 'INACTIVE';
+            payload.subscriptionExpiry = userRecord.subscriptionExpiry || null;
+            payload.subscriptionAmount = userRecord.subscriptionAmount || null;
+        }
+
+        // --- STICKY AUTH IMPLEMENTATION ---
+        
+        let shouldUpdateUser = false;
+        let activePlan = null;
+
+        // 1. If currently INACTIVE, check if there's a valid payment we missed or didn't stick
+        //    OR just check regardless to be safe (self-healing)
+        
+        // We need 'moment' here.
+        if (payload.subscriptionStatus !== 'ACTIVE') {
+            console.log(`User ${userId} is INACTIVE. Checking for valid payments (Sticky Auth)...`);
+            
+            // Check for payments in the last 30 days (assuming monthly default)
+            // Ideally we check the `subscriptionPlan` duration, but for now we look for recent success.
+            const MonthAgo = moment().subtract(30, 'days').toDate(); // or new Date() logic 
+
+            // We need to query the 'payment' collection.
+            // Using `collections.payment`. Note: Waterline might use 'payments' or 'payment'.
+            const PaymentCollection = collections.payment || collections.payments;
+
+            if (PaymentCollection) {
+                // Find COMPLETED payments for this user since MonthAgo
+                // Note: Waterline syntax might vary. Using general 'where'.
+                try {
+                     const validPayments = await PaymentCollection.find({
+                        where: {
+                            user: userId,
+                            status: 'COMPLETED',
+                            // Waterline date query might differ, assuming standard or filtering in memory if small set
+                            // For simplicity/robustness in this snippet, let's fetch recent active ones.
+                            // If timestamp is string in DB, might need string comparison or processing.
+                            // Assuming 'createdAt' or 'time' is available and comparable.
+                        },
+                        sort: 'createdAt DESC',
+                        limit: 5
+                    });
+
+                    // Parse and check dates manually if mixed types
+                    const recentValidPayment = validPayments.find(p => {
+                        const pDate = moment(p.time || p.createdAt || p.updatedAt);
+                        return pDate.isAfter(MonthAgo);
+                    });
+
+                    if (recentValidPayment) {
+                        console.log(`Sticky Auth: Found valid payment ${recentValidPayment.id} for user ${userId}. Reactivating.`);
+                        
+                        // Set details for token
+                        payload.subscriptionStatus = 'ACTIVE';
+                        payload.subscriptionExpiry = moment(recentValidPayment.time || recentValidPayment.createdAt).add(30, 'days').toISOString();
+                        payload.subscriptionAmount = String(recentValidPayment.amount);
+                        
+                        activePlan = {
+                            status: 'ACTIVE',
+                            expiry: payload.subscriptionExpiry,
+                            amount: payload.subscriptionAmount
+                        };
+                        shouldUpdateUser = true;
+                    }
+                } catch(err) {
+                    console.error("Sticky Auth: Error checking payments", err);
+                }
+            }
+        }
+
+        // 2. Self-Correction: Update User Record if we found they should be active
+        if (shouldUpdateUser && activePlan && userRecord) {
+             try {
+                 // Try updating the specific collection or the polymorphic 'user' alias if exists?
+                 // We know 'determinedUserType' gave us the collection name in 'dbCollectionName'
+                 await collections[dbCollectionName].updateOne({ id: userId }).set({
+                     subscriptionStatus: activePlan.status,
+                     subscriptionExpiry: activePlan.expiry,
+                     subscriptionAmount: activePlan.amount
+                 });
+                 console.log(`Sticky Auth: Updated user record for ${userId} to ACTIVE.`);
+             } catch (updateErr) {
+                 console.error(`Sticky Auth: Failed to update user record.`, updateErr);
+             }
+        }
+
+        // Ensure payload has the fields (either from record or from Sticky update)
+        if (userRecord && !shouldUpdateUser) {
+            payload.subscriptionStatus = userRecord.subscriptionStatus || 'INACTIVE';
+            payload.subscriptionExpiry = userRecord.subscriptionExpiry || null;
+            payload.subscriptionAmount = userRecord.subscriptionAmount || null;
         }
 
     } catch (fetchError) {

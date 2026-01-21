@@ -16,6 +16,13 @@ export default Waterline.Collection.extend({
     email: { type: "string", required: false },
     gender: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false },
+    
+    // --- Subscription & Activity ---
+    subscriptionStatus: { type: "string", defaultsTo: "INACTIVE" }, // ACTIVE, INACTIVE
+    subscriptionPlan: { type: "string" }, // DAILY, WEEKLY, TERM, YEAR
+    subscriptionExpiry: { type: "string" }, // ISO Date
+    subscriptionAmount: { type: "string" },
+    lastLogin: { type: "string" }, // ISO Date
     // --- FIX ---
     // Let Waterline manage the timestamp. It will expect a Date object.
     createdAt: { 

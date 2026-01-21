@@ -126,6 +126,10 @@ async function attachRouters() {
     app.use("/auth", authRouter);
     app.use("/mpesa", await createMpesaRouter(storage, io)); // Pass storage and the REAL io instance
     app.use("/ai_ml", ai_mlRouter);
+    
+    // --- Initialize Cron Jobs ---
+    const { initCron } = require("./cron");
+    initCron(storage);
 
     console.log("Routers have been attached.");
 }

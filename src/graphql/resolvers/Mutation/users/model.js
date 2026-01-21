@@ -15,6 +15,13 @@ export default Waterline.Collection.extend({
     other_phone: { type: "string" },
     mpesa_payments_phone: { type: "string" },
     isDeleted: { type: "boolean", defaultsTo: false },
+    
+    // --- Subscription & Activity ---
+    subscriptionStatus: { type: "string", defaultsTo: "INACTIVE" }, // ACTIVE, INACTIVE
+    subscriptionPlan: { type: "string" }, // DAILY, WEEKLY, TERM, YEAR
+    subscriptionExpiry: { type: "string" }, // ISO Date
+    subscriptionAmount: { type: "string" },
+    lastLogin: { type: "string" }, // ISO Date
     // For Handling Sorting in Querys
     // Let Waterline manage the timestamp. It will expect a Date object.
     createdAt: { 

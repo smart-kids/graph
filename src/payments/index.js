@@ -1,10 +1,9 @@
-// FILE: src/api/routes/payments.js (or wherever createMpesaRouter is located)
-
 import express from 'express';
 import bodyParser from 'body-parser';
 import moment from 'moment';
 import sms from '../graphql/resolvers/Mutation/sms';
 import { name } from "../graphql/resolvers/Mutation/payments/about.js";
+import sendSms from '../utils/sms'; // Import SMS utility
 
 /**
  * A helper function to parse the M-Pesa metadata array into a more usable object.
@@ -39,6 +38,7 @@ const parseMetadata = (items = []) => {
     router.use(bodyParser.json());
     const dbInstance= await db;
     const PaymentCollection = dbInstance.collections[name];
+    const UserCollection = dbInstance.collections.user || dbInstance.collections.users; // Need User collection
   
     router.post('/lipaCallback/:txid', async (req, res) => {
       const logger = console;
@@ -84,12 +84,52 @@ const parseMetadata = (items = []) => {
           await PaymentCollection.updateOne({ id: txid }).set(updatePayload);
           logger.log(`[Callback] Successfully updated payment ${txid} to COMPLETED.`);
   
-          if (io && existingPayment.userId) {
+            if (io && existingPayment.userId) {
             io.to(`user_${existingPayment.userId}`).emit('payment_success', {
               message: 'Your payment was successful!',
               transactionId: txid,
               amount: receivedAmount,
             });
+          }
+
+          // --- NEW: Post-Payment Actions (Notifications & User Update) ---
+          try {
+              // A. Update User Subscription
+              if (existingPayment.userId) { // Note: 'userId' field in existingPayment
+                  const expiryDate = moment().add(1, 'month').toISOString();
+                  if (UserCollection) {
+                      await UserCollection.updateOne({ id: existingPayment.userId }).set({
+                          subscriptionStatus: 'ACTIVE',
+                          subscriptionPlan: 'MONTHLY',
+                          subscriptionExpiry: expiryDate,
+                          subscriptionAmount: String(receivedAmount),
+                          updatedAt: new Date().toISOString()
+                      });
+                      logger.log(`[Callback] User ${existingPayment.userId} subscription activated.`);
+                  }
+              }
+
+              // B. Send SMS to User
+              // Need to get user phone if not in payment or metadata
+              let userPhone = metadata.phoneNumber; // from M-Pesa
+              if (!userPhone && existingPayment.userId && UserCollection) {
+                  const user = await UserCollection.findOne({ id: existingPayment.userId });
+                  userPhone = user?.phone;
+              }
+              
+              if (userPhone) {
+                   const msg = `Payment Received! Your ShulePlus subscription is now ACTIVE. Enjoy unlimited learning!`;
+                   await sendSms({ data: { phone: userPhone, message: msg } });
+              }
+
+              // C. Send SMS to Admin
+              const adminPhone = '0743214479';
+              const userRef = existingPayment.userId ? `User: ${existingPayment.userId}` : `Phone: ${userPhone}`;
+              const adminMsg = `Payment Received: ${metadata.mpesaReceiptNumber} - KES ${receivedAmount}. ${userRef}`;
+              await sendSms({ data: { phone: adminPhone, message: adminMsg } });
+
+          } catch (e) {
+              logger.error(`[Callback] Notification error:`, e);
           }
   
         } else {

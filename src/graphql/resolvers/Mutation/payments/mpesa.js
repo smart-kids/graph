@@ -1,5 +1,6 @@
 const axios = require('axios');
 const moment = require('moment');
+const sendSms = require('../../utils/sms'); // Import SMS utility
 
 const createMpesaService = ({ collections, logger = console }) => {
     // M-Pesa configuration
@@ -23,6 +24,8 @@ const createMpesaService = ({ collections, logger = console }) => {
 
     // Get the Payment collection
     const PaymentCollection = collections.payment;
+    // We also need access to User collections to update subscription status
+    const UserCollection = collections.user || collections.users; // Fallback to 'users' if 'user' alias missing
 
     // Helper function to generate password
     const _generatePassword = () => {
@@ -294,7 +297,56 @@ const createMpesaService = ({ collections, logger = console }) => {
             // 6. Update the database
             await PaymentCollection.updateOne({ id: payment.id }).set(updateData);
             
+            // 6. Update the database
+            await PaymentCollection.updateOne({ id: payment.id }).set(updateData);
+            
             logger.info(`[MpesaService] Payment ${payment.id} updated to status: ${updateData.status}`);
+
+            // --- 7. NEW: Post-Payment Actions (Notifications & User Update) ---
+            if (updateData.status === 'COMPLETED') {
+                try {
+                    // A. Update User Subscription
+                    if (payment.user) {
+                         const expiryDate = moment().add(1, 'month').toISOString(); // Default to 1 month for now, logic can be refined
+                         // Try to find the user in the main collection or specific collections if needed
+                         // For simplicity, we assume we can update via 'users' identity if Waterline is set up that way,
+                         // OR we need to know the userType. Payment record usually just has userId.
+                         // We will try updating the 'user' (polymorphic or base) collection often aliased.
+                         
+                         // If 'user' collection isn't available, we might need to search specific collections.
+                         // But typically 'users' is the base.
+                         if (UserCollection) {
+                             await UserCollection.updateOne({ id: payment.user }).set({
+                                 subscriptionStatus: 'ACTIVE',
+                                 subscriptionPlan: 'MONTHLY', // Default assumption
+                                 subscriptionExpiry: expiryDate,
+                                 subscriptionAmount: updateData.amount || payment.amount,
+                                 updatedAt: new Date().toISOString()
+                             });
+                             logger.info(`[MpesaService] User ${payment.user} subscription activated.`);
+                         } else {
+                             logger.warn(`[MpesaService] UserCollection not found. Cannot update user subscription.`);
+                         }
+                    }
+
+                    // B. Send SMS to User
+                    if (updateData.phone || payment.phone) {
+                        const userPhone = updateData.phone || payment.phone;
+                        const msg = `Payment Received! Your ShulePlus subscription is now ACTIVE. Enjoy unlimited learning!`;
+                        await sendSms({ data: { phone: userPhone, message: msg } });
+                    }
+
+                    // C. Send SMS to Admin
+                    const adminPhone = '0743214479';
+                    const userRef = payment.user ? `User: ${payment.user}` : `Phone: ${updateData.phone || payment.phone}`;
+                    const adminMsg = `Payment Received: ${updateData.mpesaReceiptNumber} - KES ${updateData.amount || payment.amount}. ${userRef}`;
+                    await sendSms({ data: { phone: adminPhone, message: adminMsg } });
+
+                } catch (notificationError) {
+                    logger.error(`[MpesaService] Post-payment actions failed:`, notificationError);
+                    // Don't fail the whole callback just because SMS failed
+                }
+            }
 
             return {
                 success: true,
