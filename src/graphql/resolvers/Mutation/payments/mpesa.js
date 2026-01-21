@@ -1,6 +1,6 @@
 const axios = require('axios');
 const moment = require('moment');
-const sendSms = require('../../../../../utils/sms'); // Import SMS utility
+const sendSms = require('../../../../utils/sms'); // Import SMS utility
 
 const createMpesaService = ({ collections, logger = console }) => {
     // M-Pesa configuration
