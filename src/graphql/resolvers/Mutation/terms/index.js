@@ -12,7 +12,8 @@ const create = async (data, { db: { collections } }) => {
 
     return entry;
   } catch (err) {
-    throw new UserError(err.details);
+    console.error(`[${name} Create Error]`, err);
+    throw new UserError(err.message || err.details || `An unexpected error occurred while creating the ${name}.`);
   }
 };
 
