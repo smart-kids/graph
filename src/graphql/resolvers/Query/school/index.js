@@ -264,6 +264,45 @@ const nested = {
       };
     },
 
+    assessments: async (root, args, { db: { collections } }) => {
+      // Specialized resolver to fetch assessments for a specific Class + Term context
+      // This avoids loading ALL school assessments into memory.
+      console.log(`[RESOLVER CALL] specialized 'assessments' lookup for School ID: ${root.id}`, args);
+      const { class: classId, term: termId, limit = 1000, offset = 0 } = args;
+
+      const query = {
+        where: {
+          school: root.id,
+          // usually models have isDeleted or similar, but let's be safe and just filter by context
+        },
+        limit,
+        skip: offset,
+        // sort: 'createdAt DESC' // Optional
+      };
+
+      if (termId) {
+        query.where.term = termId;
+      }
+
+      if (classId) {
+        // 1. Find the students in this class
+        const studentsInClass = await collections.student.find({
+            where: { class: classId },
+            select: ['id']
+        });
+        const studentIds = studentsInClass.map(s => s.id);
+
+        if (studentIds.length === 0) {
+            return [];
+        }
+        
+        // 2. Filter assessments by these students
+        query.where.student = studentIds; // Waterline/Sails usually supports array for IN query
+      }
+
+      return await collections.assessment.find(query);
+    },
+
     // ==============================================================================
     // PAGINATED NESTED RESOLVERS
     // ==============================================================================

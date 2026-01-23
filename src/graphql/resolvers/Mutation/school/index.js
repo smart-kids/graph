@@ -15,38 +15,21 @@ const default_roles_per_school = [
 ]
 
 const create = async (data, { db: { collections } }) => {
-  // Assuming 'name' is a variable available in this scope, e.g., "school"
-  // It would be better if 'name' was passed as an argument or clearly defined.
-  // For this example, I'll assume 'name' holds the primary model name (e.g., "school")
-  const modelName = name; // To make it clearer in logs
+  const entry = data[name];
+  const { phone, email, names } = entry;
 
-  console.log(`[${modelName} Create] Received data for new ${modelName}:`, data[modelName]);
-
-  const { phone, email, ...restOfModelData } = data[modelName]; // Destructure phone and email early for clarity
-
-  try {
-    console.log(`[${modelName} Create] Checking if ${modelName} with phone ${phone} already exists...`);
-    const phoneTaken = await collections[modelName].find({ phone, isDeleted: false });
-
-    if (phoneTaken.length) {
-      console.warn(`[${modelName} Create] ${modelName} with phone ${phone} already exists. Found:`, phoneTaken);
-      throw new UserError(`A ${modelName} with the phone number ${phone} already exists!.`);
-    }
-    console.log(`[${modelName} Create] Phone number ${phone} is available.`);
-  } catch (err) {
-    // If it's a UserError we threw, rethrow it to be caught by GraphQL/caller
-    if (err instanceof UserError) {
-        console.error(`[${modelName} Create] UserError during phone check:`, err.message);
-        throw err;
-    }
-    // For other unexpected errors during find
-    console.error(`[${modelName} Create] Error during phone check for ${modelName} with phone ${phone}:`, err);
-    // Decide if you want to throw a generic error or a UserError here
-    throw new UserError(`An unexpected error occurred while checking phone availability for ${modelName}.`);
+  const existing = await collections[name].findOne({ phone, isDeleted: false });
+  if (existing) {
+    throw new UserError(`A ${name} with the phone number ${phone} already exists.`);
   }
 
   const newId = new ObjectId().toHexString();
-  console.log(`[${modelName} Create] Generated new ID for ${modelName}: ${newId}`);
+  const password = generatePassword();
+  const hashedPassword = await argon2.hash(password);
+
+  let { gradeOrder, termOrder } = entry;
+  entry.gradeOrder = gradeOrder ? gradeOrder.join(",") : "";
+  entry.termOrder = termOrder ? termOrder.join(",") : "";
 
   const inviteSmsText = `Hello {{username}}, 
 
@@ -59,73 +42,57 @@ const create = async (data, { db: { collections } }) => {
   phone number: {{phone_number}}
   password: {{password}}`;
 
-  let { gradeOrder, termOrder } = data[modelName]; // gradeOrder and termOrder might be undefined
-  gradeOrder = gradeOrder ? gradeOrder.join(",") : "";
-  termOrder = termOrder ? termOrder.join(",") : "";
-  console.log(`[${modelName} Create] Processed gradeOrder: "${gradeOrder}", termOrder: "${termOrder}"`);
-
-  const entryToCreate = {
-    ...restOfModelData, // Spread the rest of the original data
-    phone,              // Add back phone
-    email,              // Add back email (if it was part of original data[name])
-    inviteSmsText,
-    gradeOrder,
-    termOrder,
-    id: newId,          // Use the generated ID
-    isDeleted: false,
-  };
-
-  console.log(`[${modelName} Create] Attempting to create ${modelName} with entry:`, entryToCreate);
-
   try {
-    const createdEntry = await collections[modelName].create(entryToCreate).fetch(); // Use .fetch() to get the full record
-    console.log(`[${modelName} Create] Successfully created ${modelName}:`, createdEntry);
+    const createdSchool = await collections[name].create({
+      ...entry,
+      id: newId,
+      isDeleted: false,
+      inviteSmsText,
+    }).fetch();
 
-    // Assuming email and phone for the admin user come from the main entry's data
-    const adminUserEmail = createdEntry.email; // Or data[modelName].email if preferred
-    const adminUserPhone = createdEntry.phone; // Or data[modelName].phone
+    // const roles = await Promise.all(
+    //   // default_roles_per_school.map((roleName) =>
+    //   //   collections["roles"].create({
+    //   //     id: new ObjectId().toHexString(),
+    //   //     name: roleName,
+    //   //     school: createdSchool.id,
+    //   //     isDeleted: false,
+    //   //   }).fetch()
+    //   // )
+    // );
 
-    if (!adminUserEmail || !adminUserPhone) {
-        console.error(`[${modelName} Create] Missing email or phone for creating associated admin user for ${modelName} ID ${createdEntry.id}. Email: ${adminUserEmail}, Phone: ${adminUserPhone}`);
-        // Decide how to handle this: throw error, or proceed without admin user?
-        // For now, let's throw an error as an admin user seems intended.
-        throw new UserError(`Cannot create admin user: email or phone not provided with ${modelName} data.`);
+    // const adminRole = roles.find((r) => r.name === "Admin");
+
+    const adminUser = await collections["users"].create({
+      id: new ObjectId().toHexString(),
+      names: names || entry.name,
+      email,
+      phone,
+      password: hashedPassword,
+      school: createdSchool.id,
+      // lastLogin: new Date(),
+      role: "Admin", //adminRole //? adminRole.id : null,
+      isDeleted: false,
+    }).fetch();
+
+    const template = Handlebars.compile(inviteSmsText);
+    const message = template({
+      username: adminUser.names,
+      team_name: createdSchool.name,
+      phone_number: phone,
+      password: password,
+    });
+
+    try {
+      await sms.send(phone, message);
+    } catch (smsErr) {
+      console.error("[SMS Error]", smsErr);
     }
 
-    const adminId = new ObjectId().toHexString();
-    console.log(`[${modelName} Create] Generated ID for admin user: ${adminId}`);
-
-    const adminUserEntry = {
-      id: adminId,
-      names: adminUserEmail, // Or a dedicated 'names' field from input
-      email: adminUserEmail,
-      phone: adminUserPhone,
-      password: adminUserPhone, // SECURITY WARNING: Storing phone as password is very insecure. HASH PASSWORDS!
-      school: createdEntry.id, // Link to the newly created school/main entry
-      isDeleted: false, // Default for new user
-      // Consider adding a default role here if applicable
-    };
-
-    console.log(`[${modelName} Create] Attempting to create admin user with entry:`, adminUserEntry);
-    await collections["users"].create(adminUserEntry).fetch(); // Use .fetch()
-    console.log(`[${modelName} Create] Successfully created admin user for ${modelName} ID ${createdEntry.id}`);
-
-    // Return the main created entry (e.g., the school)
-    // The original code returned `entry` which was the input object with the new ID.
-    // Returning `createdEntry` is better as it's the actual record from the DB.
-    return createdEntry;
-
+    return createdSchool;
   } catch (err) {
-    console.error(`[${modelName} Create] Error during ${modelName} or admin user creation (ID ${newId}):`, err);
-    // If err.details exists (common for Waterline validation errors), log it for more info
-    if (err.details) {
-        console.error(`[${modelName} Create] Waterline Error Details:`, err.details);
-    }
-    // If it's a UserError we threw (e.g., missing email/phone for admin), rethrow it
-    if (err instanceof UserError) {
-        throw err;
-    }
-    throw new UserError(err.details || `An unexpected error occurred while creating the ${modelName}.`);
+    console.error(`[${name} Create Error]`, err);
+    throw new UserError(err.message || `An unexpected error occurred while creating the ${name}.`);
   }
 };
 

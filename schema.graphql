@@ -851,6 +851,7 @@ type school {
   smsLogs(limit: Int, offset: Int): [smsLog]
   smsEvents(limit: Int, offset: Int): [smsEvent]
   books(limit: Int, offset: Int): [book]
+  assessments(class: String, term: String, limit: Int, offset: Int): [assessment]
 }
 
 input ISchool {
