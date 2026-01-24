@@ -1231,7 +1231,7 @@ type question {
   answers: [answer]
   options: [option]
   optionsOrder: [String]
-  contentOrder: [String]
+  contentOrder: [JSON]
 }
 
 input Iquestion {
@@ -1242,6 +1242,7 @@ input Iquestion {
   attachments: [String]
   images: [String]
   optionsOrder: [String]
+  contentOrder: [JSON]
 }
 
 input Uquestion {
@@ -1253,6 +1254,7 @@ input Uquestion {
   attachments: [String]
   images: [String]
   optionsOrder: [String]
+  contentOrder: [JSON]
 }
 
 type questionMutations {
