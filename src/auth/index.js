@@ -378,10 +378,32 @@ router.post(
             }
         }
 
+        // --- 3. Fallback: Authenticate Parent via Student Registration Number ---
+        if (!isAuthenticated) {
+            console.log(`OTP verification failed for user: ${user}. Checking for Parent/Student Reg No fallback.`);
+            const parents = allMatchingUsers.filter(u => u.userType === 'parent');
+            
+            if (parents.length > 0) {
+                for (const parent of parents) {
+                    const linkedStudents = await collections.student.find({
+                        or: [{ parent: parent.id }, { parent2: parent.id }],
+                        isDeleted: { '!=': true }
+                    });
+                    
+                    if (linkedStudents.some(s => s.registration === password)) {
+                        console.log(`Student Reg No match for parent: ${parent.name} (${parent.id})`);
+                        isAuthenticated = true;
+                        authenticatedUser = parent;
+                        break;
+                    }
+                }
+            }
+        }
+
         // --- 4. Handle Final Authentication Status ---
         if (!isAuthenticated) {
-            console.warn(`Authentication failed for user: ${user}. No valid OTP found.`);
-            return res.status(401).send({ message: "Invalid OTP or it has expired." });
+            console.warn(`Authentication failed for user: ${user}.`);
+            return res.status(401).send({ message: "Invalid credentials." });
         }
 
         // --- 5. Registered User Authentication Success - Generate Token ---

@@ -40,6 +40,10 @@ const school_creators = require("../src/graphql/resolvers/Mutation/school_creato
 const analytics_event = require("../src/graphql/resolvers/Mutation/analytics-event/model.js");
 const lessonAttempt = require("../src/graphql/resolvers/Mutation/lessonAttempt/model.js");
 const attemptEvent = require("../src/graphql/resolvers/Mutation/attemptEvent/model.js");
+const assessments = require("../src/graphql/resolvers/Mutation/assessments/model.js");
+const smsEvents = require("../src/graphql/resolvers/Mutation/sms/event-model.js");
+const smsLogs = require("../src/graphql/resolvers/Mutation/sms/log-model.js");
+const books = require("../src/graphql/resolvers/Mutation/library/model.js");
 
 dotenv.config();
 
@@ -91,7 +95,8 @@ const modelModules = [
     complaint, locReport, classModel, school, teacher, OTP, payments, charges,
     grades, subjects, topics, subtopics, questions, answers, options, terms,
     teams, team_members, invitations, users, roles, user_roles, google_users,
-    school_creators, analytics_event, lessonAttempt, attemptEvent
+    school_creators, analytics_event, lessonAttempt, attemptEvent, assessments,
+    smsEvents, smsLogs, books
 ];
 
 const defaultIdAttributeDefinition = {
