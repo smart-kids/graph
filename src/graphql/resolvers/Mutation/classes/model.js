@@ -12,6 +12,7 @@ export default Waterline.Collection.extend({
     teacher: { type: "string", required: false },
     school: { type: "string", required: false },
     feeAmount: { type: "number", defaultsTo: 0 },
+    grade: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });
