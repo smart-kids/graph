@@ -35,7 +35,7 @@ const nested = {
       });
     },
     async assessmentType(root, args, { db: { collections } }) {
-      return await collections["assessmentTypes"].findOne({
+      return await collections["assessmenttype"].findOne({
         where: { id: root.assessmentType }
       });
     },

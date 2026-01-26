@@ -5,14 +5,15 @@ const { UserError } = require("graphql-errors");
 
 const create = async (data, { db: { collections } }) => {
   const id = new ObjectId().toHexString();
-  const entry = Object.assign(data[name], { id, isDeleted: false });
+  const entry = { ...data[name], id, isDeleted: false };
 
   try {
     await collections[name].create(entry);
 
     return entry;
   } catch (err) {
-    throw new UserError(err.details);
+    console.error(`Error creating ${name}:`, err);
+    throw new UserError(err.details || err.message || "An error occurred during creation");
   }
 };
 
@@ -29,7 +30,7 @@ const update = async (data, { db: { collections } }) => {
       id
     };
   } catch (err) {
-    throw new UserError(err.details);
+    throw new UserError(err.details || err.message || "An error occurred during update");
   }
 };
 
@@ -43,7 +44,7 @@ const archive = async (data, { db: { collections } }) => {
       id
     };
   } catch (err) {
-    throw new UserError(err.details);
+    throw new UserError(err.details || err.message || "An error occurred during archive");
   }
 };
 
@@ -57,7 +58,7 @@ const restore = async (data, { db: { collections } }) => {
       id
     };
   } catch (err) {
-    throw new UserError(err.details);
+    throw new UserError(err.details || err.message || "An error occurred during restore");
   }
 };
 

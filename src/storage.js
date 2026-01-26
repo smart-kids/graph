@@ -43,6 +43,8 @@ import smsEvents from "./graphql/resolvers/Mutation/sms/event-model.js";
 import smsLogs from "./graphql/resolvers/Mutation/sms/log-model.js";
 import books from "./graphql/resolvers/Mutation/library/model.js";
 import assessments from "./graphql/resolvers/Mutation/assessments/model.js";
+import assessmentType from "./graphql/resolvers/Mutation/assessment-types/model.js";
+import assessmentRubric from "./graphql/resolvers/Mutation/assessment-rubrics/model.js";
 
 const {
     NODE_ENV,
@@ -130,6 +132,8 @@ waterlineInstance.registerModel(smsEvents);
 waterlineInstance.registerModel(smsLogs);
 waterlineInstance.registerModel(books);
 waterlineInstance.registerModel(assessments);
+waterlineInstance.registerModel(assessmentType);
+waterlineInstance.registerModel(assessmentRubric);
 
 const config = {
     adapters: {

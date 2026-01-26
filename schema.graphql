@@ -859,7 +859,8 @@ type school {
   invitations(limit: Int, offset: Int): [invitation]
   smsLogs(limit: Int, offset: Int): [smsLog]
   smsEvents(limit: Int, offset: Int): [smsEvent]
-  books(limit: Int, offset: Int): [book]
+  assessmentTypes: [assessmentType]
+  assessmentRubrics: [assessmentRubric]
   assessments(class: String, term: String, limit: Int, offset: Int): [assessment]
 }
 
@@ -1668,23 +1669,23 @@ type assessmentType {
   school: school
 }
 
-input IassessmentType {
+input Iassessmenttype {
   name: String!
   percentage: Float!
   school: String!
 }
 
-input UassessmentType {
+input Uassessmenttype {
   id: String!
   name: String
   percentage: Float
 }
 
 type assessmentTypeMutations {
-  create(assessmentType: IassessmentType!): assessmentType
-  update(assessmentType: UassessmentType!): assessmentType
-  archive(assessmentType: UassessmentType!): assessmentType
-  restore(assessmentType: UassessmentType!): assessmentType
+  create(assessmenttype: Iassessmenttype!): assessmentType
+  update(assessmenttype: Uassessmenttype!): assessmentType
+  archive(assessmenttype: Uassessmenttype!): assessmentType
+  restore(assessmenttype: Uassessmenttype!): assessmentType
 }
 
 # assessmentRubric things
@@ -1696,14 +1697,14 @@ type assessmentRubric {
   school: school
 }
 
-input IassessmentRubric {
+input Iassessmentrubric {
   label: String!
   minScore: Float!
   maxScore: Float!
   school: String!
 }
 
-input UassessmentRubric {
+input Uassessmentrubric {
   id: String!
   label: String
   minScore: Float
@@ -1711,8 +1712,8 @@ input UassessmentRubric {
 }
 
 type assessmentRubricMutations {
-  create(assessmentRubric: IassessmentRubric!): assessmentRubric
-  update(assessmentRubric: UassessmentRubric!): assessmentRubric
-  archive(assessmentRubric: UassessmentRubric!): assessmentRubric
-  restore(assessmentRubric: UassessmentRubric!): assessmentRubric
+  create(assessmentrubric: Iassessmentrubric!): assessmentRubric
+  update(assessmentrubric: Uassessmentrubric!): assessmentRubric
+  archive(assessmentrubric: Uassessmentrubric!): assessmentRubric
+  restore(assessmentrubric: Uassessmentrubric!): assessmentRubric
 }
