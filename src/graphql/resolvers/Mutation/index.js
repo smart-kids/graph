@@ -32,6 +32,8 @@ import lessonAttempts from "./lessonAttempt";
 import attemptEvents from "./attemptEvent";
 import books from "./library";
 import assessments from "./assessments";
+import assessmentTypes from "./assessment-types";
+import assessmentRubrics from "./assessment-rubrics";
 
 export default {
   admins,
@@ -68,6 +70,8 @@ export default {
   attemptEvents,
   books,
   assessments,
+  assessmentTypes,
+  assessmentRubrics,
   hello() {
     return "hello mutation";
   }

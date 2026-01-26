@@ -104,6 +104,10 @@ type Query {
   questionImages(id: String): [String]
   assessment(id: String): assessment
   assessments(where: JSON): [assessment]
+  assessmentType(id: String): assessmentType
+  assessmentTypes(where: JSON): [assessmentType]
+  assessmentRubric(id: String): assessmentRubric
+  assessmentRubrics(where: JSON): [assessmentRubric]
 }
 
 type Mutation {
@@ -143,6 +147,8 @@ type Mutation {
   attemptEvents: attemptEventMutations
   books: bookMutations
   assessments: assessmentMutations
+  assessmentTypes: assessmentTypeMutations
+  assessmentRubrics: assessmentRubricMutations
 }
 
 # user things
@@ -1614,6 +1620,7 @@ type assessment {
   student: student
   term: term
   subject: subject
+  assessmentType: assessmentType
   score: Float
   outOf: Float
   teacher: teacher
@@ -1625,6 +1632,7 @@ input Iassessment {
   student: String!
   term: String!
   subject: String!
+  assessmentType: String
   score: Float!
   outOf: Float
   teacher: String
@@ -1650,4 +1658,61 @@ type oldBookMutations {
   update(book: Ubook!): book
   archive(book: Ubook!): book
   restore(book: Ubook!): book
+}
+
+# assessmentType things
+type assessmentType {
+  id: String
+  name: String
+  percentage: Float
+  school: school
+}
+
+input IassessmentType {
+  name: String!
+  percentage: Float!
+  school: String!
+}
+
+input UassessmentType {
+  id: String!
+  name: String
+  percentage: Float
+}
+
+type assessmentTypeMutations {
+  create(assessmentType: IassessmentType!): assessmentType
+  update(assessmentType: UassessmentType!): assessmentType
+  archive(assessmentType: UassessmentType!): assessmentType
+  restore(assessmentType: UassessmentType!): assessmentType
+}
+
+# assessmentRubric things
+type assessmentRubric {
+  id: String
+  label: String
+  minScore: Float
+  maxScore: Float
+  school: school
+}
+
+input IassessmentRubric {
+  label: String!
+  minScore: Float!
+  maxScore: Float!
+  school: String!
+}
+
+input UassessmentRubric {
+  id: String!
+  label: String
+  minScore: Float
+  maxScore: Float
+}
+
+type assessmentRubricMutations {
+  create(assessmentRubric: IassessmentRubric!): assessmentRubric
+  update(assessmentRubric: UassessmentRubric!): assessmentRubric
+  archive(assessmentRubric: UassessmentRubric!): assessmentRubric
+  restore(assessmentRubric: UassessmentRubric!): assessmentRubric
 }

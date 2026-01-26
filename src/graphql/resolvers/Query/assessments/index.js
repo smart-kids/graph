@@ -34,6 +34,11 @@ const nested = {
         where: { id: root.subject }
       });
     },
+    async assessmentType(root, args, { db: { collections } }) {
+      return await collections["assessmentTypes"].findOne({
+        where: { id: root.assessmentType }
+      });
+    },
     async teacher(root, args, { db: { collections } }) {
       return await collections["teacher"].findOne({
         where: { id: root.teacher }

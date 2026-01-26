@@ -159,6 +159,16 @@ import {
   single as assessment,
   nested as Nassessment
 } from "./assessments";
+import {
+  list as assessmentTypes,
+  single as assessmentType,
+  nested as NassessmentType
+} from "./assessment-types";
+import {
+  list as assessmentRubrics,
+  single as assessmentRubric,
+  nested as NassessmentRubric
+} from "./assessment-rubrics";
 
 const nested = {};
 
@@ -192,7 +202,9 @@ Object.assign(
   NlessonAttempt,
   NattemptEvent,
   Nbooks,
-  Nassessment
+  Nassessment,
+  NassessmentType,
+  NassessmentRubric
 );
 
 const Query = {
@@ -296,6 +308,10 @@ const Query = {
 
   assessments,
   assessment,
+  assessmentType,
+  assessmentTypes,
+  assessmentRubric,
+  assessmentRubrics,
 
   hello: () => "hey"
 };

@@ -8,15 +8,9 @@ export default Waterline.Collection.extend({
 
   attributes: {
     id: { type: "string", required: true },
-    student: { type: "string", required: true },
-    term: { type: "string", required: true },
-    subject: { type: "string", required: true },
-    assessmentType: { type: "string" },
-    score: { type: "number", required: true },
-    outOf: { type: "number", defaultsTo: 100 },
-    teacher: { type: "string" },
+    name: { type: "string", required: true },
+    percentage: { type: "number", required: true },
     school: { type: "string", required: true },
-    remarks: { type: "string" },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });
