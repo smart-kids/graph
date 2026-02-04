@@ -98,8 +98,9 @@ export const createLoaders = (collections) => {
     parentById: createByIdLoader('parent'),
     classById: createByIdLoader('class'),
 
-    // Loader for one-to-many relation (Student -> Events)
+    // Loader for one-to-many relation (Student -> Events, Student -> Payments)
     eventsByStudentId: createRelatedLoader('event', 'student'),
+    paymentsByStudentId: createRelatedLoader('payment', 'student'),
   };
 };
 
@@ -174,8 +175,15 @@ const nested = {
         if (!classData) return { balance: 0, balanceFormated: "0.00" };
         
         const feeAmount = classData.feeAmount || 0;
-        const paidFees = root.paidFees || 0;
-        const balance = feeAmount - paidFees;
+        
+        // --- LIVE CALCULATION: Fetch and sum all payments for this student ---
+        const studentPayments = await loaders.paymentsByStudentId.load(root.id);
+        const totalPaid = studentPayments.reduce((sum, p) => {
+            const val = parseFloat(p.amount || p.ammount || 0);
+            return sum + val;
+        }, 0);
+
+        const balance = feeAmount - totalPaid;
         return {
             balance,
             balanceFormated: balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
