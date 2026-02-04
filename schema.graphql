@@ -1635,6 +1635,7 @@ type assessment {
   assessmentType: assessmentType
   score: Float
   outOf: Float
+  teachersComment: String
   teacher: teacher
   school: school
   remarks: String
@@ -1647,6 +1648,7 @@ input Iassessment {
   assessmentType: String
   score: Float!
   outOf: Float
+  teachersComment: String
   teacher: String
   school: String!
   remarks: String
@@ -1655,6 +1657,7 @@ input Iassessment {
 input Uassessment {
   id: String!
   score: Float
+  teachersComment: String
   remarks: String
 }
 
@@ -1705,6 +1708,8 @@ type assessmentRubric {
   label: String
   minScore: Float
   maxScore: Float
+  points: Float
+  teachersComment: String
   school: school
 }
 
@@ -1712,6 +1717,8 @@ input Iassessmentrubric {
   label: String!
   minScore: Float!
   maxScore: Float!
+  points: Float
+  teachersComment: String
   school: String!
 }
 
@@ -1720,6 +1727,8 @@ input Uassessmentrubric {
   label: String
   minScore: Float
   maxScore: Float
+  points: Float
+  teachersComment: String
 }
 
 type assessmentRubricMutations {

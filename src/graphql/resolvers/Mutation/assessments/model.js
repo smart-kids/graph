@@ -14,6 +14,7 @@ export default Waterline.Collection.extend({
     assessmentType: { type: "string" },
     score: { type: "number", required: true },
     outOf: { type: "number", defaultsTo: 100 },
+    teachersComment: { type: "string" },
     teacher: { type: "string" },
     school: { type: "string", required: true },
     remarks: { type: "string" },

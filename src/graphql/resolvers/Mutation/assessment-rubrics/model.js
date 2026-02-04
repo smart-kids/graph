@@ -11,6 +11,8 @@ export default Waterline.Collection.extend({
     label: { type: "string", required: true },
     minScore: { type: "number", required: true },
     maxScore: { type: "number", required: true },
+    points: { type: "number", defaultsTo: 0 },
+    teachersComment: { type: "string" },
     school: { type: "string", required: true },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
