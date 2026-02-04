@@ -16,7 +16,8 @@ const init = async (data, { auth, db: { collections } }) => {
   const { id: userId } = auth;
   // Get schoolId from payment data first, then fall back to auth, then to "general"
   const schoolId = data.payment.schoolId || auth.schoolId || "general";
-  const { ammount: amount, phone } = data.payment;
+  const { amount, ammount, phone } = data.payment;
+  const finalAmount = amount || ammount;
 
   const mpesaService = createMpesaService({
     collections: collections,
@@ -24,7 +25,7 @@ const init = async (data, { auth, db: { collections } }) => {
   });
   // Pass all required parameters including schoolId
   const result = await mpesaService.initiateSTKPush({
-    amount,
+    amount: finalAmount,
     phone,
     schoolId,
     userId,
@@ -49,6 +50,7 @@ const init = async (data, { auth, db: { collections } }) => {
     MerchantRequestID: paymentRecord.merchantRequestID || result.MerchantRequestID,
     status: paymentRecord.status,
     amount: paymentRecord.amount,
+    ammount: paymentRecord.amount,
     phone: paymentRecord.phone,
     // Add any other fields your frontend expects
   };
@@ -61,6 +63,9 @@ const init = async (data, { auth, db: { collections } }) => {
 const create = async (data, { db: { collections } }) => {
   const id = new ObjectId().toHexString();
   const entry = Object.assign(data[name], { id, isDeleted: false, time: new Date() });
+  if (entry.ammount && !entry.amount) {
+    entry.amount = entry.ammount;
+  }
 
   try {
     await collections[name].create(entry);
@@ -126,6 +131,7 @@ function formatPaymentResponse(record) {
     message: record.errorMessage || record.status,
     id: record.id,
     amount: record.amount,
+    ammount: record.amount,
     phone: record.phone,
     status: record.status,
     merchantRequestID: record.merchantRequestID,

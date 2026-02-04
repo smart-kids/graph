@@ -860,7 +860,7 @@ async function seedInitialDataForSchool(orm, schoolId, schoolDetails) {
         await collections.payment.create({
             id: new ObjectId().toHexString(),
             school: schoolId,
-            ammount: "5000", // Represent as string if your model expects it
+            amount: "5000", // Fixed typo, model is amount
             type: "MPESA",
             phone: schoolPhone,
             ref: `PAY${Math.floor(Math.random() * 1000000)}`,

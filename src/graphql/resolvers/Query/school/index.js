@@ -168,6 +168,13 @@ const nested = {
     }
   },
   // --- ADD THIS NEW TYPE RESOLVER (Sibling to school) ---
+  payment: {
+    ammount: (root) => root.amount || root.ammount
+  },
+  charge: {
+    amount: (root) => root.amount || root.ammount,
+    ammount: (root) => root.amount || root.ammount
+  },
   smsEvent: {
     logs: async (root, args, { loaders }) => {
       // This solves N+1. If you request 10 events, this runs 1 batch query for all their logs.

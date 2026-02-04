@@ -170,6 +170,7 @@ type payment {
   
   # --- Financials ---
   amount: String
+  ammount: String
   phone: String
   description: String
   accountReference: String
@@ -214,7 +215,8 @@ scalar MPESA
 
 input mpesaInput {
   phone: String!
-  ammount: String!
+  amount: String!
+  ammount: String
   school: String!
 }
 
@@ -268,6 +270,7 @@ input mpesaStartTxInput {
   id: String
   phone: String
   schoolId: String
+  amount: String
   ammount: String
 }
 
@@ -289,6 +292,7 @@ type mpesaStartTxResult {
   id: String
   school: String
   amount: String
+  ammount: String
   phone: String
   status: mpesaStatus
   mpesaReceiptNumber: String
@@ -302,7 +306,9 @@ type mpesaStartTxResult {
 input Ipayment {
   school: String
   phone: String
+  amount: String
   ammount: String
+  status: String
   type: String
   ref: String
   time: String
@@ -316,7 +322,9 @@ input Upayment {
   id: String!
   phone: String
   school: String
+  amount: String
   ammount: String
+  status: String
   type: String
   ref: String
   time: String
@@ -338,6 +346,7 @@ type paymentMutations {
 type charge {
   id: String
   school: String
+  amount: String
   ammount: String
   reason: String
   time: String
@@ -345,6 +354,7 @@ type charge {
 
 input Icharge {
   school: String
+  amount: String
   ammount: String
   reason: String
   time: String
@@ -353,6 +363,7 @@ input Icharge {
 input Ucharge {
   id: String!
   school: String
+  amount: String
   ammount: String
   reason: String
   time: String
