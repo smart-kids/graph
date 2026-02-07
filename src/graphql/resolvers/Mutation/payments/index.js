@@ -12,7 +12,7 @@ const { name } = require("./about.js"); // Assuming 'name' resolves to 'payment'
  * Initiates an M-Pesa STK Push payment request.
  */
 const init = async (data, { auth, db: { collections }, open }) => {
- const transactionId = new ObjectId().toHexString();
+  const transactionId = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
  
  // Handle both authenticated and open requests
  let userId, schoolId;
