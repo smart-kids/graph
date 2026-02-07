@@ -28,6 +28,8 @@ import { createLoaders as questionsLoaders } from "./graphql/resolvers/Query/que
 import { createLoaders as optionsLoaders } from "./graphql/resolvers/Query/options"
 import { createLoaders as lessonAttemptsLoaders } from "./graphql/resolvers/Query/lesson-attempt"
 import { createLoaders as attemptEventsLoaders } from "./graphql/resolvers/Query/attempt-event"
+import { paymentsLoaders } from "./graphql/resolvers/Query/payments"
+import { booksLoaders } from "./graphql/resolvers/Query/library"
 
 const { BUGSNAG_API_KEY } = process.env
 
@@ -133,6 +135,8 @@ export default (storage) => {
       const optionLoaderSet = optionsLoaders(db.collections);
       const lessonAttemptsLoaderSet = lessonAttemptsLoaders(db.collections);
       const attemptEventsLoaderSet = attemptEventsLoaders(db.collections);
+      const paymentLoaderSet = paymentsLoaders(db.collections);
+      const booksLoaderSet = booksLoaders(db.collections);
 
       const allLoaders = {
         ...schoolLoaderSet,
@@ -145,6 +149,8 @@ export default (storage) => {
         ...optionLoaderSet,
         ...lessonAttemptsLoaderSet,
         ...attemptEventsLoaderSet,
+        ...paymentLoaderSet,
+        ...booksLoaderSet,
       };
 
       return graphqlHTTP({

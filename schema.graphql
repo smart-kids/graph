@@ -873,6 +873,7 @@ type school {
   assessmentTypes: [assessmentType]
   assessmentRubrics: [assessmentRubric]
   assessments(class: String, term: String, limit: Int, offset: Int): [assessment]
+  books(limit: Int, offset: Int): [book]
 }
 
 input ISchool {

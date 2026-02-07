@@ -1,4 +1,5 @@
 const { name } = require("../../Mutation/library/about.js");
+const DataLoader = require('dataloader');
 
 const list = async (args, { db: { collections } }) => {
   const where = Object.assign({ isDeleted: false }, args.where || {});
@@ -34,4 +35,31 @@ const nested = {
   }
 };
 
-export { list, single, nested };
+const booksLoaders = (collections) => {
+  const createByIdLoader = (collectionName) => {
+    return new DataLoader(async (keys) => {
+      console.log(`\n[DATALOADER BATCH] Firing batch request for collection '${collectionName}' by ID with ${keys.length} keys:`, keys);
+      const items = await collections[collectionName].find({
+        where: { id: { in: keys } }
+      });
+      return keys.map(key => items.find(item => item.id === key) || null);
+    });
+  };
+
+  const createRelatedLoader = (collectionName, foreignKey) => {
+    return new DataLoader(async (keys) => {
+      console.log(`\n[DATALOADER BATCH] Firing batch request for collection '${collectionName}' with ${keys.length} keys on foreign key '${foreignKey}':`, keys);
+      const items = await collections[collectionName].find({
+        where: { [foreignKey]: { in: keys } }
+      });
+      return keys.map(key => items.filter(item => item[foreignKey] === key));
+    });
+  };
+
+  return {
+    bookById: createByIdLoader(name),
+    booksBySchoolId: createRelatedLoader(name, 'school'),
+  };
+};
+
+export { list, single, nested, booksLoaders };

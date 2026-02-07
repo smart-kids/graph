@@ -11,13 +11,30 @@ const { name } = require("./about.js"); // Assuming 'name' resolves to 'payment'
 /**
  * Initiates an M-Pesa STK Push payment request.
  */
-const init = async (data, { auth, db: { collections } }) => {
+const init = async (data, { auth, db: { collections }, open }) => {
  const transactionId = new ObjectId().toHexString();
-  const { id: userId } = auth;
-  // Get schoolId from payment data first, then fall back to auth, then to "general"
-  const schoolId = data.payment.schoolId || auth.schoolId || "general";
-  const { amount, ammount, phone } = data.payment;
-  const finalAmount = amount || ammount;
+ 
+ // Handle both authenticated and open requests
+ let userId, schoolId;
+ 
+ if (auth && auth.id) {
+   // Authenticated request
+   userId = auth.id;
+   schoolId = (data.payment && data.payment.schoolId) || (auth && auth.schoolId) || "general";
+ } else {
+   // Open request - no authentication
+   userId = null; // or (data.payment && data.payment.userId) if provided
+   schoolId = (data.payment && data.payment.schoolId) || "general";
+ }
+ 
+ const payment = data.payment || {};
+ const { amount, ammount, phone } = payment;
+ const finalAmount = amount || ammount;
+
+ // Validate required fields
+ if (!finalAmount || !phone) {
+   throw new UserError('Amount and phone are required for payment initiation');
+ }
 
   const mpesaService = createMpesaService({
     collections: collections,

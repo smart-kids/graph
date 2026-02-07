@@ -1,4 +1,5 @@
 const { name } = require("./about.js");
+const DataLoader = require('dataloader');
 
 const list = async (root, args, { db: { collections } }) => {
   // 1. Prepare default query
@@ -45,4 +46,32 @@ const listDeleted = async (root, args, { db: { collections } }) => {
   return entries;
 };
 
-export { list, listDeleted };
+const paymentsLoaders = (collections) => {
+  const createByIdLoader = (collectionName) => {
+    return new DataLoader(async (keys) => {
+      console.log(`\n[DATALOADER BATCH] Firing batch request for collection '${collectionName}' by ID with ${keys.length} keys:`, keys);
+      const items = await collections[collectionName].find({
+        where: { id: { in: keys } }
+      });
+      return keys.map(key => items.find(item => item.id === key) || null);
+    });
+  };
+
+  const createRelatedLoader = (collectionName, foreignKey) => {
+    return new DataLoader(async (keys) => {
+      console.log(`\n[DATALOADER BATCH] Firing batch request for collection '${collectionName}' with ${keys.length} keys on foreign key '${foreignKey}':`, keys);
+      const items = await collections[collectionName].find({
+        where: { [foreignKey]: { in: keys } }
+      });
+      return keys.map(key => items.filter(item => item[foreignKey] === key));
+    });
+  };
+
+  return {
+    paymentById: createByIdLoader(name),
+    paymentsBySchoolId: createRelatedLoader(name, 'school'),
+    paymentsByStudentId: createRelatedLoader(name, 'student'),
+  };
+};
+
+export { list, listDeleted, paymentsLoaders };

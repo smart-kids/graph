@@ -88,6 +88,7 @@ export const createLoaders = (collections) => {
     busesBySchoolId: createRelatedLoader('bus', 'school'),
     chargesBySchoolId: createRelatedLoader('charge', 'school'),
     paymentsBySchoolId: createRelatedLoader('payment', 'school'),
+    booksBySchoolId: createRelatedLoader('book', 'school'),
     teachersBySchoolId: createRelatedLoader('teacher', 'school'),
     classesBySchoolId: createRelatedLoader('class', 'school'),
     complaintsBySchoolId: createRelatedLoader('complaint', 'school'),
@@ -359,6 +360,12 @@ const nested = {
       console.log(`[RESOLVER CALL] Queuing 'payments' lookup for School ID: ${root.id}`);
       const { limit = 25, offset = 0 } = args;
       const allItems = await loaders.paymentsBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
+    },
+    books: async (root, args, { loaders }) => {
+      console.log(`[RESOLVER CALL] Queuing 'books' lookup for School ID: ${root.id}`);
+      const { limit = 25, offset = 0 } = args;
+      const allItems = await loaders.booksBySchoolId.load(root.id);
       return allItems.slice(offset, offset + limit);
     },
     teachers: async (root, args, { loaders }) => {
