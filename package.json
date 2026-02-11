@@ -27,7 +27,7 @@
     "@google/generative-ai": "^0.24.1",
     "@hapi/joi": "^16.1.7",
     "argon2": "^0.27.1",
-    "axios": "^1.10.0",
+    "axios": "^1.13.5",
     "babel-polyfill": "^6.26.0",
     "babel-preset-latest-node": "^5.4.0",
     "body-parser": "^1.19.0",
