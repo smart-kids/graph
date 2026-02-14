@@ -1109,12 +1109,14 @@ type grade {
   school: school
   subjects(limit: Int, offset: Int): [subject]
   subjectsOrder: [String]
+  isVisible: Boolean
 }
 
 input Igrade {
   name: String!
   school: String!
   subjectsOrder: [String]
+  isVisible: Boolean
 }
 
 input Ugrade {
@@ -1122,6 +1124,7 @@ input Ugrade {
   name: String
   school: String
   subjectsOrder: [String]
+  isVisible: Boolean
 }
 
 type gradeMutations {
@@ -1180,6 +1183,7 @@ type topic {
   icon: String
   subtopics(limit: Int, offset: Int): [subtopic]
   subtopicOrder: [String]
+  isVisible: Boolean
 }
 
 input Itopic {
@@ -1194,6 +1198,7 @@ input Utopic {
   name: String
   subject: String
   icon: String
+  isVisible: Boolean
   subtopicOrder: [String]
 }
 

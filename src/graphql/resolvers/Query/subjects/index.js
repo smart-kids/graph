@@ -160,12 +160,19 @@ const nested = {
     },
 
     // PAGINATED to fetch related topics efficiently.
-    topics: async (root, { limit = 25, offset = 0 }, { loaders }) => {
+    topics: async (root, { limit = 25, offset = 0 }, { loaders, auth }) => {
       console.log(`[RESOLVER CALL] Queuing 'topics' lookup for Subject ID: ${root.id}`);
       // The loader will batch fetch all topics for all subjects in the request.
       const allItems = await loaders.topicsBySubjectId.load(root.id);
+      
+      // Filter out invisible topics if user is NOT an admin
+      const isAdmin = auth.userType === 'sAdmin' || auth.userType === 'admin';
+      const visibleItems = isAdmin 
+        ? allItems 
+        : allItems.filter(t => t.isVisible !== false);
+
       // Pagination is applied in-memory after the batched fetch.
-      return allItems.slice(offset, offset + limit);
+      return visibleItems.slice(offset, offset + limit);
     },
 
 

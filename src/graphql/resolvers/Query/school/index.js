@@ -422,11 +422,18 @@ const nested = {
       const allItems = await loaders.schedulesBySchoolId.load(root.id);
       return allItems.slice(offset, offset + limit);
     },
-    grades: async (root, args, { loaders }) => {
+    grades: async (root, args, { loaders, auth }) => {
       console.log(`[RESOLVER CALL] Queuing 'grades' lookup for School ID: ${root.id}`);
       const { limit = 25, offset = 0 } = args;
       const allItems = await loaders.gradesBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
+      
+      // Filter out invisible grades if user is NOT an admin
+      const isAdmin = auth.userType === 'sAdmin' || auth.userType === 'admin';
+      const visibleItems = isAdmin 
+        ? allItems 
+        : allItems.filter(g => g.isVisible !== false);
+
+      return visibleItems.slice(offset, offset + limit);
     },
     terms: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'terms' lookup for School ID: ${root.id}`);
