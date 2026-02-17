@@ -2,7 +2,7 @@ const axios = require('axios');
 const moment = require('moment');
 const sendSms = require('../../../../utils/sms'); // Import SMS utility
 
-const createMpesaService = ({ collections, logger = console }) => {
+const createMpesaService = ({ collections, auth, logger = console }) => {
     // M-Pesa configuration
     const mpesaConfig = {
         baseURL: process.env.MPESA_BASE_URL || 'https://api.safaricom.co.ke',
@@ -66,13 +66,18 @@ const createMpesaService = ({ collections, logger = console }) => {
         try {
             const { amount, phone, transactionId, userId, schoolId: school, description, accountReference } = initData;
             
+            // Validate required fields
+            if (!transactionId) {
+                throw new Error('Transaction ID is required');
+            }
+            
             // Format phone number
             const formattedPhone = phone.replace(/^0/, '254').replace(/\+/, '');
 
             // 1. Create the PENDING payment record
             const paymentData = {
                 id: transactionId,
-                user: userId,
+                user: userId || null, // Ensure null for guest users
                 school,
                 phone: formattedPhone,
                 amount: Number(amount),
@@ -81,6 +86,7 @@ const createMpesaService = ({ collections, logger = console }) => {
                 accountReference: accountReference || mpesaConfig.accountReference,
                 metadata: {
                     initiatedAt: new Date().toISOString(),
+                    isGuestUser: !userId, // Track if this is a guest user
                     ...(initData.metadata || {})
                 }
             };
@@ -305,8 +311,8 @@ const createMpesaService = ({ collections, logger = console }) => {
             // --- 7. NEW: Post-Payment Actions (Notifications & User Update) ---
             if (updateData.status === 'COMPLETED') {
                 try {
-                    // A. Update User Subscription
-                    if (payment.user) {
+                    // A. Update User Subscription (only for authenticated users)
+                    if (payment.user && !payment.metadata?.isGuestUser) {
                          const expiryDate = moment().add(1, 'month').toISOString(); // Default to 1 month for now, logic can be refined
                          // Try to find the user in the main collection or specific collections if needed
                          // For simplicity, we assume we can update via 'users' identity if Waterline is set up that way,
@@ -327,6 +333,8 @@ const createMpesaService = ({ collections, logger = console }) => {
                          } else {
                              logger.warn(`[MpesaService] UserCollection not found. Cannot update user subscription.`);
                          }
+                    } else {
+                        logger.info(`[MpesaService] Guest user payment completed. No subscription update needed.`);
                     }
 
                     // B. Send SMS to User

@@ -108,6 +108,10 @@ type Query {
   assessmentTypes(where: JSON): [assessmentType]
   assessmentRubric(id: String): assessmentRubric
   assessmentRubrics(where: JSON): [assessmentRubric]
+
+  # Subscription queries
+  subscriptionStatus: SubscriptionStatus
+  paymentHistory: PaymentHistory
 }
 
 type Mutation {
@@ -1742,4 +1746,31 @@ type assessmentRubricMutations {
   update(assessmentrubric: Uassessmentrubric!): assessmentRubric
   archive(assessmentrubric: Uassessmentrubric!): assessmentRubric
   restore(assessmentrubric: Uassessmentrubric!): assessmentRubric
+}
+
+# Subscription types
+type SubscriptionStatus {
+  isActive: Boolean!
+  plan: String
+  expiryDate: String
+  amount: String
+  message: String!
+}
+
+type PaymentHistory {
+  payments: [PaymentRecord!]!
+  message: String!
+}
+
+type PaymentRecord {
+  id: String!
+  amount: String!
+  status: String!
+  phone: String!
+  description: String
+  merchantRequestID: String
+  checkoutRequestID: String
+  mpesaReceiptNumber: String
+  createdAt: String
+  processedAt: String
 }

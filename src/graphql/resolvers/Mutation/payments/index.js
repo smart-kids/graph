@@ -38,16 +38,21 @@ const init = async (data, { auth, db: { collections }, open }) => {
 
   const mpesaService = createMpesaService({
     collections: collections,
+    auth,
     logger: console,
   });
   // Pass all required parameters including schoolId
-  const result = await mpesaService.initiateSTKPush({
+  const initData = {
     amount: finalAmount,
     phone,
     schoolId,
     userId,
     transactionId,
-  });
+    description: `Payment for school ${schoolId}`,
+    accountReference: `ShulePlus-${schoolId}`
+  };
+  
+  const result = await mpesaService.initiateSTKPush(initData);
 
   if (!result.success) {
     throw new UserError(result.message || 'Payment initiation failed');
