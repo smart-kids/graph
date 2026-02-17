@@ -166,7 +166,7 @@ const nested = {
       const allItems = await loaders.topicsBySubjectId.load(root.id);
       
       // Filter out invisible topics if user is NOT an admin
-      const isAdmin = auth.userType === 'sAdmin' || auth.userType === 'admin';
+      const isAdmin = auth && (auth.userType === 'sAdmin' || auth.userType === 'admin');
       const visibleItems = isAdmin 
         ? allItems 
         : allItems.filter(t => t.isvisible !== false);
