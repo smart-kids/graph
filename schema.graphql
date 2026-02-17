@@ -1602,8 +1602,8 @@ type book {
   title: String
   author: String
   category: String
-  coverUrl: String
-  pdfUrl: String
+  coverurl: String
+  pdfurl: String
   description: String
   school: school
   isDeleted: Boolean
@@ -1613,8 +1613,8 @@ input Ibook {
   title: String!
   author: String!
   category: String!
-  coverUrl: String
-  pdfUrl: String!
+  coverurl: String
+  pdfurl: String!
   description: String
   school: String!
 }
@@ -1624,8 +1624,8 @@ input Ubook {
   title: String
   author: String
   category: String
-  coverUrl: String
-  pdfUrl: String
+  coverurl: String
+  pdfurl: String
   description: String
   school: String
 }
