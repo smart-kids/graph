@@ -15,7 +15,7 @@ export default Waterline.Collection.extend({
     pdfurl: { type: "string", required: true },
     description: { type: "string" },
     school: { type: "string", required: true },
-    isDeleted: { type: "boolean", defaultsTo: false },
+    isdeleted: { type: "boolean", defaultsTo: false },
     
     createdAt: { 
       type: 'ref',

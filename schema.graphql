@@ -1606,7 +1606,7 @@ type book {
   pdfurl: String
   description: String
   school: school
-  isDeleted: Boolean
+  isdeleted: Boolean
 }
 
 input Ibook {
