@@ -64,6 +64,15 @@ const createMpesaService = ({ collections, auth, logger = console }) => {
     // Initiate STK Push
     const initiateSTKPush = async (initData) => {
         try {
+            console.log('[MpesaService] Initiate STK Push called with:', {
+                hasTransactionId: !!initData.transactionId,
+                hasUserId: !!initData.userId,
+                userId: initData.userId,
+                schoolId: initData.schoolId,
+                phone: initData.phone,
+                amount: initData.amount
+            });
+            
             const { amount, phone, transactionId, userId, schoolId: school, description, accountReference } = initData;
             
             // Validate required fields
@@ -77,7 +86,6 @@ const createMpesaService = ({ collections, auth, logger = console }) => {
             // 1. Create the PENDING payment record
             const paymentData = {
                 id: transactionId,
-                user: userId || null, // Ensure null for guest users
                 school,
                 phone: formattedPhone,
                 amount: Number(amount),
@@ -90,6 +98,19 @@ const createMpesaService = ({ collections, auth, logger = console }) => {
                     ...(initData.metadata || {})
                 }
             };
+
+            // Only add user field if it exists (for authenticated users)
+            if (userId) {
+                paymentData.user = userId;
+                console.log('[MpesaService] Adding user to payment data:', userId);
+            } else {
+                console.log('[MpesaService] Guest user payment - no user field added');
+            }
+
+            console.log('[MpesaService] Creating payment record with data:', {
+                ...paymentData,
+                user: paymentData.user || 'OMITTED'
+            });
 
             // Create payment record
             await PaymentCollection.create(paymentData);

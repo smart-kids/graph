@@ -20,6 +20,7 @@ module.exports = Waterline.Collection.extend({
     },
     user: {
       type: "string",
+      allowNull: true,
     },
     amount: {
       type: "string",

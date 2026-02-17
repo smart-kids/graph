@@ -17,14 +17,19 @@ const init = async (data, { auth, db: { collections }, open }) => {
  // Handle both authenticated and open requests
  let userId, schoolId;
  
+ // Debug logging to check auth context
+ console.log('[PaymentInit] Auth context:', { auth: !!auth, authId: auth?.id });
+ 
  if (auth && auth.id) {
    // Authenticated request
    userId = auth.id;
    schoolId = (data.payment && data.payment.schoolId) || (auth && auth.schoolId) || "general";
+   console.log('[PaymentInit] Authenticated user:', { userId, schoolId });
  } else {
    // Open request - no authentication
-   userId = null; // or (data.payment && data.payment.userId) if provided
+   userId = null;
    schoolId = (data.payment && data.payment.schoolId) || "general";
+   console.log('[PaymentInit] Guest user payment:', { schoolId });
  }
  
  const payment = data.payment || {};
