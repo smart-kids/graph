@@ -11,7 +11,7 @@ module.exports = Waterline.Collection.extend({
     school: { type: "string", required: true },
     name: { type: "string", required: true },
     subjectsOrder: { type: "json", defaultsTo: [] },
-    isVisible: { type: "boolean", defaultsTo: true },
+    isvisible: { type: "boolean", defaultsTo: true },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });

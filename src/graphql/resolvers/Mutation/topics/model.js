@@ -12,7 +12,7 @@ export default Waterline.Collection.extend({
     subject: { type: "string", required: true },
     icon: { type: "string", required: false, allowNull: true },
     subtopicsOrder: { type: "json", defaultsTo: [] },
-    isVisible: { type: "boolean", defaultsTo: true },
+    isvisible: { type: "boolean", defaultsTo: true },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });

@@ -431,7 +431,7 @@ const nested = {
       const isAdmin = auth.userType === 'sAdmin' || auth.userType === 'admin';
       const visibleItems = isAdmin 
         ? allItems 
-        : allItems.filter(g => g.isVisible !== false);
+        : allItems.filter(g => g.isvisible !== false);
 
       return visibleItems.slice(offset, offset + limit);
     },

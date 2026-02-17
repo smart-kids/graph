@@ -169,7 +169,7 @@ const nested = {
       const isAdmin = auth.userType === 'sAdmin' || auth.userType === 'admin';
       const visibleItems = isAdmin 
         ? allItems 
-        : allItems.filter(t => t.isVisible !== false);
+        : allItems.filter(t => t.isvisible !== false);
 
       // Pagination is applied in-memory after the batched fetch.
       return visibleItems.slice(offset, offset + limit);
