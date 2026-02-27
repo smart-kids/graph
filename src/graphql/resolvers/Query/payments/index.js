@@ -22,7 +22,7 @@ const list = async (root, args, { db: { collections } }) => {
   // 4. Fetch Data
   // CRITICAL: Sort by 'id' DESC (IDs are ObjectIds, which are time-ordered)
   // NOTE: 'createdAt' is NOT a declared model attribute, so Waterline rejects sorting by it.
-  const entries = await collections[name].find(query)
+  const entries = await collections.payment.find(query)
     .limit(limit)
     .skip(skip)
     .sort('id DESC');
@@ -42,7 +42,7 @@ const listDeleted = async (root, args, { db: { collections } }) => {
   }
 
   // NOTE: 'updatedAt' is not a declared attribute; sorting by 'id' as fallback.
-  const entries = await collections[name].find(query)
+  const entries = await collections.payment.find(query)
     .sort('id DESC');
 
   return entries;
@@ -70,9 +70,9 @@ const paymentsLoaders = (collections) => {
   };
 
   return {
-    paymentById: createByIdLoader(name),
-    paymentsBySchoolId: createRelatedLoader(name, 'school'),
-    paymentsByStudentId: createRelatedLoader(name, 'student'),
+    paymentById: createByIdLoader('payment'),
+    paymentsBySchoolId: createRelatedLoader('payment', 'school'),
+    paymentsByStudentId: createRelatedLoader('payment', 'student'),
   };
 };
 
