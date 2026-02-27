@@ -390,7 +390,7 @@ router.post(
                         isDeleted: { '!=': true }
                     });
                     
-                    if (linkedStudents.some(s => s.registration === password)) {
+                    if (linkedStudents.some(s => s.registration.includes(password))) {
                         console.log(`Student Reg No match for parent: ${parent.name} (${parent.id})`);
                         isAuthenticated = true;
                         authenticatedUser = parent;

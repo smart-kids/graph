@@ -22,6 +22,10 @@ module.exports = Waterline.Collection.extend({
       type: "string",
       allowNull: true,
     },
+    student: {
+      type: "string",
+      allowNull: true,
+    },
     amount: {
       type: "string",
       defaultsTo: "-",
@@ -32,6 +36,14 @@ module.exports = Waterline.Collection.extend({
       required: true
     },
     description: {
+      type: "string",
+      allowNull: true
+    },
+    type: {
+      type: "string",
+      allowNull: true
+    },
+    paymentType: {
       type: "string",
       allowNull: true
     },

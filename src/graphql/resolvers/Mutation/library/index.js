@@ -4,7 +4,7 @@ const { UserError } = require("graphql-errors");
 
 const create = async (data, { auth, db: { collections } }) => {
   const id = new ObjectId().toHexString();
-  const entry = Object.assign(data[name], { id, isdeleted: false });
+  const entry = Object.assign(data[name], { id, isDeleted: false });
 
   try {
     await collections[name].create(entry);
@@ -34,7 +34,7 @@ const update = async (data, { db: { collections } }) => {
 const archive = async (data, { db: { collections } }) => {
   const { id } = data[name];
   try {
-    await collections[name].update({ id }).set({ isdeleted: true });
+    await collections[name].update({ id }).set({ isDeleted: true });
     return { id };
   } catch (err) {
     throw new UserError("Failed to archive book.");
@@ -44,7 +44,7 @@ const archive = async (data, { db: { collections } }) => {
 const restore = async (data, { db: { collections } }) => {
   const { id } = data[name];
   try {
-    await collections[name].update({ id }).set({ isdeleted: false });
+    await collections[name].update({ id }).set({ isDeleted: false });
     return { id };
   } catch (err) {
     throw new UserError("Failed to restore book.");

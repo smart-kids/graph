@@ -33,7 +33,7 @@ const init = async (data, { auth, db: { collections }, open }) => {
  }
  
  const payment = data.payment || {};
- const { amount, ammount, phone } = payment;
+ const { amount, ammount, phone, metadata } = payment;
  const finalAmount = amount || ammount;
 
  // Validate required fields
@@ -53,6 +53,7 @@ const init = async (data, { auth, db: { collections }, open }) => {
     schoolId,
     userId,
     transactionId,
+    metadata,
     description: `Payment for school ${schoolId}`,
     accountReference: `ShulePlus-${schoolId}`
   };

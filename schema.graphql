@@ -111,6 +111,7 @@ type Query {
 
   # Subscription queries
   subscriptionStatus: SubscriptionStatus
+  checkSubscription(phone: String!): SubscriptionStatus
   paymentHistory: PaymentHistory
 }
 
@@ -276,6 +277,7 @@ input mpesaStartTxInput {
   schoolId: String
   amount: String
   ammount: String
+  metadata: JSON
 }
 
 type mpesaStartTxVerification {
@@ -320,6 +322,7 @@ input Ipayment {
   paymentType: String
   purpose: String
   term: String
+  metadata: JSON
 }
 
 input Upayment {
@@ -336,6 +339,7 @@ input Upayment {
   paymentType: String
   purpose: String
   term: String
+  metadata: JSON
 }
 
 type paymentMutations {
@@ -1602,19 +1606,19 @@ type book {
   title: String
   author: String
   category: String
-  coverurl: String
-  pdfurl: String
+  coverUrl: String
+  pdfUrl: String
   description: String
   school: school
-  isdeleted: Boolean
+  isDeleted: Boolean
 }
 
 input Ibook {
   title: String!
   author: String!
   category: String!
-  coverurl: String
-  pdfurl: String!
+  coverUrl: String
+  pdfUrl: String!
   description: String
   school: String!
 }
@@ -1624,8 +1628,8 @@ input Ubook {
   title: String
   author: String
   category: String
-  coverurl: String
-  pdfurl: String
+  coverUrl: String
+  pdfUrl: String
   description: String
   school: String
 }
@@ -1774,4 +1778,7 @@ type PaymentRecord {
   mpesaReceiptNumber: String
   createdAt: String
   processedAt: String
+  type: String
+  paymentType: String
+  student: student
 }

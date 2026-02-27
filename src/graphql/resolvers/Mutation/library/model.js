@@ -11,11 +11,11 @@ export default Waterline.Collection.extend({
     title: { type: "string", required: true },
     author: { type: "string", required: true },
     category: { type: "string", required: true },
-    coverurl: { type: "string" },
-    pdfurl: { type: "string", required: true },
+    coverUrl: { type: "string", columnName: "coverurl" },
+    pdfUrl: { type: "string", required: true, columnName: "pdfurl" },
     description: { type: "string" },
     school: { type: "string", required: true },
-    isdeleted: { type: "boolean", defaultsTo: false },
+    isDeleted: { type: "boolean", defaultsTo: false, columnName: "isdeleted" },
     
     createdAt: { 
       type: 'ref',

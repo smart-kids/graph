@@ -1,5 +1,5 @@
-const { name } = require("./about.js");
 const DataLoader = require('dataloader');
+import { nested } from "./nested.js";
 
 const list = async (root, args, { db: { collections } }) => {
   // 1. Prepare default query
@@ -20,11 +20,12 @@ const list = async (root, args, { db: { collections } }) => {
   const skip = args.offset || 0;
 
   // 4. Fetch Data
-  // CRITICAL: We .sort('createdAt DESC') so your Timeline UI shows the latest activity first
+  // CRITICAL: Sort by 'id' DESC (IDs are ObjectIds, which are time-ordered)
+  // NOTE: 'createdAt' is NOT a declared model attribute, so Waterline rejects sorting by it.
   const entries = await collections[name].find(query)
     .limit(limit)
     .skip(skip)
-    .sort('createdAt DESC');
+    .sort('id DESC');
 
   return entries;
 };
@@ -40,8 +41,9 @@ const listDeleted = async (root, args, { db: { collections } }) => {
     query.where.school = root.id;
   }
 
+  // NOTE: 'updatedAt' is not a declared attribute; sorting by 'id' as fallback.
   const entries = await collections[name].find(query)
-    .sort('updatedAt DESC');
+    .sort('id DESC');
 
   return entries;
 };
@@ -74,4 +76,4 @@ const paymentsLoaders = (collections) => {
   };
 };
 
-export { list, listDeleted, paymentsLoaders };
+export { list, listDeleted, paymentsLoaders, nested };

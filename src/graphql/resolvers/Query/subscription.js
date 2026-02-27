@@ -52,6 +52,45 @@ const getSubscriptionStatus = async (data, { auth, db: { collections } }) => {
 };
 
 /**
+ * Check subscription status by phone number
+ */
+const checkSubscription = async (root, { phone }, { db: { collections } }) => {
+  if (!phone) {
+    throw new UserError('Phone number is required');
+  }
+
+  try {
+    const UserCollection = collections.user || collections.users;
+    const user = await UserCollection.findOne({ phone });
+    
+    if (!user) {
+      return {
+        isActive: false,
+        plan: null,
+        expiryDate: null,
+        message: "No user found with this phone number."
+      };
+    }
+
+    const isActive = user.subscriptionStatus === 'ACTIVE';
+    const isExpired = user.subscriptionExpiry && new Date(user.subscriptionExpiry) < new Date();
+
+    return {
+      isActive: isActive && !isExpired,
+      plan: user.subscriptionPlan || null,
+      expiryDate: user.subscriptionExpiry || null,
+      amount: user.subscriptionAmount || null,
+      message: isActive && !isExpired 
+        ? `Active ${user.subscriptionPlan || 'subscription'} until ${new Date(user.subscriptionExpiry).toLocaleDateString()}`
+        : "No active subscription found."
+    };
+  } catch (error) {
+    console.error('[checkSubscription] Error:', error);
+    throw new UserError('Failed to check subscription status');
+  }
+};
+
+/**
  * Get payment history for the current user
  */
 const getPaymentHistory = async (data, { auth, db: { collections } }) => {
@@ -110,6 +149,7 @@ const getPaymentHistory = async (data, { auth, db: { collections } }) => {
 export default () => {
   return {
     getSubscriptionStatus,
-    getPaymentHistory
+    getPaymentHistory,
+    checkSubscription
   };
 };

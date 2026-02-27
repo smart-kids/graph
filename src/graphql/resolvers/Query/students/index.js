@@ -84,9 +84,23 @@ export const createLoaders = (collections) => {
   const createRelatedLoader = (collectionName, foreignKey) => {
     return new DataLoader(async (keys) => {
       console.log(`\n[DATALOADER BATCH] Firing batch request for '${collectionName}' by foreign key '${foreignKey}' with ${keys.length} keys.`);
-      const items = await collections[collectionName].find({
-        where: { [foreignKey]: { in: keys }, isDeleted: false },
-      });
+      
+      // Handle payment collection specially due to schema restrictions
+      let items;
+      if (collectionName === 'payment') {
+        // For payments, use a different approach since schema: true might be enabled
+        items = [];
+        for (const key of keys) {
+          const paymentItems = await collections[collectionName].find({ [foreignKey]: key });
+          items = items.concat(paymentItems);
+        }
+      } else {
+        // For other collections, use the original batch query
+        items = await collections[collectionName].find({
+          where: { [foreignKey]: { in: keys }, isDeleted: false },
+        });
+      }
+      
       const groupedItems = groupItemsByKey(items, foreignKey);
       return keys.map(key => groupedItems.get(String(key)) || []);
     });
@@ -97,6 +111,7 @@ export const createLoaders = (collections) => {
     routeById: createByIdLoader('route'),
     parentById: createByIdLoader('parent'),
     classById: createByIdLoader('class'),
+    studentById: createByIdLoader('student'),
 
     // Loader for one-to-many relation (Student -> Events, Student -> Payments)
     eventsByStudentId: createRelatedLoader('event', 'student'),

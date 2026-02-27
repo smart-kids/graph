@@ -23,6 +23,9 @@ import {
   single as parent,
   nested as Nparents
 } from "./parents";
+import {
+  nested as Npayment
+} from "./payments";
 
 import { list as events, single as event, nested as Nevent } from "./events";
 import { list as trips, single as trip, nested as Ntrip } from "./trips";
@@ -142,6 +145,13 @@ import {
   nested as NlessonAttempt
 } from "./lesson-attempt";
 
+import subscription from "./subscription";
+const { 
+  getSubscriptionStatus: subscriptionStatus, 
+  getPaymentHistory: paymentHistory, 
+  checkSubscription 
+} = subscription();
+
 import {
   list as attemptEvents,
   single as attemptEvent,
@@ -181,6 +191,7 @@ Object.assign(
   Nroutes,
   Nbuses,
   Nparents,
+  Npayment,
   Ntrip,
   Ncomplaint,
   NlocReport,
@@ -211,6 +222,10 @@ const Query = {
   user,
   admins,
   admin,
+
+  subscriptionStatus,
+  paymentHistory,
+  checkSubscription,
   
   schools,
   school,
