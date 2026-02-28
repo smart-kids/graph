@@ -126,7 +126,7 @@ const lessonQuestions = async (root, { id, limit = 20, offset = 0, includeOption
   
   if (!allQuestions || allQuestions.length === 0) {
     return {
-    lessonQuestions: [],
+      questions: [],
       totalCount: 0,
       hasMore: false,
     };
@@ -162,7 +162,7 @@ const lessonQuestions = async (root, { id, limit = 20, offset = 0, includeOption
   );
 
   return {
-    lessonQuestions: lessonQuestionsWithOptions,
+    questions: lessonQuestionsWithOptions,
     totalCount: allQuestions.length,
     hasMore,
     currentPage: Math.floor(offset / limit) + 1,
@@ -235,21 +235,39 @@ const nested = {
     },
   },
 
+  LessonMetadata: {
+    // Resolve topic name efficiently for metadata as well
+    topicName: async (root, args, { loaders }) => {
+      if (!root.topic && !root.topicName) return root.name;
+      
+      const topicId = root.topic || root.topicId; // Handle potential variations in root object
+      if (!topicId) return root.topicName || root.name;
+
+      try {
+        const topic = await loaders.topicById.load(topicId);
+        return topic ? topic.name : (root.topicName || root.name);
+      } catch (error) {
+        console.warn('Failed to resolve topic name for metadata:', error);
+        return root.topicName || root.name;
+      }
+    },
+  },
+
   lessonQuestions: {
     // Resolve options for each question when needed
-    lessonQuestions: async (root, args, { loaders }) => {
-      if (!root.lessonQuestions || !Array.isArray(root.lessonQuestions)) {
+    questions: async (root, args, { loaders }) => {
+      if (!root.questions || !Array.isArray(root.questions)) {
         return [];
       }
 
       // If options are already included, return as-is
-      if (root.lessonQuestions.length > 0 && root.lessonQuestions[0].options) {
-        return root.lessonQuestions;
+      if (root.questions.length > 0 && root.questions[0].options) {
+        return root.questions;
       }
 
       // Otherwise, fetch options for each question
       return await Promise.all(
-        root.lessonQuestions.map(async (question) => {
+        root.questions.map(async (question) => {
           const options = await loaders.optionsByQuestionId.load(question.id);
           return {
             ...question,

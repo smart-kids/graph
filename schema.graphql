@@ -33,7 +33,7 @@ type QuestionOption {
 }
 
 type lessonQuestions {
-  lessonQuestions: [LessonQuestion!]!
+  questions: [LessonQuestion!]!
   totalCount: Int!
   hasMore: Boolean!
   currentPage: Int!
@@ -49,7 +49,7 @@ type LessonComplete {
   hasVideos: Boolean!
   hasImages: Boolean!
   difficulty: String
-  lessonQuestions: [LessonQuestion!]!
+  questions: [LessonQuestion!]!
   totalCount: Int!
   hasMore: Boolean!
   currentPage: Int!
@@ -66,7 +66,7 @@ type lesson {
   hasVideos: Boolean!
   hasImages: Boolean!
   difficulty: String
-  lessonQuestions: [LessonQuestion!]!
+  questions: [LessonQuestion!]!
   totalCount: Int!
   hasMore: Boolean!
   currentPage: Int!
