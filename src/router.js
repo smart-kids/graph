@@ -26,6 +26,7 @@ import { createLoaders as subtopicsLoaders } from "./graphql/resolvers/Query/sub
 import { createLoaders as questionsLoaders } from "./graphql/resolvers/Query/questions"
 // import { createLoaders as answersLoaders } from "./graphql/resolvers/Query/answers"
 import { createLoaders as optionsLoaders } from "./graphql/resolvers/Query/options"
+import { createLoaders as lessonsLoaders } from "./graphql/resolvers/Query/lessons"
 import { createLoaders as lessonAttemptsLoaders } from "./graphql/resolvers/Query/lesson-attempt"
 import { createLoaders as attemptEventsLoaders } from "./graphql/resolvers/Query/attempt-event"
 import { paymentsLoaders } from "./graphql/resolvers/Query/payments"
@@ -83,6 +84,7 @@ export default (storage) => {
       const subtopicLoaderSet = subtopicsLoaders(db.collections);
       const questionLoaderSet = questionsLoaders(db.collections);
       const optionLoaderSet = optionsLoaders(db.collections);
+      const lessonLoaderSet = lessonsLoaders(db.collections);
       const lessonAttemptsLoaderSet = lessonAttemptsLoaders(db.collections);
       const attemptEventsLoaderSet = attemptEventsLoaders(db.collections);
 
@@ -95,6 +97,7 @@ export default (storage) => {
         ...subtopicLoaderSet,
         ...questionLoaderSet,
         ...optionLoaderSet,
+        ...lessonLoaderSet,
         ...lessonAttemptsLoaderSet,
         ...attemptEventsLoaderSet,
       };
@@ -133,6 +136,7 @@ export default (storage) => {
       const subtopicLoaderSet = subtopicsLoaders(db.collections);
       const questionLoaderSet = questionsLoaders(db.collections);
       const optionLoaderSet = optionsLoaders(db.collections);
+      const lessonLoaderSet = lessonsLoaders(db.collections);
       const lessonAttemptsLoaderSet = lessonAttemptsLoaders(db.collections);
       const attemptEventsLoaderSet = attemptEventsLoaders(db.collections);
       const paymentLoaderSet = paymentsLoaders(db.collections);
@@ -147,6 +151,7 @@ export default (storage) => {
         ...subtopicLoaderSet,
         ...questionLoaderSet,
         ...optionLoaderSet,
+        ...lessonLoaderSet,
         ...lessonAttemptsLoaderSet,
         ...attemptEventsLoaderSet,
         ...paymentLoaderSet,

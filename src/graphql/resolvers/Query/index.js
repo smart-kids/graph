@@ -145,6 +145,13 @@ import {
   nested as NlessonAttempt
 } from "./lesson-attempt";
 
+import {
+  lessonMetadata,
+  lessonQuestions,
+  lesson,
+  nested as Nlesson
+} from "./lessons";
+
 import subscription from "./subscription";
 const { 
   getSubscriptionStatus: subscriptionStatus, 
@@ -211,6 +218,7 @@ Object.assign(
   Ninvitation,
   NanalyticsEvent,
   NlessonAttempt,
+  Nlesson,
   NattemptEvent,
   Nbooks,
   Nassessment,
@@ -314,6 +322,10 @@ const Query = {
 
   lessonAttempts,
   lessonAttempt,
+
+  lessonMetadata,
+  lessonQuestions,
+  lesson,
 
   attemptEvents,
   attemptEvent,

@@ -3,6 +3,76 @@
 # or just return metadata as a Stringified JSON.
 scalar JSON
 
+# --- Optimized Lesson Types ---
+type LessonMetadata {
+  id: String!
+  name: String!
+  topicName: String
+  questionCount: Int!
+  estimatedDuration: Int!
+  hasVideos: Boolean!
+  hasImages: Boolean!
+  difficulty: String
+}
+
+type LessonQuestion {
+  id: String!
+  name: String!
+  type: String!
+  videos: [String]
+  images: [String]
+  contentOrder: [String]
+  optionsOrder: [String]
+  options: [QuestionOption]
+}
+
+type QuestionOption {
+  id: String!
+  value: String!
+  correct: Boolean!
+}
+
+type lessonQuestions {
+  lessonQuestions: [LessonQuestion!]!
+  totalCount: Int!
+  hasMore: Boolean!
+  currentPage: Int!
+  pageSize: Int!
+}
+
+type LessonComplete {
+  id: String!
+  name: String!
+  topicName: String
+  questionCount: Int!
+  estimatedDuration: Int!
+  hasVideos: Boolean!
+  hasImages: Boolean!
+  difficulty: String
+  lessonQuestions: [LessonQuestion!]!
+  totalCount: Int!
+  hasMore: Boolean!
+  currentPage: Int!
+  pageSize: Int!
+}
+
+type lesson {
+  id: String!
+  name: String!
+  topicName: String
+  subject: subject
+  questionCount: Int!
+  estimatedDuration: Int!
+  hasVideos: Boolean!
+  hasImages: Boolean!
+  difficulty: String
+  lessonQuestions: [LessonQuestion!]!
+  totalCount: Int!
+  hasMore: Boolean!
+  currentPage: Int!
+  pageSize: Int!
+}
+
 type Query {
   hello: String
   user: user
@@ -113,6 +183,11 @@ type Query {
   subscriptionStatus: SubscriptionStatus
   checkSubscription(phone: String!): SubscriptionStatus
   paymentHistory: PaymentHistory
+
+  # --- Optimized Lesson Queries ---
+  lessonMetadata(id: String!): LessonMetadata
+  lessonQuestions(id: String!, limit: Int, offset: Int, includeOptions: Boolean): lessonQuestions!
+  lesson(id: String!, questionLimit: Int): LessonComplete
 }
 
 type Mutation {
