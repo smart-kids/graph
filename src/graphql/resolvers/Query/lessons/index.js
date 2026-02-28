@@ -131,6 +131,8 @@ const lessonQuestions = async (root, { id, limit = 20, offset = 0, includeOption
       questions: [],
       totalCount: 0,
       hasMore: false,
+      currentPage: 1,
+      pageSize: limit,
     };
   }
 
