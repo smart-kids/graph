@@ -27,6 +27,8 @@ import DataLoader from 'dataloader';
 const { GraphQLError } = require('graphql');
 
 const { name } = require("./about.js"); // Assumes 'name' is 'grade'
+import { safeParseJSON } from '../utils';
+
 
 // --- DataLoader Helper Functions ---
 
@@ -144,7 +146,7 @@ const nested = {
   grade: {
     // This resolver does not require a database call, so it remains unchanged.
     subjectsOrder: (root) => {
-      return root.subjectsOrder ? JSON.parse(root.subjectsOrder) : [];
+      return safeParseJSON(root.subjectsOrder);
     },
 
     // PAGINATED to fetch related subjects efficiently.

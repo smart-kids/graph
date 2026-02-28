@@ -30,7 +30,8 @@ const single = async (root, args, { db: { collections } }) => {
 const nested = {
   locReport: {
     async loc(root, args, { db: { collections } }) {
-      return JSON.parse(root.loc);
+      if (!root.loc) return null;
+      try { return JSON.parse(root.loc); } catch (e) { return null; }
     },
     async trip(root, args, { db: { collections } }) {
       const entry = await collections["trip"].find({

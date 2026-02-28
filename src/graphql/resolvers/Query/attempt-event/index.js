@@ -27,6 +27,8 @@ import DataLoader from 'dataloader';
 const { GraphQLError } = require('graphql');
 
 const { name } = require("./about.js"); // Assumes 'name' is 'question'
+import { safeParseJSON } from '../utils';
+
 
 // --- DataLoader Helper Functions ---
 
@@ -145,7 +147,7 @@ const nested = {
   question: {
     // This resolver does not require a database call, so it remains unchanged.
     optionsOrder: (root) => {
-      return root.optionsOrder ? JSON.parse(root.optionsOrder) : [];
+      return safeParseJSON(root.optionsOrder);
     },
 
     // Uses DataLoader to efficiently fetch the parent subtopic.

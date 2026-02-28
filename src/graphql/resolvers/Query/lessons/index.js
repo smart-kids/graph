@@ -17,6 +17,8 @@
 
 import DataLoader from 'dataloader';
 const { GraphQLError } = require('graphql');
+import { safeParseJSON } from '../utils';
+
 
 // --- DataLoader Helper Functions ---
 
@@ -145,8 +147,8 @@ const lessonQuestions = async (root, { id, limit = 20, offset = 0, includeOption
         type: question.type,
         videos: question.videos || [],
         images: question.images || [],
-        contentOrder: question.contentOrder ? JSON.parse(question.contentOrder) : [],
-        optionsOrder: question.optionsOrder ? JSON.parse(question.optionsOrder) : [],
+        contentOrder: safeParseJSON(question.contentOrder),
+        optionsOrder: safeParseJSON(question.optionsOrder),
       };
 
       // Only fetch options if requested (reduces payload size)
