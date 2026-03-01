@@ -61,6 +61,48 @@ const createMpesaService = ({ collections, auth, logger = console }) => {
         }
     };
 
+    // Helper function to activate subscription
+    const _activateSubscription = async (payment, amount) => {
+        try {
+            // A. Update User Subscription (only for authenticated users)
+            if (payment.user && !payment.metadata?.isGuestUser) {
+                const expiryDate = moment().add(1, 'month').toISOString();
+                if (UserCollection) {
+                    await UserCollection.updateOne({ id: payment.user }).set({
+                        subscriptionStatus: 'ACTIVE',
+                        subscriptionPlan: 'MONTHLY',
+                        subscriptionExpiry: expiryDate,
+                        subscriptionAmount: amount || payment.amount,
+                        updatedAt: new Date().toISOString()
+                    });
+                    logger.info(`[MpesaService] User ${payment.user} subscription activated.`);
+                } else {
+                    logger.warn(`[MpesaService] UserCollection not found. Cannot update user subscription.`);
+                }
+            } else {
+                logger.info(`[MpesaService] Guest user payment completed. No subscription update needed.`);
+            }
+
+            // B. Send SMS to User
+            const userPhone = payment.phone;
+            if (userPhone) {
+                const msg = `Payment Received! Your ShulePlus subscription is now ACTIVE. Enjoy unlimited learning!`;
+                await sendSms({ data: { phone: userPhone, message: msg } });
+            }
+
+            // C. Send SMS to Admin
+            const adminPhone = '0743214479';
+            const userRef = payment.user ? `User: ${payment.user}` : `Phone: ${payment.phone}`;
+            const adminMsg = `Payment Received: ${payment.mpesaReceiptNumber || 'MOCK'} - KES ${amount || payment.amount}. ${userRef}`;
+            await sendSms({ data: { phone: adminPhone, message: adminMsg } });
+
+            return true;
+        } catch (error) {
+            logger.error(`[MpesaService] Subscription activation failed:`, error);
+            return false;
+        }
+    };
+
     // Initiate STK Push
     const initiateSTKPush = async (initData) => {
         try {
@@ -115,6 +157,40 @@ const createMpesaService = ({ collections, auth, logger = console }) => {
             // Create payment record
             await PaymentCollection.create(paymentData);
             logger.info(`[MpesaService] Created PENDING payment record: ${transactionId}`);
+
+            // --- DEV MODE MOCK ---
+            // Force mock if not in production, or if explicitly in development, to avoid Safaricom sandbox outages
+            if (process.env.NODE_ENV !== 'production' || process.env.NODE_ENV === 'development') {
+                logger.info(`[MpesaService] [DEV MODE] Mocking success for TxID ${transactionId}`);
+                
+                const mockUpdate = {
+                    status: 'COMPLETED',
+                    mpesaReceiptNumber: `MOCK_${Date.now()}`,
+                    checkoutRequestID: `MOCK_CK_${Date.now()}`,
+                    merchantRequestID: `MOCK_MR_${Date.now()}`,
+                    processedAt: new Date().toISOString(),
+                    metadata: {
+                        ...paymentData.metadata,
+                        isMocked: true,
+                        updatedAt: new Date().toISOString()
+                    }
+                };
+
+                await PaymentCollection.updateOne({ id: transactionId }).set(mockUpdate);
+                
+                // Fetch updated record for subscription activation
+                const updatedPayment = { ...paymentData, ...mockUpdate };
+                await _activateSubscription(updatedPayment, paymentData.amount);
+
+                return {
+                    success: true,
+                    MerchantRequestID: mockUpdate.merchantRequestID,
+                    CheckoutRequestID: mockUpdate.checkoutRequestID,
+                    transactionId,
+                    message: '[DEV MODE] Payment mocked successfully.',
+                    timestamp: new Date().toISOString()
+                };
+            }
 
             // 2. Get access token
             const accessToken = await _getAccessToken();
@@ -324,57 +400,11 @@ const createMpesaService = ({ collections, auth, logger = console }) => {
             // 6. Update the database
             await PaymentCollection.updateOne({ id: payment.id }).set(updateData);
             
-            // 6. Update the database
-            await PaymentCollection.updateOne({ id: payment.id }).set(updateData);
-            
             logger.info(`[MpesaService] Payment ${payment.id} updated to status: ${updateData.status}`);
 
             // --- 7. NEW: Post-Payment Actions (Notifications & User Update) ---
             if (updateData.status === 'COMPLETED') {
-                try {
-                    // A. Update User Subscription (only for authenticated users)
-                    if (payment.user && !payment.metadata?.isGuestUser) {
-                         const expiryDate = moment().add(1, 'month').toISOString(); // Default to 1 month for now, logic can be refined
-                         // Try to find the user in the main collection or specific collections if needed
-                         // For simplicity, we assume we can update via 'users' identity if Waterline is set up that way,
-                         // OR we need to know the userType. Payment record usually just has userId.
-                         // We will try updating the 'user' (polymorphic or base) collection often aliased.
-                         
-                         // If 'user' collection isn't available, we might need to search specific collections.
-                         // But typically 'users' is the base.
-                         if (UserCollection) {
-                             await UserCollection.updateOne({ id: payment.user }).set({
-                                 subscriptionStatus: 'ACTIVE',
-                                 subscriptionPlan: 'MONTHLY', // Default assumption
-                                 subscriptionExpiry: expiryDate,
-                                 subscriptionAmount: updateData.amount || payment.amount,
-                                 updatedAt: new Date().toISOString()
-                             });
-                             logger.info(`[MpesaService] User ${payment.user} subscription activated.`);
-                         } else {
-                             logger.warn(`[MpesaService] UserCollection not found. Cannot update user subscription.`);
-                         }
-                    } else {
-                        logger.info(`[MpesaService] Guest user payment completed. No subscription update needed.`);
-                    }
-
-                    // B. Send SMS to User
-                    if (updateData.phone || payment.phone) {
-                        const userPhone = updateData.phone || payment.phone;
-                        const msg = `Payment Received! Your ShulePlus subscription is now ACTIVE. Enjoy unlimited learning!`;
-                        await sendSms({ data: { phone: userPhone, message: msg } });
-                    }
-
-                    // C. Send SMS to Admin
-                    const adminPhone = '0743214479';
-                    const userRef = payment.user ? `User: ${payment.user}` : `Phone: ${updateData.phone || payment.phone}`;
-                    const adminMsg = `Payment Received: ${updateData.mpesaReceiptNumber} - KES ${updateData.amount || payment.amount}. ${userRef}`;
-                    await sendSms({ data: { phone: adminPhone, message: adminMsg } });
-
-                } catch (notificationError) {
-                    logger.error(`[MpesaService] Post-payment actions failed:`, notificationError);
-                    // Don't fail the whole callback just because SMS failed
-                }
+                await _activateSubscription({ ...payment, ...updateData }, updateData.amount || payment.amount);
             }
 
             return {
