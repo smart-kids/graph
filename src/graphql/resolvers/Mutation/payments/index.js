@@ -114,6 +114,18 @@ const archive = async (data, { db: { collections } }) => {
   }
 };
 
+const update = async (data, { db: { collections } }) => {
+  const entry = data[name];
+  const { id } = entry;
+  try {
+    const updated = await collections[name].update({ id }).set(entry).fetch();
+    return updated[0];
+  } catch (err) {
+    console.log(err);
+    throw new UserError("Failed to update payment");
+  }
+};
+
 const restore = async (data, { db: { collections } }) => {
   const { id } = data[name];
   try {
@@ -172,6 +184,7 @@ function formatPaymentResponse(record) {
 export default () => {
   return {
     create,
+    update,
     archive,
     restore,
     init,

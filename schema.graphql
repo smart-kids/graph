@@ -421,6 +421,7 @@ type paymentMutations {
   init(payment: mpesaStartTxInput!): mpesaStartTxVerification
   confirm(payment: mpesaStartTxVerificationInput!): mpesaStartTxResult
   create(payment: Ipayment!): payment
+  update(payment: Upayment!): payment
   archive(payment: Upayment!): payment
   restore(payment: Upayment!): payment
 }
