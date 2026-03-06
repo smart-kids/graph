@@ -388,7 +388,6 @@ input Ipayment {
   school: String
   phone: String
   amount: String
-  ammount: String
   status: String
   type: String
   ref: String
@@ -405,7 +404,6 @@ input Upayment {
   phone: String
   school: String
   amount: String
-  ammount: String
   status: String
   type: String
   ref: String
@@ -431,7 +429,6 @@ type charge {
   id: String
   school: String
   amount: String
-  ammount: String
   reason: String
   time: String
 }
@@ -439,7 +436,6 @@ type charge {
 input Icharge {
   school: String
   amount: String
-  ammount: String
   reason: String
   time: String
 }
@@ -448,7 +444,6 @@ input Ucharge {
   id: String!
   school: String
   amount: String
-  ammount: String
   reason: String
   time: String
 }
