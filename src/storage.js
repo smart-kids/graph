@@ -1,5 +1,6 @@
 import Waterline from "waterline";
 import PostgresAdapter from "sails-postgresql";
+import DiskAdapter from "sails-disk";
 import pg from 'pg';
 
 // Your model imports (ensure these are correct, accessible, and export plain model definition objects)
@@ -53,40 +54,57 @@ const {
 
 console.log(`Initializing Waterline for NODE_ENV: ${NODE_ENV}`);
 
-if (!DB_URL) {
-    console.error("FATAL ERROR: PostgreSQL connection string (DB_URL) is not defined in the environment variables.");
-    process.exit(1);
-}
+// Determine which adapter to use based on environment
+const usePostgres = NODE_ENV === 'production' || (NODE_ENV !== 'development' && DB_URL);
+const useDisk = NODE_ENV === 'development' || !DB_URL;
 
-// Monkey-patch the adapter to get access to the underlying pool
-const originalInitialize = PostgresAdapter.initialize;
-PostgresAdapter.initialize = function (datastoreConfig, cb) {
-    originalInitialize(datastoreConfig, (err, datastore) => {
-        if (datastore && datastore.driver && datastore.driver.pool) {
-            console.log("Attaching error listener to the PostgreSQL connection pool.");
-            // Listen for errors on the pool
-            datastore.driver.pool.on('error', (poolErr) => {
-                console.error('PostgreSQL Pool Error:', poolErr);
-            });
-        }
-        cb(err, datastore);
-    });
-};
+console.log(`Using ${usePostgres ? 'PostgreSQL' : 'Disk'} storage for ${NODE_ENV}`);
 
-const datastoreConfig = {
-    adapter: 'postgres',
-    url: DB_URL,
-    migrate: 'safe',
-
-    // The `sails-postgresql` adapter passes these settings down to the `pg` pool.
-    pool: {
-        min: 0,
-        max: 10,
-        idleTimeoutMillis: 30000,
-        acquireTimeoutMillis: 30000,
-        reapIntervalMillis: 1000,
+// PostgreSQL configuration (for production)
+let datastoreConfig;
+if (usePostgres) {
+    if (!DB_URL) {
+        console.error("FATAL ERROR: PostgreSQL connection string (DB_URL) is not defined in the environment variables.");
+        process.exit(1);
     }
-};
+
+    // Monkey-patch the adapter to get access to the underlying pool
+    const originalInitialize = PostgresAdapter.initialize;
+    PostgresAdapter.initialize = function (datastoreConfig, cb) {
+        originalInitialize(datastoreConfig, (err, datastore) => {
+            if (datastore && datastore.driver && datastore.driver.pool) {
+                console.log("Attaching error listener to the PostgreSQL connection pool.");
+                // Listen for errors on the pool
+                datastore.driver.pool.on('error', (poolErr) => {
+                    console.error('PostgreSQL Pool Error:', poolErr);
+                });
+            }
+            cb(err, datastore);
+        });
+    };
+
+    datastoreConfig = {
+        adapter: 'postgres',
+        url: DB_URL,
+        migrate: 'safe',
+
+        // The `sails-postgresql` adapter passes these settings down to the `pg` pool.
+        pool: {
+            min: 0,
+            max: 10,
+            idleTimeoutMillis: 30000,
+            acquireTimeoutMillis: 30000,
+            reapIntervalMillis: 1000,
+        }
+    };
+} else {
+    // Disk configuration (for local development)
+    datastoreConfig = {
+        adapter: 'disk',
+        filePath: '.tmp/local-disk.db',
+        migrate: 'safe'
+    };
+}
 
 const waterlineInstance = new Waterline();
 
@@ -138,6 +156,7 @@ waterlineInstance.registerModel(assessmentRubric);
 const config = {
     adapters: {
         postgres: PostgresAdapter,
+        disk: DiskAdapter,
     },
     datastores: {
         default: datastoreConfig,
@@ -158,8 +177,10 @@ export default new Promise((resolve, reject) => {
             return reject(err);
         }
         console.log("Waterline ORM initialized successfully.");
-        if (orm.connections && orm.connections.default) {
+        if (usePostgres && orm.connections && orm.connections.default) {
              console.log("Successfully connected to PostgreSQL.");
+        } else if (useDisk) {
+            console.log("Successfully initialized Disk storage for local development.");
         }
         resolve(orm);
     });

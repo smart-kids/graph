@@ -6,7 +6,9 @@
   "author": "gitomehbranson <sirbranson67@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "test": "NODE_ENV=production nyc mocha --compilers js:@babel/register --inspect test/**/*.js --exit -r dotenv/config",
+    "test": "NODE_ENV=development npx mocha test/queries.test.js --timeout 30000 --reporter spec",
+    "test:mutations": "NODE_ENV=development npx mocha test/mutations.test.js --timeout 30000 --reporter spec",
+    "test:queries": "NODE_ENV=development npx mocha test/queries.test.js --timeout 30000 --reporter spec",
     "dev": "nodemon --exec npx babel-node --inspect  ./src/function",
     "clean-db": "nodemon --watch ./graph/src --ext es6,mjs,js,cjs,json --exec \"npx babel-node --inspect ./utils/clean-tables.js\"",
     "setup-db": "nodemon --watch ./graph/src --ext es6,mjs,js,cjs,json --exec \"npx babel-node --inspect ./utils/create-tables.js\"",
@@ -76,6 +78,7 @@
     "socket.io": "^2.3.0",
     "source-map-support": "^0.5.19",
     "tesseract.js": "^6.0.1",
+    "uuid": "^13.0.0",
     "uuidv4": "^4.0.0",
     "waterline": "^0.15.2"
   },
