@@ -28,7 +28,12 @@ module.exports = Waterline.Collection.extend({
     },
     amount: {
       type: "string",
-      defaultsTo: "-",
+      defaultsTo: "0",
+      allowNull: true,
+    },
+    ammount: {
+      type: "string",
+      defaultsTo: "0",
       allowNull: true,
     },
     phone: {
