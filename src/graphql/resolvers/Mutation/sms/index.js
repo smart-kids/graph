@@ -1,6 +1,15 @@
 import sms from "../../../../utils/sms";
 import Handlebars from "handlebars";
-import { v4 as uuidv4 } from 'uuid';
+
+// Dynamic import for uuid to handle ES module compatibility
+let uuidv4;
+const getUuid = async () => {
+  if (!uuidv4) {
+    const { v4 } = await import('uuid');
+    uuidv4 = v4;
+  }
+  return uuidv4;
+};
 
 Handlebars.registerHelper('fallback', function (value, fallbackValue) {
   return value !== undefined && value !== null && value !== '' ? value : fallbackValue;
@@ -56,7 +65,7 @@ const send = async (data, { db: { collections } }) => {
   }
 
 
-  const eventId = uuidv4();
+  const eventId = await getUuid();
   let smsEvent;
 
   if (schoolId) {
@@ -152,8 +161,11 @@ const send = async (data, { db: { collections } }) => {
       const batchResults = await Promise.allSettled(batchPromises);
       const logsToCreate = [];
 
-      batchResults.forEach((result) => {
-        const logId = uuidv4();
+      // Generate all UUIDs first to avoid async issues in forEach
+      const logIds = await Promise.all(batchResults.map(async () => await getUuid()));
+
+      batchResults.forEach((result, index) => {
+        const logId = logIds[index];
         const commonLogData = {
           id: logId,
           event: eventId,
