@@ -78,7 +78,6 @@ const init = async (data, { auth, db: { collections }, open }) => {
     MerchantRequestID: paymentRecord.merchantRequestID || result.MerchantRequestID,
     status: paymentRecord.status,
     amount: paymentRecord.amount,
-    ammount: paymentRecord.amount,
     phone: paymentRecord.phone,
     // Add any other fields your frontend expects
   };
@@ -171,7 +170,6 @@ function formatPaymentResponse(record) {
     message: record.errorMessage || record.status,
     id: record.id,
     amount: record.amount,
-    ammount: record.amount,
     phone: record.phone,
     status: record.status,
     merchantRequestID: record.merchantRequestID,

@@ -150,7 +150,7 @@ const invite = async (data, { db: { collections } }) => {
         await collections["charge"].create({
           id: new ObjectId().toHexString(),
           school,
-          ammount: smsCost,
+          amount: smsCost,
           reason: `Sending message '${message}'`,
           time: new Date(),
           isDeleted: false

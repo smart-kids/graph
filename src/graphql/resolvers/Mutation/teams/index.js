@@ -109,7 +109,7 @@ access: request for otp using {{phone_number}}
         await collections["charge"].create({
           id: new ObjectId().toHexString(),
           school,
-          ammount: smsCost || 0,
+          amount: smsCost || 0,
           reason: `Sending message '${message}'`,
           time: new Date(),
           isDeleted: false

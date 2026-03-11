@@ -872,7 +872,7 @@ async function seedInitialDataForSchool(orm, schoolId, schoolDetails) {
         await collections.charge.create({
             id: new ObjectId().toHexString(),
             school: schoolId,
-            ammount: "15", // Represent as string
+            amount: "15", // Represent as string
             reason: "SMS notification fee for welcome message.",
             time: new Date().toISOString(),
         });

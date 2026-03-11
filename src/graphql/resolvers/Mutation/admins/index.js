@@ -211,7 +211,7 @@ Phone Number: {{phone_number}}.`;
     await collections["charge"].create({
       id: new ObjectId().toHexString(),
       school,
-      ammount: parseFloat(smsCost) || 0.6, // Use amount, ensure numeric
+      amount: parseFloat(smsCost) || 0.6, // Use amount, ensure numeric
       reason: `Sending invitation SMS to admin ${admin.names || adminId} (${phone})`,
       time: new Date(),
       isDeleted: false

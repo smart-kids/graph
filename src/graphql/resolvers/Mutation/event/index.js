@@ -170,7 +170,7 @@ const create = async (data, { db: { collections } }) => {
             await collections["charge"].create({
               id: new ObjectId().toHexString(),
               school: trip.school,
-              ammount: smsCost,
+              amount: smsCost,
               reason: `Transport SMS: ${message.substring(0, 50)}...`, // Truncate for cleaner UI
               time,
               isDeleted: false

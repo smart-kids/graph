@@ -173,11 +173,10 @@ const nested = {
   },
   // --- ADD THIS NEW TYPE RESOLVER (Sibling to school) ---
   payment: {
-    ammount: (root) => root.amount || root.ammount
+    amount: (root) => root.amount || root.ammount
   },
   charge: {
-    amount: (root) => root.amount || root.ammount,
-    ammount: (root) => root.amount || root.ammount
+    amount: (root) => root.amount || root.ammount
   },
   smsEvent: {
     logs: async (root, args, { loaders }) => {
