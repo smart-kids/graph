@@ -150,6 +150,23 @@ const nested = {
       return safeParseJSON(root.optionsOrder);
     },
 
+    // Convert contentOrder objects to strings for GraphQL schema compatibility
+    contentOrder: (root) => {
+      return safeParseJSON(root.contentOrder).map(item => {
+        // Convert objects to strings for GraphQL schema compatibility
+        if (typeof item === 'object' && item !== null) {
+          if (item.type === 'TEXT') {
+            return 'text';
+          } else if (item.type === 'IMAGE' && item.id) {
+            return item.id;
+          } else if (item.id) {
+            return item.id;
+          }
+        }
+        return String(item);
+      });
+    },
+
     // Uses DataLoader to efficiently fetch the parent subtopic.
     subtopic: async (root, args, { loaders }) => {
       if (!root.subtopic) {

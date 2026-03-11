@@ -149,7 +149,19 @@ const lessonQuestions = async (root, { id, limit = 20, offset = 0, includeOption
         type: question.type,
         videos: question.videos || [],
         images: question.images || [],
-        contentOrder: safeParseJSON(question.contentOrder),
+        contentOrder: safeParseJSON(question.contentOrder).map(item => {
+          // Convert objects to strings for GraphQL schema compatibility
+          if (typeof item === 'object' && item !== null) {
+            if (item.type === 'TEXT') {
+              return 'text';
+            } else if (item.type === 'IMAGE' && item.id) {
+              return item.id;
+            } else if (item.id) {
+              return item.id;
+            }
+          }
+          return String(item);
+        }),
         optionsOrder: safeParseJSON(question.optionsOrder),
       };
 
