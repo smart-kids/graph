@@ -14,6 +14,7 @@ export default Waterline.Collection.extend({
     amount: { type: "number", required: true },
     reason: { type: "string", required: true },
     time: { type: "string", required: true },
+    term: { type: "string", required: false },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });

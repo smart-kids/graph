@@ -7,10 +7,6 @@ const create = async (data, { db: { collections } }) => {
   
   const id = new ObjectId().toHexString();
   const entry = Object.assign(data[name], { id, isDeleted: false });
-  if (entry.ammount) {
-    entry.amount = entry.ammount;
-    delete entry.ammount;
-  }
 
   try {
     await collections[name].create(entry);

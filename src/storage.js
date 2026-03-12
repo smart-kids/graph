@@ -56,8 +56,8 @@ const {
 console.log(`Initializing Waterline for NODE_ENV: ${NODE_ENV}`);
 
 // Determine which adapter to use based on environment
-const usePostgres = NODE_ENV === 'production' || (NODE_ENV !== 'development' && DB_URL);
-const useDisk = NODE_ENV === 'development' || !DB_URL;
+const usePostgres = !!DB_URL;
+const useDisk = !DB_URL;
 
 console.log(`Using ${usePostgres ? 'PostgreSQL' : 'Disk'} storage for ${NODE_ENV}`);
 
@@ -128,6 +128,7 @@ waterlineInstance.registerModel(teacher);
 waterlineInstance.registerModel(OTP);
 waterlineInstance.registerModel(payments);
 waterlineInstance.registerModel(charges);
+waterlineInstance.registerModel(chargeTypes);
 waterlineInstance.registerModel(grades);
 waterlineInstance.registerModel(subjects);
 waterlineInstance.registerModel(topics);

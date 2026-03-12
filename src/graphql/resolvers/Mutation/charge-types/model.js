@@ -3,6 +3,7 @@ const { name: identity } = require("./about.js");
 
 export default Waterline.Collection.extend({
   identity,
+  tableName: 'charge_type',
   datastore: "default",
   primaryKey: "id",
 

@@ -1,3 +1,3 @@
 module.exports = {
-    "name":"charge_type"
+    "name":"chargeType"
 }

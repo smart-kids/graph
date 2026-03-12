@@ -87,7 +87,7 @@ export const createLoaders = (collections) => {
     studentsBySchoolId: createRelatedLoader('student', 'school'),
     busesBySchoolId: createRelatedLoader('bus', 'school'),
     chargesBySchoolId: createRelatedLoader('charge', 'school'),
-    chargeTypesBySchoolId: createRelatedLoader('charge_type', 'school'),
+    chargeTypesBySchoolId: createRelatedLoader('chargetype', 'school'),
     paymentsBySchoolId: createRelatedLoader('payment', 'school'),
     booksBySchoolId: createRelatedLoader('book', 'school'),
     teachersBySchoolId: createRelatedLoader('teacher', 'school'),

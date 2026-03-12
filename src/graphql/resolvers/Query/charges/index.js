@@ -57,8 +57,14 @@ const nested = {
     },
     chargeType: async (root, args, { db: { collections }}) => {
       if (!root.chargeType) return null;
-      return await collections["charge_type"].findOne({ 
+      return await collections["chargetype"].findOne({ 
         where: { id: root.chargeType, isDeleted: false }
+      });
+    },
+    term: async (root, args, { db: { collections }}) => {
+      if (!root.term) return null;
+      return await collections["term"].findOne({ 
+        where: { id: root.term, isDeleted: false }
       });
     }
   }

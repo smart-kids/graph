@@ -437,6 +437,7 @@ type charge {
   amount: String
   reason: String
   time: String
+  term: term
 }
 
 input Icharge {
@@ -446,6 +447,7 @@ input Icharge {
   amount: String
   reason: String
   time: String
+  term: String
 }
 
 input Ucharge {
@@ -456,6 +458,7 @@ input Ucharge {
   amount: String
   reason: String
   time: String
+  term: String
 }
 
 type chargeMutations {
@@ -490,10 +493,10 @@ input UchargeType {
 }
 
 type chargeTypeMutations {
-  create(charge_type: IchargeType!): chargeType
-  update(charge_type: UchargeType!): chargeType
-  archive(charge_type: UchargeType!): chargeType
-  restore(charge_type: UchargeType!): chargeType
+  create(chargeType: IchargeType!): chargeType
+  update(chargeType: UchargeType!): chargeType
+  archive(chargeType: UchargeType!): chargeType
+  restore(chargeType: UchargeType!): chargeType
 }
 
 # admins things

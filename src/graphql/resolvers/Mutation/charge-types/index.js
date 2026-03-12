@@ -8,7 +8,7 @@ const create = async (data, { db: { collections } }) => {
   const entry = Object.assign(data[name], { id, isDeleted: false });
 
   try {
-    await collections[name].create(entry);
+    await collections[name.toLowerCase()].create(entry);
     return entry;
   } catch (err) {
     console.log(err)
@@ -22,7 +22,7 @@ const update = async (data, { db: { collections } }) => {
 
   try {
     delete entry.id;
-    await collections[name].update({ id }).set(entry);
+    await collections[name.toLowerCase()].update({ id }).set(entry);
     return { id };
   } catch (err) {
     throw new UserError(err.details);
@@ -33,7 +33,7 @@ const archive = async (data, { db: { collections } }) => {
   const { id } = data[name];
 
   try {
-    await collections[name].update({ id }).set({ isDeleted: true });
+    await collections[name.toLowerCase()].update({ id }).set({ isDeleted: true });
     return { id };
   } catch (err) {
     throw new UserError(err.details);
@@ -44,7 +44,7 @@ const restore = async (data, { db: { collections } }) => {
   const { id } = data[name];
 
   try {
-    await collections[name].update({ id }).set({ isDeleted: false });
+    await collections[name.toLowerCase()].update({ id }).set({ isDeleted: false });
     return { id };
   } catch (err) {
     throw new UserError(err.details);
