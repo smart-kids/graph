@@ -43,6 +43,11 @@ import {
 } from "./charges";
 
 import {
+  list as chargeTypes,
+  single as chargeType
+} from "./charge-types";
+
+import {
   list as locReports,
   single as locReport,
   nested as NlocReport
@@ -243,6 +248,9 @@ const Query = {
 
   charges,
   charge,
+
+  chargeTypes,
+  chargeType,
 
   routes,
   route,

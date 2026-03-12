@@ -47,6 +47,20 @@ const nested = {
 
       return entry
     }
+  },
+  charge: {
+    parent: async (root, args, { db: { collections }}) => {
+      if (!root.parent) return null;
+      return await collections["parent"].findOne({ 
+        where: { id: root.parent, isDeleted: false }
+      });
+    },
+    chargeType: async (root, args, { db: { collections }}) => {
+      if (!root.chargeType) return null;
+      return await collections["charge_type"].findOne({ 
+        where: { id: root.chargeType, isDeleted: false }
+      });
+    }
   }
 }
 

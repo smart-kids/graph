@@ -21,6 +21,7 @@ import teacher from "./graphql/resolvers/Mutation/teachers/model.js";
 import OTP from "./graphql/resolvers/Mutation/OTP/model.js";
 import payments from "./graphql/resolvers/Mutation/payments/model.js";
 import charges from "./graphql/resolvers/Mutation/charges/model.js";
+import chargeTypes from "./graphql/resolvers/Mutation/charge-types/model.js";
 import grades from "./graphql/resolvers/Mutation/grades/model.js";
 import subjects from "./graphql/resolvers/Mutation/subjects/model.js";
 import topics from "./graphql/resolvers/Mutation/topics/model.js";

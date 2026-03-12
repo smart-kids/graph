@@ -9,11 +9,9 @@ export default Waterline.Collection.extend({
   attributes: {
     id: { type: "string", required: true },
     school: { type: "string", required: true },
-    parent: { type: "string", required: false },
-    chargeType: { type: "string", required: false },
-    amount: { type: "number", required: true },
-    reason: { type: "string", required: true },
-    time: { type: "string", required: true },
+    name: { type: "string", required: true },
+    description: { type: "string", required: false },
+    amount: { type: "number", defaultsTo: 0 },
     isDeleted: { type: "boolean", defaultsTo: false }
   }
 });

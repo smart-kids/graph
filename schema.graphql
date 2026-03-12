@@ -126,6 +126,9 @@ type Query {
   charge: charge
   charges: [charge]
 
+  chargeType: chargeType
+  chargeTypes: [chargeType]
+
   grade: grade
   grades: [grade]
 
@@ -205,6 +208,7 @@ type Mutation {
   events: eventMutations
   complaints: complaintMutations
   charges: chargeMutations
+  chargeTypes: chargeTypeMutations
   locReports: locReportMutations
   classes: classMutations
   schools: schoolMutations
@@ -428,6 +432,8 @@ type paymentMutations {
 type charge {
   id: String
   school: String
+  parent: parent
+  chargeType: chargeType
   amount: String
   reason: String
   time: String
@@ -435,6 +441,8 @@ type charge {
 
 input Icharge {
   school: String
+  parent: String
+  chargeType: String
   amount: String
   reason: String
   time: String
@@ -443,6 +451,8 @@ input Icharge {
 input Ucharge {
   id: String!
   school: String
+  parent: String
+  chargeType: String
   amount: String
   reason: String
   time: String
@@ -453,6 +463,37 @@ type chargeMutations {
   update(charge: Ucharge!): charge
   archive(charge: Ucharge!): charge
   restore(charge: Ucharge!): charge
+}
+
+# chargeTypes things
+type chargeType {
+  id: String
+  school: String
+  name: String
+  description: String
+  amount: Float
+}
+
+input IchargeType {
+  school: String!
+  name: String!
+  description: String
+  amount: Float
+}
+
+input UchargeType {
+  id: String!
+  school: String
+  name: String
+  description: String
+  amount: Float
+}
+
+type chargeTypeMutations {
+  create(charge_type: IchargeType!): chargeType
+  update(charge_type: UchargeType!): chargeType
+  archive(charge_type: UchargeType!): chargeType
+  restore(charge_type: UchargeType!): chargeType
 }
 
 # admins things
@@ -943,6 +984,7 @@ type school {
   teachers(limit: Int, offset: Int): [teacher]
   payments(limit: Int, offset: Int):[payment]
   charges(limit: Int, offset: Int):[charge]
+  chargeTypes: [chargeType]
   grades(limit: Int, offset: Int): [grade]
   terms(limit: Int, offset: Int): [term]
   teams(limit: Int, offset: Int): [team]

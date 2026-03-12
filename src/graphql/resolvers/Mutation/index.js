@@ -14,6 +14,7 @@ import schools from "./school"
 import teachers from "./teachers"
 import payments from "./payments"
 import charges from "./charges"
+import chargeTypes from "./charge-types"
 import sms from "./sms"
 import grades from "./grades"
 import subjects from "./subjects"
@@ -37,6 +38,7 @@ import assessmentRubrics from "./assessment-rubrics";
 
 export default {
   admins,
+  chargeTypes,
   charges,
   payments,
   routes,
