@@ -223,14 +223,27 @@ const nested = {
         loaders.smsEventsBySchoolId.load(root.id) // Fetch SMS history to calculate usage
       ]);
 
-      // 2. Calculate Total Income (Deposits)
-      const totalIncome = allPayments.reduce((total, p) => {
-        // Only count COMPLETED transactions
-        if (p.status !== 'COMPLETED') return total;
-        
+      // 2. Separate Income: Bulk SMS vs General Fees
+      let smsIncome = 0;
+      let generalIncome = 0;
+
+      allPayments.forEach(p => {
+        if (p.status !== 'COMPLETED') return;
         const val = parseFloat(p.amount || p.ammount || 0);
-        return total + (isNaN(val) ? 0 : val);
-      }, 0);
+        if (isNaN(val)) return;
+
+        // Check if tagged for Bulk SMS in metadata
+        let metadata = p.metadata || {};
+        if (typeof metadata === 'string') {
+          try { metadata = JSON.parse(metadata); } catch(e) {}
+        }
+
+        if (metadata.type === 'bulksms' || p.type === 'bulksms') {
+          smsIncome += val;
+        } else {
+          generalIncome += val;
+        }
+      });
 
       // 3. Calculate Expenses from Manual Charges (Legacy/Admin fees)
       const manualExpenses = allCharges.reduce((total, c) => {
@@ -241,36 +254,29 @@ const nested = {
       // 4. Calculate Expenses from SMS Usage
       const smsExpenses = allSmsEvents.reduce((total, event) => {
         const successCount = event.successCount || 0;
-        
-        // If no messages were sent successfully, no charge.
         if (successCount === 0) return total;
 
-        // Calculate Message Segments (Concatenated SMS logic)
-        // Length 0-160 = 1 credit
-        // Length 161-320 = 2 credits
         const content = event.messageTemplate || "";
         const length = content.length;
         const segments = length > 0 ? Math.ceil(length / CHARS_PER_SMS) : 1;
-
-        // Cost = Segments * People * Price
         const eventCost = segments * successCount * COST_PER_SMS;
 
         return total + eventCost;
       }, 0);
 
       // 5. Final Calculation
-      const totalExpenses = manualExpenses + smsExpenses;
-      const balance = totalIncome - totalExpenses;
+      const smsBalance = smsIncome - smsExpenses;
+      const combinedBalance = (generalIncome + smsIncome) - (manualExpenses + smsExpenses);
 
       // Calculate how many standard (1-segment) SMS they can send with remaining balance
-      const smsRemaining = Math.floor(balance / COST_PER_SMS);
+      const smsRemaining = Math.floor(smsBalance / COST_PER_SMS);
 
-      // Debug log to help you verify calculations in server console
-      console.log(`[Financial] School ${root.id}: Income=${totalIncome}, ManualExp=${manualExpenses}, SmsExp=${smsExpenses}, Bal=${balance}`);
+      console.log(`[Financial] School ${root.id}: SMS Income=${smsIncome}, SMS Exp=${smsExpenses}, SMS Bal=${smsBalance}, Total Bal=${combinedBalance}`);
 
       return { 
-        balance: balance, 
-        // Ensure we don't show negative numbers for UI niceness
+        balance: smsBalance, // Navbar uses 'balance' for SMS display now
+        smsBalance: smsBalance,
+        smsIncome: smsIncome,
         balanceFormated: `${Math.max(0, smsRemaining)} SMS's`
       };
     },

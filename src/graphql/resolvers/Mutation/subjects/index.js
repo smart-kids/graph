@@ -51,7 +51,10 @@ async function retryOperation(operation, maxRetries = 3, delayMs = 1000, operati
 
 
 // --- Modified create function ---
-const create = async (data, { db: { collections } }) => {
+const create = async (data, { db: { collections }, auth }) => {
+  if (auth && auth.userType === 'teacher') {
+      throw new UserError("Teachers are not allowed to create subjects.");
+  }
   console.log("Subject creation started.", data);
   const subjectCollection = collections[name];
   const gradeCollection = collections.grade;
@@ -364,10 +367,24 @@ const create = async (data, { db: { collections } }) => {
 
 
 // --- Existing update, archive, restore functions ---
-const update = async (data, { db: { collections } }) => {
+const update = async (data, { db: { collections }, auth }) => {
   const subjectCollection = collections[name];
   const { id } = data[name];
   const entry = data[name];
+  
+  // Permission Check
+  if (auth && auth.userType === 'teacher') {
+      const existing = await subjectCollection.findOne({ id });
+      if (!existing || String(existing.teacher) !== String(auth.id)) {
+          throw new UserError("You are not authorized to edit this subject.");
+      }
+      
+      // Teachers shouldn't change the teacher field or grade or school
+      delete entry.teacher;
+      delete entry.grade;
+      delete entry.school;
+  }
+
   let { topicOrder } = entry;
 
   entry.topicsOrder = topicOrder; // Assuming it's an array of IDs
@@ -384,7 +401,10 @@ const update = async (data, { db: { collections } }) => {
   }
 };
 
-const archive = async (data, { db: { collections } }) => {
+const archive = async (data, { db: { collections }, auth }) => {
+  if (auth && auth.userType === 'teacher') {
+      throw new UserError("Teachers are not allowed to archive subjects.");
+  }
   const subjectCollection = collections[name];
   const { id } = data[name];
 
@@ -399,9 +419,13 @@ const archive = async (data, { db: { collections } }) => {
   }
 };
 
-const restore = async (data, { db: { collections } }) => {
+const restore = async (data, { db: { collections }, auth }) => {
+  if (auth && auth.userType === 'teacher') {
+      throw new UserError("Teachers are not allowed to restore subjects.");
+  }
   const subjectCollection = collections[name];
   const { id } = data[name];
+  
 
   try {
     await subjectCollection.update({ id }).set({ isDeleted: false });

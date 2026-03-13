@@ -905,7 +905,9 @@ type classMutations {
 
 type financial {
   balance: Float,
-  balanceFormated: String
+  balanceFormated: String,
+  smsBalance: Float,
+  smsIncome: Float
 }
 
 type lessonAttempt {
@@ -1263,6 +1265,7 @@ type subject {
   id: String
   name: String
   grade: grade
+  teacher: String
   topics(limit: Int, offset: Int): [topic]
   topicsOrder: [String]
   lessonAttempts(limit: Int, offset: Int): [lessonAttempt]

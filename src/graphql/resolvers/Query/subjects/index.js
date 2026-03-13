@@ -108,14 +108,17 @@ export const createLoaders = (collections) => {
 
 // --- GraphQL Resolvers (Using Loaders) ---
 
-const list = async (root, args, { db: { collections } }) => {
+const list = async (root, args, { db: { collections }, auth }) => {
   // DataLoader is not typically used for a top-level list of the primary resource.
   // Direct database call is appropriate here.
-  const entries = await collections[name].find({
-    where: {
-      isDeleted: false
-    }
-  });
+  const where = { isDeleted: false };
+  
+  // Filter by teacher if user is a teacher
+  if (auth && auth.userType === 'teacher') {
+    where.teacher = auth.id;
+  }
+
+  const entries = await collections[name].find({ where });
   return entries;
 };
 
