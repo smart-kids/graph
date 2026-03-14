@@ -978,8 +978,8 @@ type school {
   # relations for saas
   admins(limit: Int, offset: Int, search: String): [admin]
   adminsCount: Int
-  studentsCount: Int
-  parentsCount: Int
+  studentsCount(search: String): Int
+  parentsCount(search: String): Int
   teachersCount: Int
   classesCount: Int
   busesCount: Int

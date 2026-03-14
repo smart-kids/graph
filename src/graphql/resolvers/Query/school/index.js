@@ -211,11 +211,27 @@ const nested = {
     providerResponse: (root) => root.providerResponse
   },
   school: {
-    studentsCount: async (root, args, { db: { collections } }) => {
-      return await collections.student.count({ where: { school: root.id, isDeleted: false } });
+    studentsCount: async (root, { search = "" }, { db: { collections } }) => {
+      const query = { where: { school: root.id, isDeleted: false } };
+      if (search) {
+        query.where.or = [
+          { names: { contains: search } },
+          { registration: { contains: search } },
+          { phone: { contains: search } }
+        ];
+      }
+      return await collections.student.count(query);
     },
-    parentsCount: async (root, args, { db: { collections } }) => {
-      return await collections.parent.count({ where: { school: root.id, isDeleted: false } });
+    parentsCount: async (root, { search = "" }, { db: { collections } }) => {
+      const query = { where: { school: root.id, isDeleted: false } };
+      if (search) {
+        query.where.or = [
+          { name: { contains: search } },
+          { phone: { contains: search } },
+          { email: { contains: search } }
+        ];
+      }
+      return await collections.parent.count(query);
     },
     teachersCount: async (root, args, { db: { collections } }) => {
       return await collections.teacher.count({ where: { school: root.id, isDeleted: false } });
