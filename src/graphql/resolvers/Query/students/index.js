@@ -194,6 +194,8 @@ const nested = {
         // --- LIVE CALCULATION: Fetch and sum all payments for this student ---
         const studentPayments = await loaders.paymentsByStudentId.load(root.id);
         const totalPaid = studentPayments.reduce((sum, p) => {
+            // Only sum completed payments
+            if (p.status !== 'COMPLETED') return sum;
             const val = parseFloat(p.amount || p.ammount || 0);
             return sum + val;
         }, 0);
