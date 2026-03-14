@@ -121,7 +121,8 @@ type Query {
   payments: [payment]
 
   school(id: String): school
-  schools: [school]
+  schools(limit: Int, offset: Int, search: String): [school]
+  schoolsCount: Int
 
   charge: charge
   charges: [charge]
@@ -972,30 +973,42 @@ type school {
   themeColor: String
 
   # relations for saas
-  admins(limit: Int, offset: Int): [admin]
+  admins(limit: Int, offset: Int, search: String): [admin]
+  adminsCount: Int
   studentsCount: Int
   parentsCount: Int
-  students(limit: Int, offset: Int): [student]
-  parents(limit: Int, offset: Int): [parent]
-  drivers(limit: Int, offset: Int): [driver]
-  buses(limit: Int, offset: Int): [bus]
-  trips(limit: Int, offset: Int): [trip]
-  routes(limit: Int, offset: Int): [route]
-  schedules(limit: Int, offset: Int): [schedule]
-  events(limit: Int, offset: Int): [event]
-  complaints(limit: Int, offset: Int): [complaint]
-  locReports(limit: Int, offset: Int): [locReport]
-  classes(limit: Int, offset: Int): [class]
-  teachers(limit: Int, offset: Int): [teacher]
-  payments(limit: Int, offset: Int):[payment]
-  charges(limit: Int, offset: Int):[charge]
+  teachersCount: Int
+  classesCount: Int
+  busesCount: Int
+  driversCount: Int
+  routesCount: Int
+  schedulesCount: Int
+  paymentsCount: Int
+  chargesCount: Int
+  eventsCount: Int
+  booksCount: Int
+  complaintsCount: Int
+  students(limit: Int, offset: Int, search: String): [student]
+  parents(limit: Int, offset: Int, search: String): [parent]
+  drivers(limit: Int, offset: Int, search: String): [driver]
+  buses(limit: Int, offset: Int, search: String): [bus]
+  trips(limit: Int, offset: Int, search: String): [trip]
+  routes(limit: Int, offset: Int, search: String): [route]
+  schedules(limit: Int, offset: Int, search: String): [schedule]
+  events(limit: Int, offset: Int, search: String): [event]
+  complaints(limit: Int, offset: Int, search: String): [complaint]
+  locReports(limit: Int, offset: Int, search: String): [locReport]
+  classes(limit: Int, offset: Int, search: String): [class]
+  teachers(limit: Int, offset: Int, search: String): [teacher]
+  payments(limit: Int, offset: Int, search: String):[payment]
+  charges(limit: Int, offset: Int, search: String):[charge]
   chargeTypes: [chargeType]
-  grades(limit: Int, offset: Int): [grade]
-  terms(limit: Int, offset: Int): [term]
-  teams(limit: Int, offset: Int): [team]
-  invitations(limit: Int, offset: Int): [invitation]
-  smsLogs(limit: Int, offset: Int): [smsLog]
-  smsEvents(limit: Int, offset: Int): [smsEvent]
+  grades(limit: Int, offset: Int, search: String): [grade]
+  terms(limit: Int, offset: Int, search: String): [term]
+  teams(limit: Int, offset: Int, search: String): [team]
+  invitations(limit: Int, offset: Int, search: String): [invitation]
+  smsLogs(limit: Int, offset: Int, search: String): [smsLog]
+  smsEvents(limit: Int, offset: Int, search: String): [smsEvent]
   assessmentTypes: [assessmentType]
   assessmentRubrics: [assessmentRubric]
   assessments(class: String, term: String, limit: Int, offset: Int): [assessment]

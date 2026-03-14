@@ -113,13 +113,27 @@ export const createLoaders = (collections) => {
 
 // --- GraphQL Resolvers (Using Loaders) ---
 
-const list = async (root, args, { auth = {}, open, db: { collections }, loaders }) => {
+const list = async (root, args, { auth = {}, open, db: { collections } }) => {
   let { userType, school: schoolId } = auth;
+  const { limit = 25, offset = 0, search = "" } = args;
 
   if (userType === 'sAdmin') {
-    const query = { where: { isDeleted: false } };
+    const query = {
+        where: { isDeleted: false },
+        skip: offset,
+        limit: limit,
+        sort: 'name ASC'
+    };
+    if (search) {
+        query.where.or = [
+            { name: { contains: search } },
+            { phone: { contains: search } },
+            { email: { contains: search } }
+        ];
+    }
     return await collections[name].find(query);
   } else {
+    // Legacy logic for non-sAdmins
     if (open === true && !schoolId) {
       schoolId = openSchoolId;
     }
@@ -134,9 +148,15 @@ const list = async (root, args, { auth = {}, open, db: { collections }, loaders 
     if (!schoolId) {
       throw new GraphQLError('Access Denied: User configuration incomplete.', { extensions: { code: 'FORBIDDEN' } });
     }
-    const school = await loaders.schoolById.load(schoolId);
+    // Single school for non-sAdmins
+    const school = await collections[name].findOne({ id: schoolId, isDeleted: false });
     return school ? [school] : [];
   }
+};
+
+const count = async (root, args, { auth, db: { collections } }) => {
+    if (auth.userType !== 'sAdmin') return 1;
+    return await collections[name].count({ isDeleted: false });
 };
 // in your resolver file
 const single = async (root, args, { auth, open, db: { collections }, loaders, params: { params } = { params: { id: undefined } } }) => {
@@ -192,20 +212,46 @@ const nested = {
   },
   school: {
     studentsCount: async (root, args, { db: { collections } }) => {
-      console.log(`[RESOLVER CALL] Queuing 'studentsCount' lookup for School ID: ${root.id}`);
-      // The loader fetches all students, and we just need the length.
-      // This is efficient because the loader will cache the result if the full
-      // student list was already fetched by another resolver in the same request.
-      const count = await collections.student.count({ where: { school: root.id, isDeleted: false } });
-      return count;
+      return await collections.student.count({ where: { school: root.id, isDeleted: false } });
     },
     parentsCount: async (root, args, { db: { collections } }) => {
-      console.log(`[RESOLVER CALL] Queuing 'parentsCount' lookup for School ID: ${root.id}`);
-      // The loader fetches all students, and we just need the length.
-      // This is efficient because the loader will cache the result if the full
-      // student list was already fetched by another resolver in the same request.
-      const count = await collections.parent.count({ where: { school: root.id, isDeleted: false } });
-      return count;
+      return await collections.parent.count({ where: { school: root.id, isDeleted: false } });
+    },
+    teachersCount: async (root, args, { db: { collections } }) => {
+      return await collections.teacher.count({ where: { school: root.id, isDeleted: false } });
+    },
+    classesCount: async (root, args, { db: { collections } }) => {
+      return await collections.class.count({ where: { school: root.id, isDeleted: false } });
+    },
+    busesCount: async (root, args, { db: { collections } }) => {
+      return await collections.bus.count({ where: { school: root.id, isDeleted: false } });
+    },
+    driversCount: async (root, args, { db: { collections } }) => {
+      return await collections.driver.count({ where: { school: root.id, isDeleted: false } });
+    },
+    adminsCount: async (root, args, { db: { collections } }) => {
+      return await collections.admin.count({ where: { school: root.id, isDeleted: false } });
+    },
+    routesCount: async (root, args, { db: { collections } }) => {
+      return await collections.route.count({ where: { school: root.id, isDeleted: false } });
+    },
+    schedulesCount: async (root, args, { db: { collections } }) => {
+      return await collections.schedule.count({ where: { school: root.id, isDeleted: false } });
+    },
+    paymentsCount: async (root, args, { db: { collections } }) => {
+      return await collections.payment.count({ where: { school: root.id, isDeleted: false } });
+    },
+    chargesCount: async (root, args, { db: { collections } }) => {
+      return await collections.charge.count({ where: { school: root.id, isDeleted: false } });
+    },
+    eventsCount: async (root, args, { db: { collections } }) => {
+      return await collections.event.count({ where: { school: root.id, isDeleted: false } });
+    },
+    booksCount: async (root, args, { db: { collections } }) => {
+      return await collections.book.count({ where: { school: root.id, isDeleted: false } });
+    },
+    complaintsCount: async (root, args, { db: { collections } }) => {
+      return await collections.complaint.count({ where: { school: root.id, isDeleted: false } });
     },
     gradeOrder: (root) => root.gradeOrder ? root.gradeOrder.split(",") : [],
     termOrder: (root) => root.termOrder ? root.termOrder.split(",") : [],
@@ -329,123 +375,208 @@ const nested = {
     // ==============================================================================
 
     // in nested.school
-    students: async (root, { limit = 25, offset = 0 }, { db: { collections } }) => {
-      // ✅ FIX: Corrected logging to use root.id
+    students: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
       console.log(`[RESOLVER CALL] Fetching paginated students for School ID: ${root.id}`);
-      console.log(`[RESOLVER ARGS] limit: ${limit}, offset: ${offset}`);
+      console.log(`[RESOLVER ARGS] limit: ${limit}, offset: ${offset}, search: ${search}`);
 
-      // ✅ FIX: Bypass Dataloader and query the database directly with pagination
-      // Waterline's .find() supports `skip` (offset) and `limit`.
-      const paginatedStudents = await collections.student.find({
+      const query = {
         where: {
           school: root.id,
           isDeleted: false
         },
-        skip: offset, // `skip` is the same as `offset`
+        skip: offset,
         limit: limit,
-        // You might want to add a default sort order for consistent pagination
         sort: 'createdAt DESC'
-      });
+      };
 
-      // No need for .slice() because the database already did the work!
-      return paginatedStudents;
+      if (search) {
+        query.where.or = [
+          { names: { contains: search } },
+          { registration: { contains: search } },
+          { phone: { contains: search } }
+        ];
+      }
+
+      return await collections.student.find(query);
     },
-    buses: async (root, args, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'buses' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.busesBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
+    buses: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated buses for School ID: ${root.id}`);
+      const query = { where: { school: root.id, isDeleted: false }, skip: offset, limit: limit, sort: 'createdAt DESC' };
+      if (search) {
+        query.where.or = [
+          { plate: { contains: search } },
+          { make: { contains: search } }
+        ];
+      }
+      return await collections.bus.find(query);
     },
-    charges: async (root, args, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'charges' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.chargesBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
+    charges: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated charges for School ID: ${root.id}`);
+      const query = { where: { school: root.id, isDeleted: false }, skip: offset, limit: limit, sort: 'time DESC' };
+      if (search) {
+        query.where.or = [
+          { reason: { contains: search } },
+          { amount: { contains: search } }
+        ];
+      }
+      return await collections.charge.find(query);
     },
     chargeTypes: async (root, args, { loaders }) => {
+      // Keep as is for now since it's usually a small list, or update if needed
       console.log(`[RESOLVER CALL] Queuing 'chargeTypes' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
+      const { limit = 100, offset = 0 } = args;
       const allItems = await loaders.chargeTypesBySchoolId.load(root.id);
       return allItems.slice(offset, offset + limit);
     },
-    payments: async (root, args, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'payments' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.paymentsBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
+    payments: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated payments for School ID: ${root.id}`);
+      const query = { where: { school: root.id, isDeleted: false }, skip: offset, limit: limit, sort: 'time DESC' };
+      if (search) {
+        query.where.or = [
+          { phone: { contains: search } },
+          { ref: { contains: search } },
+          { mpesaReceiptNumber: { contains: search } },
+          { amount: { contains: search } }
+        ];
+      }
+      return await collections.payment.find(query);
     },
-    books: async (root, args, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'books' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.booksBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
+    books: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated books for School ID: ${root.id}`);
+      const query = { where: { school: root.id, isDeleted: false }, skip: offset, limit: limit, sort: 'createdAt DESC' };
+      if (search) {
+        query.where.or = [
+          { title: { contains: search } },
+          { author: { contains: search } }
+        ];
+      }
+      return await collections.book.find(query);
     },
-    teachers: async (root, args, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'teachers' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.teachersBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
-    },
-    classes: async (root, args, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'classes' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.classesBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
-    },
-    complaints: async (root, args, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'complaints' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.complaintsBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
-    },
-    drivers: async (root, args, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'drivers' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.driversBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
-    },
-    admins: async (root, args, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'admins' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.adminsBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
-    },
-    parents: async (root, args, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'parents' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.parentsBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
-    },
-    routes: async (root, args, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'routes' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.routesBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
-    },
-    trips: async (root, args, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'trips' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.tripsBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
-    },
-    schedules: async (root, args, { loaders }) => {
-      console.log(`[RESOLVER CALL] Queuing 'schedules' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.schedulesBySchoolId.load(root.id);
-      return allItems.slice(offset, offset + limit);
-    },
-    grades: async (root, args, { loaders, auth }) => {
-      console.log(`[RESOLVER CALL] Queuing 'grades' lookup for School ID: ${root.id}`);
-      const { limit = 25, offset = 0 } = args;
-      const allItems = await loaders.gradesBySchoolId.load(root.id);
+    teachers: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated teachers for School ID: ${root.id}`);
       
-      // Filter out invisible grades if user is NOT an admin
-      const isAdmin = auth && (auth.userType === 'sAdmin' || auth.userType === 'admin');
-      const visibleItems = isAdmin 
-        ? allItems 
-        : allItems.filter(g => g.isvisible !== false);
+      const query = {
+        where: {
+          school: root.id,
+          isDeleted: false
+        },
+        skip: offset,
+        limit: limit,
+        sort: 'createdAt DESC'
+      };
 
-      return visibleItems.slice(offset, offset + limit);
+      if (search) {
+        query.where.or = [
+          { names: { contains: search } },
+          { email: { contains: search } },
+          { phone: { contains: search } }
+        ];
+      }
+
+      return await collections.teacher.find(query);
+    },
+    classes: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated classes for School ID: ${root.id}`);
+      const query = { where: { school: root.id, isDeleted: false }, skip: offset, limit: limit, sort: 'name ASC' };
+      if (search) {
+        query.where.name = { contains: search };
+      }
+      return await collections.class.find(query);
+    },
+    complaints: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated complaints for School ID: ${root.id}`);
+      const query = { where: { school: root.id, isDeleted: false }, skip: offset, limit: limit, sort: 'time DESC' };
+      if (search) {
+        query.where.content = { contains: search };
+      }
+      return await collections.complaint.find(query);
+    },
+    drivers: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated drivers for School ID: ${root.id}`);
+      const query = { where: { school: root.id, isDeleted: false }, skip: offset, limit: limit, sort: 'names ASC' };
+      if (search) {
+        query.where.or = [
+          { names: { contains: search } },
+          { phone: { contains: search } },
+          { username: { contains: search } }
+        ];
+      }
+      return await collections.driver.find(query);
+    },
+    admins: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated admins for School ID: ${root.id}`);
+      const query = { where: { school: root.id, isDeleted: false }, skip: offset, limit: limit, sort: 'names ASC' };
+      if (search) {
+        query.where.or = [
+          { names: { contains: search } },
+          { email: { contains: search } },
+          { phone: { contains: search } }
+        ];
+      }
+      return await collections.admin.find(query);
+    },
+    parents: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated parents for School ID: ${root.id}`);
+      
+      const query = {
+        where: {
+          school: root.id,
+          isDeleted: false
+        },
+        skip: offset,
+        limit: limit,
+        sort: 'createdAt DESC'
+      };
+
+      if (search) {
+        query.where.or = [
+          { name: { contains: search } },
+          { phone: { contains: search } },
+          { email: { contains: search } }
+        ];
+      }
+
+      return await collections.parent.find(query);
+    },
+    routes: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated routes for School ID: ${root.id}`);
+      const query = { where: { school: root.id, isDeleted: false }, skip: offset, limit: limit, sort: 'name ASC' };
+      if (search) {
+        query.where.name = { contains: search };
+      }
+      return await collections.route.find(query);
+    },
+    trips: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated trips for School ID: ${root.id}`);
+      const query = { where: { school: root.id, isDeleted: false }, skip: offset, limit: limit, sort: 'startedAt DESC' };
+      // Trips might be searched by date or driver name (harder since direct DB), just leave content search for now
+      return await collections.trip.find(query);
+    },
+    schedules: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections } }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated schedules for School ID: ${root.id}`);
+      const query = { where: { school: root.id, isDeleted: false }, skip: offset, limit: limit, sort: 'name ASC' };
+      if (search) {
+        query.where.name = { contains: search };
+      }
+      return await collections.schedule.find(query);
+    },
+    grades: async (root, { limit = 25, offset = 0, search = "" }, { db: { collections }, auth }) => {
+      console.log(`[RESOLVER CALL] Fetching paginated grades for School ID: ${root.id}`);
+      const isAdmin = auth && (auth.userType === 'sAdmin' || auth.userType === 'admin');
+      const query = { 
+        where: { 
+          school: root.id, 
+          isDeleted: false,
+          ...(isAdmin ? {} : { isvisible: { '!=': false } })
+        }, 
+        skip: offset, 
+        limit: limit, 
+        sort: 'name ASC' 
+      };
+      if (search) {
+        query.where.name = { contains: search };
+      }
+      return await collections.grade.find(query);
     },
     terms: async (root, args, { loaders }) => {
       console.log(`[RESOLVER CALL] Queuing 'terms' lookup for School ID: ${root.id}`);
