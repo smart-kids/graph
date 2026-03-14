@@ -401,6 +401,7 @@ input Ipayment {
   paymentType: String
   purpose: String
   term: String
+  resultDesc: String
   metadata: JSON
 }
 
@@ -591,6 +592,8 @@ type bus {
   plate: String
   size: Float
   driver: driver
+  createdAt: String
+  updatedAt: String
 }
 
 input Ibus {
