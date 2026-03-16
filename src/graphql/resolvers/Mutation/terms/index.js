@@ -62,10 +62,23 @@ const restore = async (data, { db: { collections } }) => {
   }
 };
 
+const updateOrder = async ({ orders }, { db: { collections } }) => {
+  try {
+    for (const { id, order } of orders) {
+      await collections[name].update({ id }).set({ order });
+    }
+    return true;
+  } catch (err) {
+    console.error(`[${name} Order Update Error]`, err);
+    throw new UserError(err.message || err.details || `An unexpected error occurred while updating ${name} order.`);
+  }
+};
+
 export default () => {
   return {
     create,
     update,
+    updateOrder,
     archive,
     restore
   };

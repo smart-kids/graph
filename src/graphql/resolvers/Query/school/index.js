@@ -347,20 +347,22 @@ const nested = {
       // Specialized resolver to fetch assessments for a specific Class + Term context
       // This avoids loading ALL school assessments into memory.
       console.log(`[RESOLVER CALL] specialized 'assessments' lookup for School ID: ${root.id}`, args);
-      const { class: classId, term: termId, limit = 1000, offset = 0 } = args;
+      const { class: classId, term: termId, student: studentId, limit = 1000, offset = 0 } = args;
 
       const query = {
         where: {
           school: root.id,
-          // usually models have isDeleted or similar, but let's be safe and just filter by context
         },
         limit,
         skip: offset,
-        // sort: 'createdAt DESC' // Optional
       };
 
       if (termId) {
         query.where.term = termId;
+      }
+
+      if (studentId) {
+        query.where.student = studentId;
       }
 
       if (classId) {

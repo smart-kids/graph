@@ -1014,7 +1014,7 @@ type school {
   smsEvents(limit: Int, offset: Int, search: String): [smsEvent]
   assessmentTypes: [assessmentType]
   assessmentRubrics: [assessmentRubric]
-  assessments(class: String, term: String, limit: Int, offset: Int): [assessment]
+  assessments(class: String, term: String, student: String, limit: Int, offset: Int): [assessment]
   books(limit: Int, offset: Int): [book]
 }
 
@@ -1614,6 +1614,7 @@ type term {
   school: school
   startDate: String
   endDate: String
+  order: Int
 }
 
 input Iterm {
@@ -1621,6 +1622,7 @@ input Iterm {
   school: String!
   startDate: String
   endDate: String
+  order: Int
 }
 
 input Uterm {
@@ -1629,11 +1631,18 @@ input Uterm {
   school: String
   startDate: String
   endDate: String
+  order: Int
+}
+
+input TermOrderInput {
+  id: String!
+  order: Int!
 }
 
 type termMutations {
   create(term: Iterm!): term
   update(term: Uterm!): term
+  updateOrder(orders: [TermOrderInput]!): Boolean
   archive(term: Uterm!): term
   restore(term: Uterm!): term
 }
@@ -1845,6 +1854,7 @@ type assessmentType {
   id: String
   name: String
   percentage: Float
+  order: Int
   school: school
 }
 
@@ -1852,17 +1862,25 @@ input Iassessmenttype {
   name: String!
   percentage: Float!
   school: String!
+  order: Int
 }
 
 input Uassessmenttype {
   id: String!
   name: String
   percentage: Float
+  order: Int
+}
+
+input AssessmentTypeOrderInput {
+  id: String!
+  order: Int!
 }
 
 type assessmentTypeMutations {
   create(assessmenttype: Iassessmenttype!): assessmentType
   update(assessmenttype: Uassessmenttype!): assessmentType
+  updateOrder(orders: [AssessmentTypeOrderInput]!): Boolean
   archive(assessmenttype: Uassessmenttype!): assessmentType
   restore(assessmenttype: Uassessmenttype!): assessmentType
 }

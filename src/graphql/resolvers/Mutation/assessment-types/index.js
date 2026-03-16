@@ -62,10 +62,23 @@ const restore = async (data, { db: { collections } }) => {
   }
 };
 
+const updateOrder = async ({ orders }, { db: { collections } }) => {
+  try {
+    for (const { id, order } of orders) {
+      await collections[name].update({ id }).set({ order });
+    }
+    return true;
+  } catch (err) {
+    console.error("Error updating assessment type orders:", err);
+    throw new UserError(err.details || err.message || "An error occurred during order update");
+  }
+};
+
 export default () => {
   return {
     create,
     update,
+    updateOrder,
     archive,
     restore
   };
