@@ -1811,11 +1811,26 @@ input Uassessment {
   remarks: String
 }
 
+input BulkAssessmentInput {
+  id: String
+  student: String!
+  term: String!
+  subject: String!
+  assessmentType: String
+  score: Float!
+  outOf: Float
+  teachersComment: String
+  teacher: String
+  school: String!
+  remarks: String
+}
+
 type assessmentMutations {
   create(assessment: Iassessment!): assessment
   update(assessment: Uassessment!): assessment
   archive(assessment: Uassessment!): assessment
   restore(assessment: Uassessment!): assessment
+  bulkSave(assessments: [BulkAssessmentInput]!): [assessment]
 }
 
 type oldBookMutations {

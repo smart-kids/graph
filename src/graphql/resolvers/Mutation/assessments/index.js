@@ -66,6 +66,33 @@ export default () => {
     create,
     update,
     archive,
-    restore
+    restore,
+    bulkSave: async (data, { db: { collections } }) => {
+      const assessments = data.assessments || [];
+      const results = [];
+
+      for (const entryData of assessments) {
+        try {
+          if (entryData.id) {
+            const { id } = entryData;
+            const entry = { ...entryData };
+            delete entry.id;
+            await collections[name].update({ id }).set(entry);
+            const updated = await collections[name].findOne({ id });
+            results.push(updated);
+          } else {
+            const id = new ObjectId().toHexString();
+            const entry = Object.assign(entryData, { id, isDeleted: false });
+            await collections[name].create(entry);
+            results.push(entry);
+          }
+        } catch (err) {
+          console.error("Error in bulkSave for assessment", err);
+          throw new UserError(err.details || err.message);
+        }
+      }
+
+      return results;
+    }
   };
 };
