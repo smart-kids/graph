@@ -17,7 +17,7 @@ export default Waterline.Collection.extend({
     registration: { type: "string", required: true },
     class: { type: "string", required: false },
     yearOfEntry: { type: "string", required: false, columnName: "yearofentry" },
-    paidFees: { type: "number", defaultsTo: 0, columnName: "paidfees" },
+    paidFees: { type: "number", defaultsTo: 0 },
     isDeleted: { type: "boolean", defaultsTo: false },
     // --- FIX ---
     // Let Waterline manage the timestamp. It will expect a Date object.
