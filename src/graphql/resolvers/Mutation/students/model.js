@@ -16,6 +16,7 @@ export default Waterline.Collection.extend({
     parent2: { type: "string", required: false },
     registration: { type: "string", required: true },
     class: { type: "string", required: false },
+    yearOfEntry: { type: "string", required: false },
     paidFees: { type: "number", defaultsTo: 0 },
     isDeleted: { type: "boolean", defaultsTo: false },
     // --- FIX ---

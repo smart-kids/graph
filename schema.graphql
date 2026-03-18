@@ -805,6 +805,7 @@ type student {
   parent: parent
   parent2: parent
   class: class
+  yearOfEntry: String
   events: [event]
   feeStatus: financial
 }
@@ -818,6 +819,7 @@ input Istudent {
   school: String!
   parent2: String
   class: String
+  yearOfEntry: String
   paidFees: Float
 }
 
@@ -830,6 +832,7 @@ input Ustudent {
   parent: String
   parent2: String
   class: String
+  yearOfEntry: String
   paidFees: Float
 }
 

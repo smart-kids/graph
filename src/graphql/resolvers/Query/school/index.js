@@ -214,22 +214,28 @@ const nested = {
     studentsCount: async (root, { search = "" }, { db: { collections } }) => {
       const query = { where: { school: root.id, isDeleted: false } };
       if (search) {
-        query.where.or = [
-          { names: { contains: search } },
-          { registration: { contains: search } },
-          { phone: { contains: search } }
-        ];
+        const words = search.split(/\s+/).filter(w => w.length > 0);
+        query.where.and = words.map(word => ({
+          or: [
+            { names: { contains: word } },
+            { registration: { contains: word } },
+            { phone: { contains: word } }
+          ]
+        }));
       }
       return await collections.student.count(query);
     },
     parentsCount: async (root, { search = "" }, { db: { collections } }) => {
       const query = { where: { school: root.id, isDeleted: false } };
       if (search) {
-        query.where.or = [
-          { name: { contains: search } },
-          { phone: { contains: search } },
-          { email: { contains: search } }
-        ];
+        const words = search.split(/\s+/).filter(w => w.length > 0);
+        query.where.and = words.map(word => ({
+          or: [
+            { name: { contains: word } },
+            { phone: { contains: word } },
+            { email: { contains: word } }
+          ]
+        }));
       }
       return await collections.parent.count(query);
     },
@@ -408,11 +414,14 @@ const nested = {
       };
 
       if (search) {
-        query.where.or = [
-          { names: { contains: search } },
-          { registration: { contains: search } },
-          { phone: { contains: search } }
-        ];
+        const words = search.split(/\s+/).filter(w => w.length > 0);
+        query.where.and = words.map(word => ({
+          or: [
+            { names: { contains: word } },
+            { registration: { contains: word } },
+            { phone: { contains: word } }
+          ]
+        }));
       }
 
       return await collections.student.find(query);
@@ -547,11 +556,14 @@ const nested = {
       };
 
       if (search) {
-        query.where.or = [
-          { name: { contains: search } },
-          { phone: { contains: search } },
-          { email: { contains: search } }
-        ];
+        const words = search.split(/\s+/).filter(w => w.length > 0);
+        query.where.and = words.map(word => ({
+          or: [
+            { name: { contains: word } },
+            { phone: { contains: word } },
+            { email: { contains: word } }
+          ]
+        }));
       }
 
       return await collections.parent.find(query);
