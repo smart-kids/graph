@@ -11,13 +11,13 @@ export default Waterline.Collection.extend({
     student: { type: "string", required: true },
     term: { type: "string", required: true },
     subject: { type: "string", required: true },
-    assessmentType: { type: "string" },
+    assessmentType: { type: "string", columnName: "assessmenttype" },
     score: { type: "number", required: true },
-    outOf: { type: "number", defaultsTo: 100, columnName: "outof" },
-    teachersComment: { type: "string" },
+    outOf: { type: "number", defaultsTo: 100, columnName: "outOf" },
+    teachersComment: { type: "string", columnName: "teacherscomment" },
     teacher: { type: "string" },
     school: { type: "string", required: true },
     remarks: { type: "string" },
-    isDeleted: { type: "boolean", defaultsTo: false }
+    isDeleted: { type: "boolean", defaultsTo: false, columnName: "isdeleted" }
   }
 });
