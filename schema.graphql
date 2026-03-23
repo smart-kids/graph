@@ -808,6 +808,7 @@ type student {
   yearOfEntry: String
   events: [event]
   feeStatus: financial
+  balanceBroughtForward: Float
 }
 
 input Istudent {
@@ -821,6 +822,7 @@ input Istudent {
   class: String
   yearOfEntry: String
   paidFees: Float
+  balanceBroughtForward: Float
 }
 
 input Ustudent {
@@ -834,6 +836,7 @@ input Ustudent {
   class: String
   yearOfEntry: String
   paidFees: Float
+  balanceBroughtForward: Float
 }
 
 type studentMutations {
