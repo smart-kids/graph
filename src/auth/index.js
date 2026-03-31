@@ -1424,8 +1424,8 @@ router.post(
             // Admins might have username or phone
             { type: 'admin', collection: 'admin', field: adminIdentifierField },
             // Others typically use phone or email
-            //{ type: 'teacher', collection: 'teacher', field: identifierField },
-            //{ type: 'student', collection: 'student', field: identifierField },
+            { type: 'teacher', collection: 'teacher', field: identifierField },
+            { type: 'student', collection: 'student', field: identifierField },
             { type: 'parent', collection: 'parent', field: identifierField },
             { type: 'driver', collection: 'driver', field: identifierField },
             // Add 'users' here if it's a fallback or primary source
