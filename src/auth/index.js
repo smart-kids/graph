@@ -293,6 +293,9 @@ async function generateTokenForUser(userId, determinedUserType, collections) {
     delete safeUserData.otp;      // Remove OTP details if present
     delete safeUserData.otpSecret;// Remove OTP secrets
     // Add any other fields to remove
+    
+    // Add userType to safeUserData for frontend consumption
+    safeUserData.userType = payload.userType;
 
     console.log("Generated Token Payload:", payload);
     return { token, user: safeUserData };
