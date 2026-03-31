@@ -228,14 +228,28 @@ const nested = {
     parentsCount: async (root, { search = "" }, { db: { collections } }) => {
       const query = { where: { school: root.id, isDeleted: false } };
       if (search) {
+        // Implement fuzzy search for count - split into words and search each field
         const words = search.split(/\s+/).filter(w => w.length > 0);
-        query.where.and = words.map(word => ({
-          or: [
-            { name: { contains: word } },
-            { phone: { contains: word } },
-            { email: { contains: word } }
-          ]
-        }));
+        
+        if (words.length === 1) {
+          // Single word - use contains for broader matching
+          query.where.or = [
+            { name: { contains: words[0] } },
+            { phone: { contains: words[0] } },
+            { email: { contains: words[0] } },
+            { national_id: { contains: words[0] } }
+          ];
+        } else {
+          // Multiple words - each word must match in at least one field (fuzzy AND)
+          query.where.and = words.map(word => ({
+            or: [
+              { name: { contains: word } },
+              { phone: { contains: word } },
+              { email: { contains: word } },
+              { national_id: { contains: word } }
+            ]
+          }));
+        }
       }
       return await collections.parent.count(query);
     },
@@ -556,14 +570,28 @@ const nested = {
       };
 
       if (search) {
+        // Implement fuzzy search - split into words and search each field
         const words = search.split(/\s+/).filter(w => w.length > 0);
-        query.where.and = words.map(word => ({
-          or: [
-            { name: { contains: word } },
-            { phone: { contains: word } },
-            { email: { contains: word } }
-          ]
-        }));
+        
+        if (words.length === 1) {
+          // Single word - use contains for broader matching
+          query.where.or = [
+            { name: { contains: words[0] } },
+            { phone: { contains: words[0] } },
+            { email: { contains: words[0] } },
+            { national_id: { contains: words[0] } }
+          ];
+        } else {
+          // Multiple words - each word must match in at least one field (fuzzy AND)
+          query.where.and = words.map(word => ({
+            or: [
+              { name: { contains: word } },
+              { phone: { contains: word } },
+              { email: { contains: word } },
+              { national_id: { contains: word } }
+            ]
+          }));
+        }
       }
 
       return await collections.parent.find(query);

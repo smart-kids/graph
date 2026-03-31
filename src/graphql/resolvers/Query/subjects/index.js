@@ -109,12 +109,12 @@ export const createLoaders = (collections) => {
 // --- GraphQL Resolvers (Using Loaders) ---
 
 const list = async (root, args, { db: { collections }, auth }) => {
-  // DataLoader is not typically used for a top-level list of the primary resource.
+  // DataLoader is not typically used for a top-level list of a primary resource.
   // Direct database call is appropriate here.
   const where = { isDeleted: false };
   
-  // Filter by teacher if user is a teacher
-  if (auth && auth.userType === 'teacher') {
+  // Filter by teacher if user is a teacher or parent
+  if (auth && (auth.userType === 'teacher' || auth.userType === 'parent')) {
     where.teacher = auth.id;
   }
 

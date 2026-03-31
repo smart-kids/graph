@@ -52,8 +52,8 @@ async function retryOperation(operation, maxRetries = 3, delayMs = 1000, operati
 
 // --- Modified create function ---
 const create = async (data, { db: { collections }, auth }) => {
-  if (auth && auth.userType === 'teacher') {
-      throw new UserError("Teachers are not allowed to create subjects.");
+  if (auth && (auth.userType === 'teacher' || auth.userType === 'parent')) {
+    throw new UserError("Teachers and Parents are not allowed to create subjects.");
   }
   console.log("Subject creation started.", data);
   const subjectCollection = collections[name];
@@ -373,16 +373,16 @@ const update = async (data, { db: { collections }, auth }) => {
   const entry = data[name];
   
   // Permission Check
-  if (auth && auth.userType === 'teacher') {
-      const existing = await subjectCollection.findOne({ id });
-      if (!existing || String(existing.teacher) !== String(auth.id)) {
-          throw new UserError("You are not authorized to edit this subject.");
-      }
-      
-      // Teachers shouldn't change the teacher field or grade or school
-      delete entry.teacher;
-      delete entry.grade;
-      delete entry.school;
+  if (auth && (auth.userType === 'teacher' || auth.userType === 'parent')) {
+    const existing = await subjectCollection.findOne({ id });
+    if (!existing || String(existing.teacher) !== String(auth.id)) {
+      throw new UserError("You are not authorized to edit this subject.");
+    }
+    
+    // Teachers and Parents shouldn't change the teacher field or grade or school
+    delete entry.teacher;
+    delete entry.grade;
+    delete entry.school;
   }
 
   let { topicOrder } = entry;
@@ -402,8 +402,8 @@ const update = async (data, { db: { collections }, auth }) => {
 };
 
 const archive = async (data, { db: { collections }, auth }) => {
-  if (auth && auth.userType === 'teacher') {
-      throw new UserError("Teachers are not allowed to archive subjects.");
+  if (auth && (auth.userType === 'teacher' || auth.userType === 'parent')) {
+    throw new UserError("Teachers and Parents are not allowed to archive subjects.");
   }
   const subjectCollection = collections[name];
   const { id } = data[name];
@@ -420,8 +420,8 @@ const archive = async (data, { db: { collections }, auth }) => {
 };
 
 const restore = async (data, { db: { collections }, auth }) => {
-  if (auth && auth.userType === 'teacher') {
-      throw new UserError("Teachers are not allowed to restore subjects.");
+  if (auth && (auth.userType === 'teacher' || auth.userType === 'parent')) {
+    throw new UserError("Teachers and Parents are not allowed to restore subjects.");
   }
   const subjectCollection = collections[name];
   const { id } = data[name];
