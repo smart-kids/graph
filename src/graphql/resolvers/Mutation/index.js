@@ -35,6 +35,8 @@ import books from "./library";
 import assessments from "./assessments";
 import assessmentTypes from "./assessment-types";
 import assessmentRubrics from "./assessment-rubrics";
+import scheme_of_works from "./scheme_of_work";
+import record_of_works from "./record_of_work";
 
 export default {
   admins,
@@ -74,6 +76,8 @@ export default {
   assessments,
   assessmentTypes,
   assessmentRubrics,
+  scheme_of_works,
+  record_of_works,
   hello() {
     return "hello mutation";
   }

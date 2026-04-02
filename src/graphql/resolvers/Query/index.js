@@ -192,6 +192,18 @@ import {
   nested as NassessmentRubric
 } from "./assessment-rubrics";
 
+import {
+  list as scheme_of_works,
+  single as scheme_of_work,
+  nested as Nscheme_of_work
+} from "./scheme_of_work";
+
+import {
+  list as record_of_works,
+  single as record_of_work,
+  nested as Nrecord_of_work
+} from "./record_of_work";
+
 const nested = {};
 
 Object.assign(
@@ -228,7 +240,9 @@ Object.assign(
   Nbooks,
   Nassessment,
   NassessmentType,
-  NassessmentRubric
+  NassessmentRubric,
+  Nscheme_of_work,
+  Nrecord_of_work
 );
 
 const Query = {
@@ -347,6 +361,12 @@ const Query = {
   assessmentTypes,
   assessmentRubric,
   assessmentRubrics,
+
+  scheme_of_work,
+  scheme_of_works,
+
+  record_of_work,
+  record_of_works,
 
   hello: () => "hey"
 };

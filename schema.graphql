@@ -183,6 +183,12 @@ type Query {
   assessmentRubric(id: String): assessmentRubric
   assessmentRubrics(where: JSON): [assessmentRubric]
 
+  scheme_of_work(id: String): scheme_of_work
+  scheme_of_works(where: JSON): [scheme_of_work]
+
+  record_of_work(id: String): record_of_work
+  record_of_works(where: JSON): [record_of_work]
+
   # Subscription queries
   subscriptionStatus: SubscriptionStatus
   checkSubscription(phone: String!): SubscriptionStatus
@@ -234,6 +240,8 @@ type Mutation {
   assessments: assessmentMutations
   assessmentTypes: assessmentTypeMutations
   assessmentRubrics: assessmentRubricMutations
+  scheme_of_works: scheme_of_workMutations
+  record_of_works: record_of_workMutations
 }
 
 # user things
@@ -1955,4 +1963,124 @@ type PaymentRecord {
   type: String
   paymentType: String
   student: student
+}
+
+# --- Teacher Planning Module ---
+
+type scheme_of_work {
+  id: String
+  school: String
+  subject: subject
+  term: term
+  teacher: teacher
+  week: Int
+  lessonnumber: Int
+  strand: String
+  substrands: String
+  learningoutcomes: String
+  keyenquiringquestions: String
+  learningexperience: String
+  corecompetencies: String
+  valueslearnt: String
+  learningresources: String
+  assessment: String
+  reflection: String
+  createdAt: String
+  updatedAt: String
+}
+
+input Ischeme_of_work {
+  school: String!
+  subject: String!
+  term: String
+  teacher: String
+  week: Int
+  lessonnumber: Int
+  strand: String
+  substrands: String
+  learningoutcomes: String
+  keyenquiringquestions: String
+  learningexperience: String
+  corecompetencies: String
+  valueslearnt: String
+  learningresources: String
+  assessment: String
+  reflection: String
+}
+
+input Uscheme_of_work {
+  id: String!
+  school: String
+  subject: String
+  term: String
+  teacher: String
+  week: Int
+  lessonnumber: Int
+  strand: String
+  substrands: String
+  learningoutcomes: String
+  keyenquiringquestions: String
+  learningexperience: String
+  corecompetencies: String
+  valueslearnt: String
+  learningresources: String
+  assessment: String
+  reflection: String
+}
+
+type scheme_of_workMutations {
+  create(scheme_of_work: Ischeme_of_work!): scheme_of_work
+  update(scheme_of_work: Uscheme_of_work!): scheme_of_work
+  archive(scheme_of_work: Uscheme_of_work!): scheme_of_work
+  restore(scheme_of_work: Uscheme_of_work!): scheme_of_work
+}
+
+type record_of_work {
+  id: String
+  school: String
+  subject: subject
+  term: term
+  teacher: teacher
+  week: Int
+  dateofteaching: String
+  learningoutcomes: String
+  lessoncovered: String
+  keyactivities: String
+  assignments: String
+  createdAt: String
+  updatedAt: String
+}
+
+input Irecord_of_work {
+  school: String!
+  subject: String!
+  term: String
+  teacher: String
+  week: Int
+  dateofteaching: String
+  learningoutcomes: String
+  lessoncovered: String
+  keyactivities: String
+  assignments: String
+}
+
+input Urecord_of_work {
+  id: String!
+  school: String
+  subject: String
+  term: String
+  teacher: String
+  week: Int
+  dateofteaching: String
+  learningoutcomes: String
+  lessoncovered: String
+  keyactivities: String
+  assignments: String
+}
+
+type record_of_workMutations {
+  create(record_of_work: Irecord_of_work!): record_of_work
+  update(record_of_work: Urecord_of_work!): record_of_work
+  archive(record_of_work: Urecord_of_work!): record_of_work
+  restore(record_of_work: Urecord_of_work!): record_of_work
 }
