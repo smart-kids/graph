@@ -86,6 +86,9 @@ function getPostgresType(attr) {
             return 'DATE';
         case 'datetime':
             return 'TIMESTAMPTZ';
+        case 'ref':
+            if (attr.autoCreatedAt || attr.autoUpdatedAt) return 'TIMESTAMPTZ';
+            return 'TEXT';
         default:
             console.warn(`Unknown Waterline type: "${attr.type}" for an attribute. Defaulting to TEXT.`);
             return 'TEXT';
