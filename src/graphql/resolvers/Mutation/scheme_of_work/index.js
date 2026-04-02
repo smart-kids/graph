@@ -2,18 +2,20 @@ import { ObjectId } from "mongodb"
 const { name } = require("./about.js")
 const { UserError } = require("graphql-errors");
 
-const create = async (data, { db: { collections } }) => {
+const create = async (parent, args, context) => {
+  const { db: { collections } } = context;
   const id = new ObjectId().toHexString();
-  const entry = Object.assign(data[name], { id, isDeleted: false });
+  const entry = Object.assign(args[name], { id, isDeleted: false });
   try {
     await collections[name].create(entry);
     return entry;
   } catch (err) { throw new UserError(err.details || err.message); }
 };
 
-const update = async (data, { db: { collections } }) => {
-  const { id } = data[name];
-  const entry = data[name];
+const update = async (parent, args, context) => {
+  const { db: { collections } } = context;
+  const { id } = args[name];
+  const entry = args[name];
   try {
     delete entry.id;
     await collections[name].update({ id }).set(entry);
@@ -21,22 +23,22 @@ const update = async (data, { db: { collections } }) => {
   } catch (err) { throw new UserError(err.details || err.message); }
 };
 
-const archive = async (data, { db: { collections } }) => {
-  const { id } = data[name];
+const archive = async (parent, args, context) => {
+  const { db: { collections } } = context;
+  const { id } = args[name];
   try {
     await collections[name].update({ id }).set({ isDeleted: true });
     return { id };
   } catch (err) { throw new UserError(err.details || err.message); }
 };
 
-const restore = async (data, { db: { collections } }) => {
-  const { id } = data[name];
+const restore = async (parent, args, context) => {
+  const { db: { collections } } = context;
+  const { id } = args[name];
   try {
     await collections[name].update({ id }).set({ isDeleted: false });
     return { id };
   } catch (err) { throw new UserError(err.details || err.message); }
 };
 
-export default () => {
-  return { create, update, archive, restore };
-};
+export default { create, update, archive, restore };
