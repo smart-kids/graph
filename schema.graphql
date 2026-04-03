@@ -1018,6 +1018,8 @@ type school {
   classes(limit: Int, offset: Int, search: String): [class]
   teachers(limit: Int, offset: Int, search: String): [teacher]
   payments(limit: Int, offset: Int, search: String):[payment]
+  scheme_of_works(limit: Int, offset: Int, search: String): [scheme_of_work]
+  record_of_works(limit: Int, offset: Int, search: String): [record_of_work]
   charges(limit: Int, offset: Int, search: String):[charge]
   chargeTypes: [chargeType]
   grades(limit: Int, offset: Int, search: String): [grade]

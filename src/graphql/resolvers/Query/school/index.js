@@ -108,6 +108,8 @@ export const createLoaders = (collections) => {
     smsLogsBySchoolId: createRelatedLoader('smslog', 'school'),
     assessmentTypesBySchoolId: createRelatedLoader('assessmenttype', 'school'),
     assessmentRubricsBySchoolId: createRelatedLoader('assessmentrubric', 'school'),
+    schemeOfWorksBySchoolId: createRelatedLoader('scheme_of_work', 'school'),
+    recordOfWorksBySchoolId: createRelatedLoader('record_of_work', 'school'),
   };
 };
 
@@ -676,6 +678,18 @@ const nested = {
       console.log(`[RESOLVER CALL] Queuing 'assessmentRubrics' lookup for School ID: ${root.id}`);
       const { limit = 100, offset = 0 } = args;
       const allItems = await loaders.assessmentRubricsBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
+    },
+    scheme_of_works: async (root, args, { loaders }) => {
+      console.log(`[RESOLVER CALL] Queuing 'scheme_of_works' lookup for School ID: ${root.id}`);
+      const { limit = 5000, offset = 0 } = args;
+      const allItems = await loaders.schemeOfWorksBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
+    },
+    record_of_works: async (root, args, { loaders }) => {
+      console.log(`[RESOLVER CALL] Queuing 'record_of_works' lookup for School ID: ${root.id}`);
+      const { limit = 5000, offset = 0 } = args;
+      const allItems = await loaders.recordOfWorksBySchoolId.load(root.id);
       return allItems.slice(offset, offset + limit);
     },
   }
