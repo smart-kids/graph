@@ -6,6 +6,7 @@ export default Waterline.Collection.extend({
   datastore: "default",
   primaryKey: "id",
   attributes: {
+    id: { type: "string", required: true },
     school: { type: 'string', required: true },
     subject: { type: 'string', required: true },
     term: { type: 'string' },
