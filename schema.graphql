@@ -1989,7 +1989,7 @@ type scheme_of_work {
   reflection: String
   createdAt: String
   updatedAt: String
-}
+  isDeleted: Boolean}
 
 input Ischeme_of_work {
   school: String!
@@ -2054,7 +2054,7 @@ type record_of_work {
   createdAt: String
   updatedAt: String
 }
-
+  isDeleted: Boolean
 input Irecord_of_work {
   school: String!
   subject: String!
