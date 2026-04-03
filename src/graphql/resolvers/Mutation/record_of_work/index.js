@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb"
 const { name } = require("./about.js")
 const { UserError } = require("graphql-errors");
 
-const create = async (parent, args, context) => {
+const create = async (args, context) => {
   const { db: { collections } } = context;
   const id = new ObjectId().toHexString();
   const entry = Object.assign(args[name], { id, isDeleted: false });
@@ -12,7 +12,7 @@ const create = async (parent, args, context) => {
   } catch (err) { throw new UserError(err.details || err.message); }
 };
 
-const update = async (parent, args, context) => {
+const update = async (args, context) => {
   const { db: { collections } } = context;
   const { id } = args[name];
   const entry = args[name];
@@ -23,7 +23,7 @@ const update = async (parent, args, context) => {
   } catch (err) { throw new UserError(err.details || err.message); }
 };
 
-const archive = async (parent, args, context) => {
+const archive = async (args, context) => {
   const { db: { collections } } = context;
   const { id } = args[name];
   try {
@@ -32,7 +32,7 @@ const archive = async (parent, args, context) => {
   } catch (err) { throw new UserError(err.details || err.message); }
 };
 
-const restore = async (parent, args, context) => {
+const restore = async (args, context) => {
   const { db: { collections } } = context;
   const { id } = args[name];
   try {
@@ -41,4 +41,4 @@ const restore = async (parent, args, context) => {
   } catch (err) { throw new UserError(err.details || err.message); }
 };
 
-export default { create, update, archive, restore };
+export default () => ({ create, update, archive, restore });
