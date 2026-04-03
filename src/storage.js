@@ -47,6 +47,8 @@ import books from "./graphql/resolvers/Mutation/library/model.js";
 import assessments from "./graphql/resolvers/Mutation/assessments/model.js";
 import assessmentType from "./graphql/resolvers/Mutation/assessment-types/model.js";
 import assessmentRubric from "./graphql/resolvers/Mutation/assessment-rubrics/model.js";
+import scheme_of_work from "./graphql/resolvers/Mutation/scheme_of_work/model.js";
+import record_of_work from "./graphql/resolvers/Mutation/record_of_work/model.js";
 
 const {
     NODE_ENV,
@@ -154,6 +156,8 @@ waterlineInstance.registerModel(books);
 waterlineInstance.registerModel(assessments);
 waterlineInstance.registerModel(assessmentType);
 waterlineInstance.registerModel(assessmentRubric);
+waterlineInstance.registerModel(scheme_of_work);
+waterlineInstance.registerModel(record_of_work);
 
 const config = {
     adapters: {
