@@ -14,6 +14,8 @@ export default Waterline.Collection.extend({
     
     week: { type: 'number' },
     dateofteaching: { type: 'string' },
+    strand: { type: 'string' },
+    substrands: { type: 'string' },
     
     learningoutcomes: { type: 'string' },
     lessoncovered: { type: 'string' },
