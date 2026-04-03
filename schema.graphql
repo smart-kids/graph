@@ -2045,6 +2045,8 @@ type record_of_work {
   teacher: teacher
   week: Int
   dateofteaching: String
+  strand: String
+  substrands: String
   learningoutcomes: String
   lessoncovered: String
   keyactivities: String
@@ -2060,6 +2062,8 @@ input Irecord_of_work {
   teacher: String
   week: Int
   dateofteaching: String
+  strand: String
+  substrands: String
   learningoutcomes: String
   lessoncovered: String
   keyactivities: String
@@ -2074,6 +2078,8 @@ input Urecord_of_work {
   teacher: String
   week: Int
   dateofteaching: String
+  strand: String
+  substrands: String
   learningoutcomes: String
   lessoncovered: String
   keyactivities: String
