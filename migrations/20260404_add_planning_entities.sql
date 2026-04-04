@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS "lesson_plan" (
     "extendedactivity" TEXT,
     "reflection" TEXT,
     "isDeleted" BOOLEAN DEFAULT FALSE,
-    "createdAt" BIGINT,
-    "updatedAt" BIGINT
+    "createdAt" TEXT,
+    "updatedAt" TEXT
 );
 
 -- Create iep_template table
@@ -42,8 +42,8 @@ CREATE TABLE IF NOT EXISTS "iep_template" (
     "terminationDate" TEXT,
     "reflection" TEXT,
     "isDeleted" BOOLEAN DEFAULT FALSE,
-    "createdAt" BIGINT,
-    "updatedAt" BIGINT
+    "createdAt" TEXT,
+    "updatedAt" TEXT
 );
 
 -- Indexing for performance
