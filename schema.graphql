@@ -183,6 +183,9 @@ type Query {
   assessmentRubric(id: String): assessmentRubric
   assessmentRubrics(where: JSON): [assessmentRubric]
 
+  scheme_of_work(id: String): scheme_of_work
+  scheme_of_works(where: JSON): [scheme_of_work]
+
   record_of_work(id: String): record_of_work
   record_of_works(where: JSON): [record_of_work]
 
