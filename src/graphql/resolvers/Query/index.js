@@ -204,6 +204,18 @@ import {
   nested as Nrecord_of_work
 } from "./record_of_work";
 
+import {
+  list as lesson_plans,
+  single as lesson_plan,
+  nested as Nlesson_plan
+} from "./lesson_plan";
+
+import {
+  list as iep_templates,
+  single as iep_template,
+  nested as Niep_template
+} from "./iep_template";
+
 const nested = {};
 
 Object.assign(
@@ -242,7 +254,9 @@ Object.assign(
   NassessmentType,
   NassessmentRubric,
   Nscheme_of_work,
-  Nrecord_of_work
+  Nrecord_of_work,
+  Nlesson_plan,
+  Niep_template
 );
 
 const Query = {
@@ -367,6 +381,12 @@ const Query = {
 
   record_of_work,
   record_of_works,
+
+  lesson_plan,
+  lesson_plans,
+
+  iep_template,
+  iep_templates,
 
   hello: () => "hey"
 };

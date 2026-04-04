@@ -37,6 +37,8 @@ import assessmentTypes from "./assessment-types";
 import assessmentRubrics from "./assessment-rubrics";
 import scheme_of_works from "./scheme_of_work";
 import record_of_works from "./record_of_work";
+import lesson_plans from "./lesson_plan";
+import iep_templates from "./iep_template";
 
 export default {
   admins,
@@ -78,6 +80,8 @@ export default {
   assessmentRubrics,
   scheme_of_works,
   record_of_works,
+  lesson_plans,
+  iep_templates,
   hello() {
     return "hello mutation";
   }

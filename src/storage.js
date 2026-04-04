@@ -49,6 +49,8 @@ import assessmentType from "./graphql/resolvers/Mutation/assessment-types/model.
 import assessmentRubric from "./graphql/resolvers/Mutation/assessment-rubrics/model.js";
 import scheme_of_work from "./graphql/resolvers/Mutation/scheme_of_work/model.js";
 import record_of_work from "./graphql/resolvers/Mutation/record_of_work/model.js";
+import lesson_plan from "./graphql/resolvers/Mutation/lesson_plan/model.js";
+import iep_template from "./graphql/resolvers/Mutation/iep_template/model.js";
 
 const {
     NODE_ENV,
@@ -158,6 +160,8 @@ waterlineInstance.registerModel(assessmentType);
 waterlineInstance.registerModel(assessmentRubric);
 waterlineInstance.registerModel(scheme_of_work);
 waterlineInstance.registerModel(record_of_work);
+waterlineInstance.registerModel(lesson_plan);
+waterlineInstance.registerModel(iep_template);
 
 const config = {
     adapters: {

@@ -183,11 +183,14 @@ type Query {
   assessmentRubric(id: String): assessmentRubric
   assessmentRubrics(where: JSON): [assessmentRubric]
 
-  scheme_of_work(id: String): scheme_of_work
-  scheme_of_works(where: JSON): [scheme_of_work]
-
   record_of_work(id: String): record_of_work
   record_of_works(where: JSON): [record_of_work]
+
+  lesson_plan(id: String): lesson_plan
+  lesson_plans(where: JSON): [lesson_plan]
+
+  iep_template(id: String): iep_template
+  iep_templates(where: JSON): [iep_template]
 
   # Subscription queries
   subscriptionStatus: SubscriptionStatus
@@ -242,6 +245,8 @@ type Mutation {
   assessmentRubrics: assessmentRubricMutations
   scheme_of_works: scheme_of_workMutations
   record_of_works: record_of_workMutations
+  lesson_plans: lesson_planMutations
+  iep_templates: iep_templateMutations
 }
 
 # user things
@@ -2093,4 +2098,138 @@ type record_of_workMutations {
   update(record_of_work: Urecord_of_work!): record_of_work
   archive(record_of_work: Urecord_of_work!): record_of_work
   restore(record_of_work: Urecord_of_work!): record_of_work
+}
+
+# lesson_plan things
+type lesson_plan {
+  id: String
+  school: String
+  subject: subject
+  term: term
+  teacher: teacher
+  
+  strand: String
+  substrands: String
+  
+  learningoutcomes: String
+  keyenquiringquestions: String
+  learningresources: String
+  introduction: String
+  lessondevelopment: String
+  conclusion: String
+  extendedactivity: String
+  reflection: String
+  isDeleted: Boolean
+}
+
+input Ilesson_plan {
+  school: String!
+  subject: String!
+  term: String
+  teacher: String
+  strand: String
+  substrands: String
+  learningoutcomes: String
+  keyenquiringquestions: String
+  learningresources: String
+  introduction: String
+  lessondevelopment: String
+  conclusion: String
+  extendedactivity: String
+  reflection: String
+}
+
+input Ulesson_plan {
+  id: String!
+  school: String
+  subject: String
+  term: String
+  teacher: String
+  strand: String
+  substrands: String
+  learningoutcomes: String
+  keyenquiringquestions: String
+  learningresources: String
+  introduction: String
+  lessondevelopment: String
+  conclusion: String
+  extendedactivity: String
+  reflection: String
+}
+
+type lesson_planMutations {
+  create(lesson_plan: Ilesson_plan!): lesson_plan
+  update(lesson_plan: Ulesson_plan!): lesson_plan
+  archive(lesson_plan: Ulesson_plan!): lesson_plan
+  restore(lesson_plan: Ulesson_plan!): lesson_plan
+}
+
+# iep_template things
+type iep_template {
+  id: String
+  school: String
+  student: student
+  subject: subject
+  term: term
+  teacher: teacher
+  
+  strand: String
+  substrands: String
+  
+  strengths: String
+  needs: String
+  outcome: String
+  experience: String
+  resources: String
+  methods: String
+  initiationDate: String
+  terminationDate: String
+  reflection: String
+  isDeleted: Boolean
+}
+
+input Iiep_template {
+  school: String!
+  student: String!
+  subject: String
+  term: String
+  teacher: String
+  strand: String
+  substrands: String
+  strengths: String
+  needs: String
+  outcome: String
+  experience: String
+  resources: String
+  methods: String
+  initiationDate: String
+  terminationDate: String
+  reflection: String
+}
+
+input Uiep_template {
+  id: String!
+  school: String
+  student: String
+  subject: String
+  term: String
+  teacher: String
+  strand: String
+  substrands: String
+  strengths: String
+  needs: String
+  outcome: String
+  experience: String
+  resources: String
+  methods: String
+  initiationDate: String
+  terminationDate: String
+  reflection: String
+}
+
+type iep_templateMutations {
+  create(iep_template: Iiep_template!): iep_template
+  update(iep_template: Uiep_template!): iep_template
+  archive(iep_template: Uiep_template!): iep_template
+  restore(iep_template: Uiep_template!): iep_template
 }
