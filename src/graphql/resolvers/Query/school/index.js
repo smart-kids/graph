@@ -110,6 +110,8 @@ export const createLoaders = (collections) => {
     assessmentRubricsBySchoolId: createRelatedLoader('assessmentrubric', 'school'),
     schemeOfWorksBySchoolId: createRelatedLoader('scheme_of_work', 'school'),
     recordOfWorksBySchoolId: createRelatedLoader('record_of_work', 'school'),
+    lessonPlansBySchoolId: createRelatedLoader('lesson_plan', 'school'),
+    iepTemplatesBySchoolId: createRelatedLoader('iep_template', 'school'),
   };
 };
 
@@ -690,6 +692,18 @@ const nested = {
       console.log(`[RESOLVER CALL] Queuing 'record_of_works' lookup for School ID: ${root.id}`);
       const { limit = 5000, offset = 0 } = args;
       const allItems = await loaders.recordOfWorksBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
+    },
+    lesson_plans: async (root, args, { loaders }) => {
+      console.log(`[RESOLVER CALL] Queuing 'lesson_plans' lookup for School ID: ${root.id}`);
+      const { limit = 5000, offset = 0 } = args;
+      const allItems = await loaders.lessonPlansBySchoolId.load(root.id);
+      return allItems.slice(offset, offset + limit);
+    },
+    iep_templates: async (root, args, { loaders }) => {
+      console.log(`[RESOLVER CALL] Queuing 'iep_templates' lookup for School ID: ${root.id}`);
+      const { limit = 5000, offset = 0 } = args;
+      const allItems = await loaders.iepTemplatesBySchoolId.load(root.id);
       return allItems.slice(offset, offset + limit);
     },
   }

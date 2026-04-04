@@ -1028,6 +1028,8 @@ type school {
   payments(limit: Int, offset: Int, search: String):[payment]
   scheme_of_works(limit: Int, offset: Int, search: String): [scheme_of_work]
   record_of_works(limit: Int, offset: Int, search: String): [record_of_work]
+  lesson_plans(limit: Int, offset: Int, search: String): [lesson_plan]
+  iep_templates(limit: Int, offset: Int, search: String): [iep_template]
   charges(limit: Int, offset: Int, search: String):[charge]
   chargeTypes: [chargeType]
   grades(limit: Int, offset: Int, search: String): [grade]
